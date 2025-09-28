@@ -1,12 +1,182 @@
+@import "@csstools/normalize.css";
+@import "@/lib/css/index.css";
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary palette - Teal (matching logo) */
+  --lk-color-primary-10: #001f1c;
+  --lk-color-primary-20: #003731;
+  --lk-color-primary-30: #005047;
+  --lk-color-primary-40: #006a5f;
+  --lk-color-primary-50: #008577;
+  --lk-color-primary-60: #00a190;
+  --lk-color-primary-70: #2bbcaa;
+  --lk-color-primary-80: #4fd8c6;
+  --lk-color-primary-90: #6ff5e2;
+  --lk-color-primary-95: #b2ffef;
+  --lk-color-primary-99: #f0fffa;
+  --lk-color-primary-100: #ffffff;
+
+  /* Secondary palette - Blue */
+  --lk-color-secondary-10: #001d31;
+  --lk-color-secondary-20: #003450;
+  --lk-color-secondary-30: #004b70;
+  --lk-color-secondary-40: #00648f;
+  --lk-color-secondary-50: #007dae;
+  --lk-color-secondary-60: #0098ce;
+  --lk-color-secondary-70: #00b3ee;
+  --lk-color-secondary-80: #47ceff;
+  --lk-color-secondary-90: #a8e7ff;
+  --lk-color-secondary-95: #d6f3ff;
+  --lk-color-secondary-99: #f5fcff;
+  --lk-color-secondary-100: #ffffff;
+
+  /* Tertiary palette - Coral accent */
+  --lk-color-tertiary-10: #3a0e16;
+  --lk-color-tertiary-20: #541e29;
+  --lk-color-tertiary-30: #6f2f3c;
+  --lk-color-tertiary-40: #8b4051;
+  --lk-color-tertiary-50: #a85366;
+  --lk-color-tertiary-60: #c6667c;
+  --lk-color-tertiary-70: #e37a93;
+  --lk-color-tertiary-80: #ff94ac;
+  --lk-color-tertiary-90: #ffb9c7;
+  --lk-color-tertiary-95: #ffdde3;
+  --lk-color-tertiary-99: #fff9f7;
+  --lk-color-tertiary-100: #ffffff;
+
+  /* Error colors */
+  --lk-color-error-10: #410002;
+  --lk-color-error-20: #690005;
+  --lk-color-error-30: #93000a;
+  --lk-color-error-40: #ba1a1a;
+  --lk-color-error-50: #de3730;
+  --lk-color-error-60: #ff5449;
+  --lk-color-error-70: #ff897d;
+  --lk-color-error-80: #ffb4ab;
+  --lk-color-error-90: #ffdad6;
+  --lk-color-error-95: #ffedea;
+  --lk-color-error-99: #fffbff;
+  --lk-color-error-100: #ffffff;
+
+  /* Neutral colors */
+  --lk-color-neutral-10: #1a1c1e;
+  --lk-color-neutral-20: #2f3033;
+  --lk-color-neutral-30: #46474a;
+  --lk-color-neutral-40: #5e5e62;
+  --lk-color-neutral-50: #76777a;
+  --lk-color-neutral-60: #909094;
+  --lk-color-neutral-70: #ababae;
+  --lk-color-neutral-80: #c6c6ca;
+  --lk-color-neutral-90: #e3e2e6;
+  --lk-color-neutral-95: #f1f0f4;
+  --lk-color-neutral-99: #fdfcff;
+  --lk-color-neutral-100: #ffffff;
+
+  /* Surface colors */
+  --lk-color-surface-dim: #dfe1e5;
+  --lk-color-surface-default: #fafbff;
+  --lk-color-surface-bright: #fafbff;
+  --lk-color-surface-container-lowest: #ffffff;
+  --lk-color-surface-container-low: #f4f5f9;
+  --lk-color-surface-container: #eef0f4;
+  --lk-color-surface-container-high: #e8e9ee;
+  --lk-color-surface-container-highest: #e3e4e9;
+
+  /* New Color Palette - Professional Healthcare Theme */
+  --lk-primary: #1e607a;        /* Deep blue/teal - primary actions */
+  --lk-onprimary: #ffffff;      /* White text on primary */
+  --lk-primarycontainer: #c8eaeb; /* Light teal - primary containers */
+  --lk-onprimarycontainer: #000000; /* Black text on primary container */
+  
+  --lk-secondary: #1e607a;      /* Same as primary for consistency */
+  --lk-onsecondary: #ffffff;    /* White text on secondary */
+  --lk-secondarycontainer: #eff8ff; /* Very light blue - secondary containers */
+  --lk-onsecondarycontainer: #000000; /* Black text on secondary container */
+  
+  --lk-tertiary: #000000;       /* Pure black - for emphasis */
+  --lk-ontertiary: #ffffff;     /* White text on black */
+  --lk-tertiarycontainer: #c8eaeb; /* Light teal for tertiary containers */
+  --lk-ontertiarycontainer: #000000; /* Black text on tertiary container */
+  
+  --lk-error: #dc2626;
+  --lk-onerror: #ffffff;
+  --lk-errorcontainer: #ffdad6;
+  --lk-onerrorcontainer: #410002;
+  
+  --lk-background: #eff8ff;      /* Very light blue - main background */
+  --lk-onbackground: #000000;    /* Pure black - main text */
+  --lk-surface: #ffffff;         /* Pure white - cards and surfaces */
+  --lk-onsurface: #000000;       /* Pure black - text on surfaces */
+  --lk-surfacevariant: #c8eaeb;  /* Light teal - variant surfaces */
+  --lk-onsurfacevariant: #000000; /* Black text on variant surfaces */
+  --lk-outline: #1e607a;
+  
+  /* On-colors */
+  --lk-color-on-primary: #ffffff;
+  --lk-color-on-secondary: #ffffff;
+  --lk-color-on-tertiary: #ffffff;
+  --lk-color-on-error: #ffffff;
+  --lk-color-on-surface: #1a1c1e;
+  --lk-color-on-surface-variant: #46474a;
+
+  /* Typography scale */
+  --lk-typography-display-large-size: 3.5rem;
+  --lk-typography-display-medium-size: 2.8125rem;
+  --lk-typography-display-small-size: 2.25rem;
+  --lk-typography-headline-large-size: 2rem;
+  --lk-typography-headline-medium-size: 1.75rem;
+  --lk-typography-headline-small-size: 1.5rem;
+  --lk-typography-title-large-size: 1.375rem;
+  --lk-typography-title-medium-size: 1rem;
+  --lk-typography-title-small-size: 0.875rem;
+  --lk-typography-body-large-size: 1rem;
+  --lk-typography-body-medium-size: 0.875rem;
+  --lk-typography-body-small-size: 0.75rem;
+  --lk-typography-label-large-size: 0.875rem;
+  --lk-typography-label-medium-size: 0.75rem;
+  --lk-typography-label-small-size: 0.6875rem;
+
+  /* Border radius */
+  --lk-shape-corner-none: 0;
+  --lk-shape-corner-extra-small: 0.25rem;
+  --lk-shape-corner-small: 0.5rem;
+  --lk-shape-corner-medium: 0.75rem;
+  --lk-shape-corner-large: 1rem;
+  --lk-shape-corner-extra-large: 1.75rem;
+  --lk-shape-corner-full: 999rem;
 }
 
+/* Force light theme - disable dark mode */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Keep light theme even in dark mode preference - New Color Palette */
+    --lk-primary: #1e607a !important;
+    --lk-onprimary: #ffffff !important;
+    --lk-primarycontainer: #c8eaeb !important;
+    --lk-onprimarycontainer: #000000 !important;
+    
+    --lk-secondary: #1e607a !important;
+    --lk-onsecondary: #ffffff !important;
+    --lk-secondarycontainer: #eff8ff !important;
+    --lk-onsecondarycontainer: #000000 !important;
+    
+    --lk-tertiary: #000000 !important;
+    --lk-ontertiary: #ffffff !important;
+    --lk-tertiarycontainer: #c8eaeb !important;
+    --lk-ontertiarycontainer: #000000 !important;
+    
+    --lk-background: #eff8ff !important;
+    --lk-onbackground: #000000 !important;
+    --lk-surface: #ffffff !important;
+    --lk-onsurface: #000000 !important;
+    --lk-surfacevariant: #c8eaeb !important;
+    --lk-onsurfacevariant: #000000 !important;
+    --lk-outline: #1e607a !important;
+  }
+  
+  body {
+    background-color: #eff8ff !important;
+    color: #000000 !important;
   }
 }
 
@@ -16,10 +186,17 @@ body {
   overflow-x: hidden;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  /* New professional healthcare theme */
+  background-color: #eff8ff;
+  color: #000000;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -35,8 +212,89 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+/* Ensure main app uses new professional theme */
+#__next,
+[data-nextjs-scroll-focus-boundary] {
+  background-color: #eff8ff !important;
+  color: #000000 !important;
+  min-height: 100vh;
+}
+
+/* Override any background classes with new theme */
+.bg-background {
+  background-color: #eff8ff !important;
+  color: #000000 !important;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Hero section awesome styles */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Tech grid animation */
+@keyframes techGrid {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(60px, 60px); }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.bg-gradient-animated {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+/* Modern glassmorphism effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Smooth focus styles */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Button hover effects */
+.btn-hover-effect {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-hover-effect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c8eaeb;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1e607a;
 }

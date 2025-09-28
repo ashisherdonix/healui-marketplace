@@ -1,0 +1,337 @@
+'use client';
+
+import React from 'react';
+import { Grid3x3, CalendarDays } from 'lucide-react';
+
+interface DateSelectionProps {
+  dateViewMode: 'quick' | 'calendar';
+  setDateViewMode: (mode: 'quick' | 'calendar') => void;
+  selectedDate: string;
+  setSelectedDate: (date: string) => void;
+  dateSlotCounts: {[key: string]: {HOME_VISIT: number, ONLINE: number}};
+  consultationType: 'HOME_VISIT' | 'ONLINE';
+  findNextAvailableSlot: () => void;
+}
+
+const DateSelection: React.FC<DateSelectionProps> = ({
+  dateViewMode,
+  setDateViewMode,
+  selectedDate,
+  setSelectedDate,
+  dateSlotCounts,
+  consultationType,
+  findNextAvailableSlot
+}) => {
+  const formatDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
+    };
+    return date.toLocaleDateString('en-US', options);
+  };
+
+  const getSlotCountForDate = (dateString: string) => {
+    const slotData = dateSlotCounts[dateString];
+    if (!slotData) return 0;
+    return slotData[consultationType];
+  };
+
+  const getDaysOfMonth = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDayOfWeek = firstDay.getDay();
+    
+    const days = [];
+    
+    for (let i = 0; i < startDayOfWeek; i++) {
+      days.push(null);
+    }
+    
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      const date = new Date(year, month, i);
+      days.push({
+        date: date,
+        dateString: date.toISOString().split('T')[0],
+        isPast: date < new Date(new Date().setHours(0,0,0,0))
+      });
+    }
+    
+    return days;
+  };
+
+  return (
+    <div style={{
+      backgroundColor: 'white',
+      borderRadius: '12px',
+      padding: '16px',
+      border: '1px solid #E5E7EB',
+      marginBottom: '16px'
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '20px',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}>
+        <h3 style={{
+          fontSize: '18px',
+          fontWeight: '700',
+          color: '#1F2937',
+          margin: 0
+        }}>
+          Select Date
+        </h3>
+        <div className="view-toggle" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{
+            display: 'flex',
+            backgroundColor: '#F3F4F6',
+            borderRadius: '8px',
+            padding: '2px'
+          }}>
+            <button
+              onClick={() => setDateViewMode('quick')}
+              style={{
+                padding: '6px 12px',
+                border: 'none',
+                borderRadius: '6px',
+                backgroundColor: dateViewMode === 'quick' ? '#2563EB' : 'transparent',
+                color: dateViewMode === 'quick' ? 'white' : '#6B7280',
+                fontSize: '12px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <Grid3x3 style={{ width: '14px', height: '14px' }} />
+              Quick
+            </button>
+            <button
+              onClick={() => setDateViewMode('calendar')}
+              style={{
+                padding: '6px 12px',
+                border: 'none',
+                borderRadius: '6px',
+                backgroundColor: dateViewMode === 'calendar' ? '#2563EB' : 'transparent',
+                color: dateViewMode === 'calendar' ? 'white' : '#6B7280',
+                fontSize: '12px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <CalendarDays style={{ width: '14px', height: '14px' }} />
+              Calendar
+            </button>
+          </div>
+          
+          <button
+            onClick={findNextAvailableSlot}
+            style={{
+              padding: '6px 12px',
+              backgroundColor: '#10B981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '12px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10B981'}
+          >
+            Next Available
+          </button>
+        </div>
+      </div>
+      
+      {dateViewMode === 'quick' && (
+        <div className="quick-date-grid" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+          gap: '8px'
+        }}>
+          {[0, 1, 2, 3, 4, 5, 6].map((daysAhead) => {
+            const date = new Date();
+            date.setDate(date.getDate() + daysAhead);
+            const dateString = date.toISOString().split('T')[0];
+            const isSelected = selectedDate === dateString;
+            const slotCount = getSlotCountForDate(dateString);
+            
+            return (
+              <button
+                key={dateString}
+                onClick={() => setSelectedDate(dateString)}
+                disabled={slotCount === 0}
+                style={{
+                  position: 'relative',
+                  padding: '12px',
+                  border: `2px solid ${isSelected ? '#2563EB' : '#E5E7EB'}`,
+                  borderRadius: '8px',
+                  backgroundColor: isSelected ? '#EFF6FF' : slotCount > 0 ? 'white' : '#F9FAFB',
+                  color: slotCount > 0 ? (isSelected ? '#1E40AF' : '#1F2937') : '#9CA3AF',
+                  cursor: slotCount > 0 ? 'pointer' : 'not-allowed',
+                  textAlign: 'center',
+                  transition: 'all 0.2s ease',
+                  opacity: slotCount === 0 ? 0.6 : 1
+                }}
+                onMouseEnter={(e) => {
+                  if (slotCount > 0 && !isSelected) {
+                    e.currentTarget.style.borderColor = '#93BBFB';
+                    e.currentTarget.style.backgroundColor = '#F0F9FF';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (slotCount > 0 && !isSelected) {
+                    e.currentTarget.style.borderColor = '#E5E7EB';
+                    e.currentTarget.style.backgroundColor = 'white';
+                  }
+                }}
+              >
+                <div style={{ fontWeight: '600', fontSize: '14px' }}>
+                  {daysAhead === 0 ? 'Today' : daysAhead === 1 ? 'Tomorrow' : formatDate(date)}
+                </div>
+                <div style={{ fontSize: '11px', opacity: 0.8 }}>
+                  {slotCount > 0 ? `${slotCount} slots` : 'No slots'}
+                </div>
+                {isSelected && slotCount > 0 && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '-8px',
+                    right: '-8px',
+                    width: '20px',
+                    height: '20px',
+                    backgroundColor: '#2563EB',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                  }}>
+                    <span style={{ fontSize: '12px', color: 'white' }}>✓</span>
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      
+      {dateViewMode === 'calendar' && (
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            padding: '16px',
+            backgroundColor: '#F3F4F6',
+            textAlign: 'center',
+            fontWeight: '600'
+          }}>
+            {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+          </div>
+          
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '1px',
+            backgroundColor: '#E5E7EB',
+            padding: '1px'
+          }}>
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div key={day} style={{
+                padding: '8px',
+                textAlign: 'center',
+                fontSize: '12px',
+                fontWeight: '600',
+                color: '#6B7280',
+                backgroundColor: '#F9FAFB'
+              }}>
+                {day}
+              </div>
+            ))}
+          </div>
+          
+          <div className="calendar-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '1px',
+            backgroundColor: '#E5E7EB',
+            padding: '1px'
+          }}>
+            {getDaysOfMonth().map((dayInfo, i) => {
+              if (!dayInfo) {
+                return <div key={`empty-${i}`} style={{ padding: '12px' }}></div>;
+              }
+              
+              const isSelected = selectedDate === dayInfo.dateString;
+              const slotCount = getSlotCountForDate(dayInfo.dateString);
+              const isToday = dayInfo.dateString === new Date().toISOString().split('T')[0];
+              
+              return (
+                <button
+                  key={dayInfo.dateString}
+                  onClick={() => !dayInfo.isPast && slotCount > 0 && setSelectedDate(dayInfo.dateString)}
+                  disabled={dayInfo.isPast || slotCount === 0}
+                  style={{
+                    padding: '12px 8px',
+                    backgroundColor: isSelected ? '#2563EB' : isToday ? '#F0F9FF' : 'white',
+                    border: 'none',
+                    cursor: dayInfo.isPast || slotCount === 0 ? 'not-allowed' : 'pointer',
+                    opacity: dayInfo.isPast ? 0.4 : 1,
+                    position: 'relative',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!dayInfo.isPast && slotCount > 0 && !isSelected) {
+                      e.currentTarget.style.backgroundColor = '#F0F9FF';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!dayInfo.isPast && slotCount > 0 && !isSelected) {
+                      e.currentTarget.style.backgroundColor = isToday ? '#F0F9FF' : 'white';
+                    }
+                  }}
+                >
+                  <div style={{
+                    fontSize: '14px',
+                    fontWeight: isToday || isSelected ? '700' : '400',
+                    color: isSelected ? 'white' : dayInfo.isPast ? '#9CA3AF' : '#1F2937'
+                  }}>
+                    {dayInfo.date.getDate()}
+                  </div>
+                  {slotCount > 0 && !dayInfo.isPast && (
+                    <div style={{
+                      fontSize: '10px',
+                      marginTop: '2px',
+                      color: isSelected ? 'white' : '#2563EB',
+                      fontWeight: '600'
+                    }}>
+                      {slotCount}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DateSelection;
