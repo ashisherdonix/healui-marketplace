@@ -6,17 +6,11 @@ import { clearError } from '@/store/slices/authSlice';
 import { firebaseAuthService } from '@/services/firebase-auth';
 import { ConfirmationResult } from 'firebase/auth';
 import ApiManager from '@/services/api';
-import Card from '@/components/card';
-import Button from '@/components/button';
 import Image from 'next/image';
 import { 
   X, 
-  Phone, 
-  ShieldCheck,
   AlertCircle,
-  CheckCircle,
-  ArrowLeft,
-  Timer
+  ArrowLeft
 } from 'lucide-react';
 
 interface BookingContext {
@@ -25,7 +19,11 @@ interface BookingContext {
   scheduled_date: string;
   scheduled_time: string;
   visit_mode: 'HOME_VISIT' | 'ONLINE';
-  selectedSlot: any;
+  selectedSlot: {
+    start_time: string;
+    end_time: string;
+    visit_mode: 'HOME_VISIT' | 'ONLINE';
+  };
 }
 
 interface LoginModalProps {

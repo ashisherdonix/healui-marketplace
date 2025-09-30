@@ -34,7 +34,7 @@ const AuthInitializer = () => {
           // Dispatch getCurrentUser to restore auth state
           await dispatch(getCurrentUser()).unwrap();
           console.log('✅ AuthInitializer - Auth state restored successfully');
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.log('❌ AuthInitializer - Failed to restore auth state:', error);
           
           // For any error during initialization, just gracefully continue without auth

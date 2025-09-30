@@ -32,14 +32,10 @@ export default function MaterialLayer({
   materialProps,
 }: LkMaterialLayerProps) {
   /**If materialProps are provided, loop through the keys and pass each one as a data attribute to the component. */
-  let lkMatProps: LkMatProps;
-
-  if (materialProps) {
-    lkMatProps = useMemo(
-      () => propsToDataAttrs(materialProps, `${type}`),
-      [materialProps],
-    );
-  }
+  const lkMatProps: LkMatProps | undefined = useMemo(
+    () => materialProps ? propsToDataAttrs(materialProps, `${type}`) : undefined,
+    [materialProps, type],
+  );
 
   /**Commented out, was likely used for debugging */
 

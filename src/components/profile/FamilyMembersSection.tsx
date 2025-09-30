@@ -28,7 +28,7 @@ interface FamilyMemberFormData {
   pincode: string;
 }
 
-interface ApiResponse<T = any> {
+interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string | string[];

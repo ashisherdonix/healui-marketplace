@@ -20,9 +20,18 @@ interface FeaturedSectionProps {
   userLocation?: string;
 }
 
+interface TherapistProfile {
+  id: string;
+  full_name: string;
+  consultation_fee: number;
+  location: string;
+  average_rating: number;
+  years_of_experience?: number;
+  is_verified?: boolean;
+}
+
 const FeaturedSection: React.FC<FeaturedSectionProps> = ({ userLocation }) => {
-  const { therapists } = useAppSelector((state) => state.therapist);
-  const [featuredTherapists, setFeaturedTherapists] = useState<any[]>([]);
+  const [featuredTherapists, setFeaturedTherapists] = useState<TherapistProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

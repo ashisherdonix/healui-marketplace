@@ -1,4 +1,5 @@
 import React from 'react'
+import Image from 'next/image'
 import Card from '@/components/card'
 import Button from '@/components/button'
 
@@ -45,7 +46,7 @@ export function TherapistCard({
               flexShrink: 0
             }}
           >
-            {image && <img src={image} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+            {image && <Image src={image} alt={name} width={64} height={64} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
           </div>
           <div style={{ flex: 1 }}>
             <div className="lk-typography-headline-small">{name}</div>

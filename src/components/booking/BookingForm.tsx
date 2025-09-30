@@ -3,17 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import ApiManager from '@/services/api';
-import Card from '@/components/card';
-import Button from '@/components/button';
 import { 
   X, 
   Calendar, 
   Clock, 
-  MapPin, 
   User, 
-  Phone, 
-  CreditCard, 
-  CheckCircle,
   AlertCircle,
   Home,
   Video
@@ -48,7 +42,16 @@ interface BookingFormProps {
   selectedSlot: AvailabilitySlot;
   selectedDate: string;
   onClose: () => void;
-  onSuccess: (bookingData?: any) => void;
+  onSuccess: (bookingData?: {
+    id: string;
+    patient_user_id: string;
+    physiotherapist_id: string;
+    scheduled_date: string;
+    scheduled_time: string;
+    visit_mode: 'HOME_VISIT' | 'ONLINE';
+    total_amount: number;
+    status: string;
+  }) => void;
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({
@@ -194,9 +197,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
       } else {
         setError(response.message || 'Failed to create booking');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Booking failed:', error);
-      setError(error.message || 'An unexpected error occurred');
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
