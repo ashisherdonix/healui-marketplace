@@ -143,13 +143,27 @@ const EnhancedBookingForm: React.FC<EnhancedBookingFormProps> = ({
     onClose();
   };
 
-  const handleBookingSuccess = (bookingData: BookingData) => {
+  const handleBookingSuccess = (bookingData?: {
+    id: string;
+    patient_user_id: string;
+    physiotherapist_id: string;
+    scheduled_date: string;
+    scheduled_time: string;
+    visit_mode: 'HOME_VISIT' | 'ONLINE';
+    total_amount: number;
+    status: string;
+  }) => {
     // Clear booking context on successful booking
     dispatch(clearBookingContext());
     
-    // Show success modal with booking data
-    setBookingSuccessData(bookingData);
-    setShowSuccess(true);
+    if (bookingData) {
+      // Show success modal with booking data
+      setBookingSuccessData(bookingData as unknown as BookingData);
+      setShowSuccess(true);
+    } else {
+      // No booking data provided, just close
+      onSuccess();
+    }
   };
 
   const handleSuccessClose = () => {
@@ -188,7 +202,18 @@ const EnhancedBookingForm: React.FC<EnhancedBookingFormProps> = ({
             end_time: selectedSlot.end_time,
             visit_mode: selectedSlot.visit_mode
           }
-        }) as any}
+        }) as {
+          physiotherapist_id: string;
+          physiotherapist_name: string;
+          scheduled_date: string;
+          scheduled_time: string;
+          visit_mode: 'HOME_VISIT' | 'ONLINE';
+          selectedSlot: {
+            start_time: string;
+            end_time: string;
+            visit_mode: 'HOME_VISIT' | 'ONLINE';
+          };
+        }}
         urgencyMessage="Quick login to secure this appointment"
       />
     );
