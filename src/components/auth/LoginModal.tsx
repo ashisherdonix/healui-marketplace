@@ -102,9 +102,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
       // Store confirmationResult locally for later use
       setLocalConfirmationResult(result.confirmationResult);
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('Send OTP failed:', error);
-      setLocalError(error.message || 'Failed to send OTP. Please try again.');
+      setLocalError((error as Error).message || 'Failed to send OTP. Please try again.');
       
       // Reset reCAPTCHA on error (following clinic-web pattern)
       firebaseAuthService.clearRecaptcha();
@@ -153,9 +153,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
       } else {
         setLocalError(response.message || 'Login failed');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('OTP verification failed:', error);
-      setLocalError(error.message || 'OTP verification failed');
+      setLocalError((error as Error).message || 'OTP verification failed');
     } finally {
       setIsLoading(false);
     }

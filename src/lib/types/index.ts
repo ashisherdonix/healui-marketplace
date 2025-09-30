@@ -266,7 +266,7 @@ export interface Notification extends BaseEntity {
   type: NotificationType;
   isRead: boolean;
   actionUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export type NotificationType = 
@@ -374,5 +374,5 @@ export interface ApiError {
   message: string;
   code?: string;
   field?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }

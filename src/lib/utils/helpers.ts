@@ -54,7 +54,7 @@ export const formatDateTime = (date: Date | string): string => {
 };
 
 // URL helpers
-export const buildQueryString = (params: Record<string, any>): string => {
+export const buildQueryString = (params: Record<string, string | number | boolean>): string => {
   const searchParams = new URLSearchParams();
   Object.keys(params).forEach(key => {
     if (params[key] !== undefined && params[key] !== null) {
@@ -65,12 +65,13 @@ export const buildQueryString = (params: Record<string, any>): string => {
 };
 
 // Error handling helpers
-export const handleApiError = (error: any): string => {
-  if (error?.response?.data?.message) {
-    return error.response.data.message;
+export const handleApiError = (error: Error | unknown): string => {
+  const err = error as { response?: { data?: { message?: string } } };
+  if (err?.response?.data?.message) {
+    return err.response.data.message;
   }
-  if (error?.message) {
-    return error.message;
+  if ((error as Error)?.message) {
+    return (error as Error).message;
   }
   return 'An unexpected error occurred';
 };
@@ -87,13 +88,13 @@ export const isValidPhone = (phone: string): boolean => {
 };
 
 // Storage helpers for client-side data
-export const setLocalStorage = (key: string, value: any) => {
+export const setLocalStorage = (key: string, value: unknown) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem(key, JSON.stringify(value));
   }
 };
 
-export const getLocalStorage = (key: string): any => {
+export const getLocalStorage = (key: string): unknown => {
   if (typeof window !== 'undefined') {
     const item = localStorage.getItem(key);
     return item ? JSON.parse(item) : null;
@@ -108,7 +109,7 @@ export const removeLocalStorage = (key: string) => {
 };
 
 // Debounce helper for search
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number
 ): ((...args: Parameters<T>) => void) => {

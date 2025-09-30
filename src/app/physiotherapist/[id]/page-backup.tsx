@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ApiManager from '@/services/api';
-import { Calendar, Star, CheckCircle, ArrowLeft, MapPin, Clock, Phone, Grid3x3, CalendarDays } from 'lucide-react';
+import { Calendar, Star, ArrowLeft, MapPin, Clock, Phone } from 'lucide-react';
 import EnhancedBookingForm from '@/components/booking/EnhancedBookingForm';
 
 interface AvailabilitySlot {
@@ -62,7 +62,6 @@ const PhysiotherapistDetailPage: React.FC = () => {
   const [consultationType, setConsultationType] = useState<'HOME_VISIT' | 'ONLINE'>('HOME_VISIT');
   const [activeTab, setActiveTab] = useState<'availability' | 'reviews'>('availability');
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const [dateViewMode, setDateViewMode] = useState<'quick' | 'calendar'>('quick');
   const [dateSlotCounts, setDateSlotCounts] = useState<{[key: string]: {HOME_VISIT: number, ONLINE: number}}>({});
 
   useEffect(() => {
@@ -70,13 +69,13 @@ const PhysiotherapistDetailPage: React.FC = () => {
       loadProfile();
       loadDateSlotCounts();
     }
-  }, [physioId]);
+  }, [physioId, loadProfile, loadDateSlotCounts]);
 
   useEffect(() => {
     if (profile && selectedDate) {
       loadAvailability();
     }
-  }, [profile, selectedDate, consultationType]);
+  }, [profile, selectedDate, consultationType, loadAvailability]);
 
   const loadProfile = async () => {
     try {
@@ -95,9 +94,9 @@ const PhysiotherapistDetailPage: React.FC = () => {
       } else {
         setError('Failed to load physiotherapist profile');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error loading profile:', err);
-      setError(err.message || 'Failed to load profile');
+      setError((err as Error).message || 'Failed to load profile');
     } finally {
       setLoading(false);
     }
@@ -118,7 +117,7 @@ const PhysiotherapistDetailPage: React.FC = () => {
         setAvailability(response.data.slots || []);
         setSelectedSlot(null);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error loading availability:', err);
       setAvailability([]);
     } finally {
@@ -161,13 +160,13 @@ const PhysiotherapistDetailPage: React.FC = () => {
         const onlineResponse = responses[index * 2 + 1];
         
         newDateSlotCounts[dateString] = {
-          HOME_VISIT: homeVisitResponse.success ? (homeVisitResponse.data?.slots?.filter((slot: any) => slot.is_available)?.length || 0) : 0,
-          ONLINE: onlineResponse.success ? (onlineResponse.data?.slots?.filter((slot: any) => slot.is_available)?.length || 0) : 0
+          HOME_VISIT: homeVisitResponse.success ? (homeVisitResponse.data?.slots?.filter((slot: AvailabilitySlot) => slot.is_available)?.length || 0) : 0,
+          ONLINE: onlineResponse.success ? (onlineResponse.data?.slots?.filter((slot: AvailabilitySlot) => slot.is_available)?.length || 0) : 0
         };
       });
       
       setDateSlotCounts(newDateSlotCounts);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error loading date slot counts:', err);
     }
   };
@@ -575,7 +574,7 @@ const PhysiotherapistDetailPage: React.FC = () => {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as 'availability' | 'reviews')}
                   style={{
                     flex: 1,
                     padding: '12px 16px',
@@ -791,7 +790,7 @@ const PhysiotherapistDetailPage: React.FC = () => {
                       
                       {review.review_text && (
                         <div style={{ fontSize: '14px', lineHeight: '1.6', color: '#374151' }}>
-                          "{review.review_text}"
+                          &quot;{review.review_text}&quot;
                         </div>
                       )}
                     </div>

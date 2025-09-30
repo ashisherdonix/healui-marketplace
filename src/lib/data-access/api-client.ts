@@ -6,12 +6,12 @@ import { getCookieValue } from '@/lib/utils/helpers';
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api/v1/';
 
 // Response interface following clinic-web pattern
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   statusCode: number;
   message: string;
   data?: T;
-  error?: any;
+  error?: string | Record<string, unknown>;
 }
 
 // Get headers with authentication and context
@@ -21,7 +21,7 @@ const getHeaders = (additionalHeaders?: Record<string, string>, url?: string) =>
   const access_token = isAuthEndpoint ? null : getCookieValue('access_token');
   
   // Context headers from Redux store
-  let contextHeaders: Record<string, string> = {};
+  const contextHeaders: Record<string, string> = {};
   
   if (typeof window !== 'undefined') {
     try {
@@ -61,7 +61,7 @@ const getHeaders = (additionalHeaders?: Record<string, string>, url?: string) =>
 const getFileHeaders = (additionalHeaders?: Record<string, string>) => {
   const access_token = getCookieValue('access_token');
   
-  let contextHeaders: Record<string, string> = {};
+  const contextHeaders: Record<string, string> = {};
   
   if (typeof window !== 'undefined') {
     try {
@@ -143,7 +143,7 @@ export class ApiMethods {
   static async apiRequest(
     method: string,
     url: string,
-    body?: any,
+    body?: unknown,
     additionalHeaders?: Record<string, string>
   ): Promise<ApiResponse> {
     const config: RequestInit = {
@@ -175,7 +175,7 @@ export class ApiMethods {
   // POST method
   static async post(
     url: string,
-    data: any,
+    data: unknown,
     headers?: Record<string, string>
   ): Promise<ApiResponse> {
     return this.apiRequest('POST', url, data, headers);
@@ -184,7 +184,7 @@ export class ApiMethods {
   // PUT method
   static async put(
     url: string,
-    data: any,
+    data: unknown,
     headers?: Record<string, string>
   ): Promise<ApiResponse> {
     return this.apiRequest('PUT', url, data, headers);
@@ -193,7 +193,7 @@ export class ApiMethods {
   // PATCH method
   static async patch(
     url: string,
-    data: any,
+    data: unknown,
     headers?: Record<string, string>
   ): Promise<ApiResponse> {
     return this.apiRequest('PATCH', url, data, headers);

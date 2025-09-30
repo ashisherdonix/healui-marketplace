@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { 
   Therapist, 
   Service, 
-  PaginatedResponse, 
   TherapistFilters, 
   Review 
 } from '@/lib/types';
@@ -78,8 +77,8 @@ export const getTherapists = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch therapists');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to fetch therapists');
     }
   }
 );
@@ -90,20 +89,20 @@ export const getTherapist = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch therapist');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to fetch therapist');
     }
   }
 );
 
 export const getFeaturedTherapists = createAsyncThunk(
   'therapist/getFeaturedTherapists',
-  async (limit: number = 6, { rejectWithValue }) => {
+  async (_limit: number = 6, { rejectWithValue }) => {
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch featured therapists');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to fetch featured therapists');
     }
   }
 );
@@ -114,8 +113,8 @@ export const getTherapistAvailability = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch availability');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to fetch availability');
     }
   }
 );
@@ -126,8 +125,8 @@ export const getTherapistReviews = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch reviews');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to fetch reviews');
     }
   }
 );
@@ -138,8 +137,8 @@ export const searchTherapists = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to search therapists');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to search therapists');
     }
   }
 );
@@ -196,13 +195,13 @@ const therapistSlice = createSlice({
       state.pagination = initialState.pagination;
     },
     // Direct setters for API responses
-    setTherapists: (state, action: PayloadAction<any[]>) => {
+    setTherapists: (state, action: PayloadAction<Record<string, unknown>[]>) => {
       state.therapists = action.payload;
     },
-    setFeaturedTherapists: (state, action: PayloadAction<any[]>) => {
+    setFeaturedTherapists: (state, action: PayloadAction<Record<string, unknown>[]>) => {
       state.featuredTherapists = action.payload;
     },
-    setTherapistReviews: (state, action: PayloadAction<any[]>) => {
+    setTherapistReviews: (state, action: PayloadAction<Record<string, unknown>[]>) => {
       state.therapistReviews = action.payload;
     },
   },
@@ -262,7 +261,7 @@ const therapistSlice = createSlice({
         state.loading.services = true;
         state.error.services = null;
       })
-      .addCase(getTherapistAvailability.fulfilled, (state, action) => {
+      .addCase(getTherapistAvailability.fulfilled, (state, _action) => {
         state.loading.services = false;
         // Availability data would be handled in booking slice or separate availability slice
         state.error.services = null;

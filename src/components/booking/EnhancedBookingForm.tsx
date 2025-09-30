@@ -23,6 +23,18 @@ interface PhysiotherapistProfile {
   location: string;
 }
 
+interface BookingData {
+  id: string;
+  physiotherapist?: {
+    phone?: string;
+  };
+  patient_address?: string;
+  total_amount: number;
+  consultation_fee: number;
+  travel_fee?: number;
+  status: string;
+}
+
 interface EnhancedBookingFormProps {
   physiotherapist: PhysiotherapistProfile;
   selectedSlot: AvailabilitySlot;
@@ -43,7 +55,7 @@ const EnhancedBookingForm: React.FC<EnhancedBookingFormProps> = ({
   const { bookingContext } = useAppSelector((state) => state.booking);
   
   const [showLoginModal, setShowLoginModal] = useState(!isAuthenticated);
-  const [bookingSuccessData, setBookingSuccessData] = useState(null);
+  const [bookingSuccessData, setBookingSuccessData] = useState<BookingData | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
@@ -80,7 +92,7 @@ const EnhancedBookingForm: React.FC<EnhancedBookingFormProps> = ({
     onClose();
   };
 
-  const handleBookingSuccess = (bookingData: any) => {
+  const handleBookingSuccess = (bookingData: BookingData) => {
     // Clear booking context on successful booking
     dispatch(clearBookingContext());
     

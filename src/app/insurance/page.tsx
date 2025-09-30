@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Header from "@/components/layout/Header";
 import Link from "next/link";
-import { Shield, CheckCircle, FileText, Phone, CreditCard, Users } from "lucide-react";
+import { Shield, CheckCircle, FileText, Phone, Users } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Insurance Coverage | Healui - Physiotherapy Insurance Claims",
@@ -213,7 +213,7 @@ export default function InsurancePage() {
               color: "#666666",
               fontSize: "1rem"
             }}>
-              *Don't see your insurer? Contact us to check coverage options.
+              *Don&apos;t see your insurer? Contact us to check coverage options.
             </p>
           </div>
         </section>

@@ -9,7 +9,6 @@ import {
   Clock, 
   MapPin, 
   User, 
-  Phone, 
   CheckCircle,
   XCircle,
   AlertCircle,
@@ -19,6 +18,27 @@ import {
   ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
+
+interface VitalSigns {
+  temperature?: number;
+  bloodPressure?: {
+    systolic: number;
+    diastolic: number;
+  };
+  heartRate?: number;
+  respiratoryRate?: number;
+  weight?: number;
+  height?: number;
+  oxygenSaturation?: number;
+}
+
+interface BookingReview {
+  id: string;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface Booking {
   id: string;
@@ -39,7 +59,7 @@ interface Booking {
   cancelled_by?: string | null;
   cancelled_at?: string | null;
   parent_visit_id?: string | null;
-  vital_signs?: any | null;
+  vital_signs?: VitalSigns | null;
   video_link?: string;
   video_session_id?: string;
   visit_source: 'MARKETPLACE' | 'CLINIC';
@@ -68,7 +88,7 @@ interface Booking {
     phone: string;
     full_name: string;
   };
-  review?: any | null;
+  review?: BookingReview | null;
 }
 
 const BookingsPage: React.FC = () => {

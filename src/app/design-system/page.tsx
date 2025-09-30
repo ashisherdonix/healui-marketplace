@@ -1,7 +1,6 @@
 'use client'
 
 import Button from '@/components/button'
-import Card from '@/components/card'
 import { ServiceCard } from '@/components/ui/service-card'
 import { TherapistCard } from '@/components/ui/therapist-card'
 import { Home, Users, Calendar } from 'lucide-react'

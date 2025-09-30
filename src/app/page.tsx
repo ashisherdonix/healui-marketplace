@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAppSelector } from '@/store/hooks';
 import ApiManager from '@/services/api';
 import Header from '@/components/layout/Header';
 import CleanSearchBar from '@/components/search/CleanSearchBar';
@@ -11,19 +10,7 @@ import Button from '@/components/button';
 import { theme } from '@/utils/theme';
 import { 
   Search, 
-  Users,
-  MapPin,
-  Shield,
-  Clock,
-  Star,
-  Award,
-  CheckCircle,
-  Phone,
-  Calendar,
-  ArrowRight,
-  Building2,
-  Globe,
-  Video
+  Users
 } from 'lucide-react';
 
 interface SearchParams {
@@ -37,14 +24,34 @@ interface SearchParams {
   gender: 'M' | 'F' | '';
 }
 
+interface Physiotherapist {
+  id: string;
+  full_name: string;
+  specializations?: string[];
+  years_of_experience?: number;
+  average_rating: number;
+  total_reviews: number;
+  practice_address?: string;
+  service_areas?: string;
+  consultation_fee?: string;
+  home_visit_fee?: string;
+  profile_picture?: string;
+  profile_photo_url?: string;
+  cover_photo_url?: string;
+  bio?: string;
+  availability_status?: 'AVAILABLE' | 'BUSY' | 'OFFLINE';
+  is_verified?: boolean;
+  home_visit_available?: boolean;
+  online_consultation_available?: boolean;
+  gender?: string;
+}
+
 const HomePage: React.FC = () => {
-  const { therapists } = useAppSelector((state) => state.therapist);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [allPhysiotherapists, setAllPhysiotherapists] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Physiotherapist[]>([]);
+  const [allPhysiotherapists, setAllPhysiotherapists] = useState<Physiotherapist[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [searchPerformed, setSearchPerformed] = useState(false);
-  const [userLocation, setUserLocation] = useState<string>('');
   const [currentHeadlineIndex, setCurrentHeadlineIndex] = useState(0);
   const [animationPhase, setAnimationPhase] = useState<'part1' | 'part2' | 'part3' | 'complete'>('part1');
 
@@ -113,11 +120,11 @@ const HomePage: React.FC = () => {
   const getUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        () => {
           // In a real app, you'd reverse geocode this to get city name
-          setUserLocation('Your Location');
+          console.log('Location access granted');
         },
-        (error) => {
+        () => {
           console.log('Location access denied');
         }
       );
@@ -181,8 +188,8 @@ const HomePage: React.FC = () => {
     } catch (error) {
       console.error('❌ Failed to load physiotherapists - Error details:', {
         error,
-        message: error.message,
-        stack: error.stack
+        message: (error as Error).message,
+        stack: (error as Error).stack
       });
       setError('Unable to load physiotherapists at this time. Please check your connection and try again.');
       setAllPhysiotherapists([]);
@@ -201,7 +208,7 @@ const HomePage: React.FC = () => {
       console.log('🔍 Starting search with params:', searchParams);
       
       // Convert search params to API params
-      const apiParams: any = {};
+      const apiParams: Record<string, string | number> = {};
       
       if (searchParams.query) apiParams.query = searchParams.query;
       if (searchParams.location) apiParams.location = searchParams.location;
@@ -238,8 +245,8 @@ const HomePage: React.FC = () => {
     } catch (error) {
       console.error('❌ Search error - Full details:', {
         error,
-        message: error.message,
-        stack: error.stack
+        message: (error as Error).message,
+        stack: (error as Error).stack
       });
       setError('An error occurred while searching. Please try again.');
       setSearchResults([]);

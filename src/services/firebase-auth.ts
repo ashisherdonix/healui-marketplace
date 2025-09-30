@@ -3,7 +3,8 @@ import {
   RecaptchaVerifier, 
   ConfirmationResult,
   ApplicationVerifier,
-  Auth
+  Auth,
+  User
 } from 'firebase/auth';
 import { auth } from '../../credentials';
 
@@ -16,7 +17,7 @@ export interface OTPResponse {
 
 export interface VerifyOTPResponse {
   success: boolean;
-  user?: any;
+  user?: User;
   error?: string;
 }
 
@@ -56,7 +57,7 @@ class FirebaseAuthService {
       console.log('🔄 FirebaseAuth - Creating new RecaptchaVerifier');
       this.recaptchaVerifier = new RecaptchaVerifier(this.auth, containerId, {
         size: 'invisible',
-        callback: (response: any) => {
+        callback: (_response: string) => {
           console.log('✅ FirebaseAuth - reCAPTCHA solved');
         },
         'expired-callback': () => {
@@ -108,11 +109,12 @@ class FirebaseAuthService {
         confirmationResult
       };
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error sending OTP:', error);
+      const firebaseError = error as { code?: string; message?: string };
       
       // Handle specific Firebase errors
-      if (error.code === 'auth/too-many-requests') {
+      if (firebaseError.code === 'auth/too-many-requests') {
         return {
           success: false,
           error: 'Too many requests. Please try again later.',
@@ -120,7 +122,7 @@ class FirebaseAuthService {
         };
       }
       
-      if (error.code === 'auth/invalid-phone-number') {
+      if (firebaseError.code === 'auth/invalid-phone-number') {
         return {
           success: false,
           error: 'Invalid phone number format.',
@@ -128,7 +130,7 @@ class FirebaseAuthService {
         };
       }
 
-      if (error.code === 'auth/quota-exceeded') {
+      if (firebaseError.code === 'auth/quota-exceeded') {
         return {
           success: false,
           error: 'SMS quota exceeded. Please try again later.',
@@ -137,8 +139,8 @@ class FirebaseAuthService {
       }
 
       // For reCAPTCHA errors, try to reinitialize and retry once
-      if ((error.code === 'auth/recaptcha-not-enabled' || 
-           error.code === 'auth/missing-verification-code') && 
+      if ((firebaseError.code === 'auth/recaptcha-not-enabled' || 
+           firebaseError.code === 'auth/missing-verification-code') && 
           retryCount < 1) {
         
         console.log('Retrying OTP send with fresh reCAPTCHA...');
@@ -149,7 +151,7 @@ class FirebaseAuthService {
 
       return {
         success: false,
-        error: error.message || 'Failed to send OTP. Please try again.',
+        error: firebaseError.message || 'Failed to send OTP. Please try again.',
         retry: retryCount < 2
       };
     }
@@ -165,17 +167,18 @@ class FirebaseAuthService {
         user: result.user
       };
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error verifying OTP:', error);
+      const firebaseError = error as { code?: string; message?: string };
       
-      if (error.code === 'auth/invalid-verification-code') {
+      if (firebaseError.code === 'auth/invalid-verification-code') {
         return {
           success: false,
           error: 'Invalid OTP. Please check and try again.'
         };
       }
       
-      if (error.code === 'auth/code-expired') {
+      if (firebaseError.code === 'auth/code-expired') {
         return {
           success: false,
           error: 'OTP has expired. Please request a new one.'
@@ -184,7 +187,7 @@ class FirebaseAuthService {
 
       return {
         success: false,
-        error: error.message || 'Failed to verify OTP. Please try again.'
+        error: firebaseError.message || 'Failed to verify OTP. Please try again.'
       };
     }
   }
@@ -214,7 +217,7 @@ class FirebaseAuthService {
   }
 
   // Listen to auth state changes
-  onAuthStateChanged(callback: (user: any) => void) {
+  onAuthStateChanged(callback: (user: User | null) => void) {
     return this.auth.onAuthStateChanged(callback);
   }
 

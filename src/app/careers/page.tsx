@@ -96,7 +96,7 @@ export default function CareersPage() {
               marginBottom: "2rem"
             }}>
               Healui is transforming healthcare by making professional physiotherapy accessible 
-              at home. We're building India's largest network of qualified physiotherapists 
+              at home. We&apos;re building India&apos;s largest network of qualified physiotherapists 
               and leveraging technology to deliver personalized care where patients need it most.
             </p>
             <p style={{
@@ -205,7 +205,7 @@ export default function CareersPage() {
                 marginBottom: "1.5rem",
                 lineHeight: "1.6"
               }}>
-                We don't have any open positions at the moment, but we're always looking 
+                We don&apos;t have any open positions at the moment, but we&apos;re always looking 
                 for talented individuals to join our team. Submit your details below to 
                 be notified when relevant opportunities become available.
               </p>
@@ -330,7 +330,7 @@ export default function CareersPage() {
                 color: "#666666",
                 marginBottom: "1.5rem"
               }}>
-                Send your resume to our HR team and we'll contact you when suitable positions open up.
+                Send your resume to our HR team and we&apos;ll contact you when suitable positions open up.
               </p>
               <a href="mailto:careers@healui.com?subject=Join Talent Pool">
                 <button style={{

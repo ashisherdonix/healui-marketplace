@@ -55,14 +55,14 @@ interface PhysiotherapistProfile {
   home_visit_available?: boolean;
   is_verified?: boolean;
   license_number?: string;
-  services?: Array<any>;
-  workshops?: Array<any>;
-  machines?: Array<any>;
-  recent_reviews?: Array<any>;
+  services?: Array<Record<string, unknown>>;
+  workshops?: Array<Record<string, unknown>>;
+  machines?: Array<Record<string, unknown>>;
+  recent_reviews?: Array<Record<string, unknown>>;
   reviews_stats?: {
     averageRating: number;
     totalReviews: number;
-    ratingBreakdown: any;
+    ratingBreakdown: Record<string, number>;
   };
 }
 
@@ -114,9 +114,9 @@ const PhysiotherapistResponsivePage: React.FC = () => {
       } else {
         setError('Failed to load physiotherapist profile');
       }
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       console.error('Error loading profile:', err);
-      setError(err.message || 'Failed to load profile');
+      setError((err as Error)?.message || 'Failed to load profile');
     } finally {
       setLoading(false);
     }
@@ -140,7 +140,7 @@ const PhysiotherapistResponsivePage: React.FC = () => {
       } else {
         setAvailability([]);
       }
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       console.error('Error loading availability:', err);
       setAvailability([]);
     } finally {
@@ -188,11 +188,11 @@ const PhysiotherapistResponsivePage: React.FC = () => {
           (onlineResponse.data?.slots || onlineResponse.data?.available_slots || onlineResponse.data || []) : [];
         
         newDateSlotCounts[dateString] = {
-          HOME_VISIT: Array.isArray(homeVisitSlots) ? homeVisitSlots.filter((slot: any) => 
+          HOME_VISIT: Array.isArray(homeVisitSlots) ? homeVisitSlots.filter((slot: AvailabilitySlot) => 
             (slot.is_available !== false && slot.available !== false) && 
             (slot.visit_mode === 'HOME_VISIT' || slot.service_type === 'HOME_VISIT' || !slot.visit_mode)
           ).length : 0,
-          ONLINE: Array.isArray(onlineSlots) ? onlineSlots.filter((slot: any) => 
+          ONLINE: Array.isArray(onlineSlots) ? onlineSlots.filter((slot: AvailabilitySlot) => 
             (slot.is_available !== false && slot.available !== false) && 
             (slot.visit_mode === 'ONLINE' || slot.service_type === 'ONLINE' || !slot.visit_mode)
           ).length : 0
@@ -200,7 +200,7 @@ const PhysiotherapistResponsivePage: React.FC = () => {
       });
       
       setDateSlotCounts(newDateSlotCounts);
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       console.error('Error loading date slot counts:', err);
     }
   };

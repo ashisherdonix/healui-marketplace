@@ -19,8 +19,8 @@ export const clearFirebaseCache = (): void => {
     });
     
     console.log('Firebase cache cleared');
-  } catch (error) {
-    console.error('Error clearing Firebase cache:', error);
+  } catch {
+    console.error('Error clearing Firebase cache');
   }
 };
 
@@ -29,7 +29,7 @@ export const isMobileDevice = (): boolean => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -37,7 +37,7 @@ export const isMobileDevice = (): boolean => {
 export const isIOSDevice = (): boolean => {
   try {
     return /iPad|iPhone|iPod/.test(navigator.userAgent);
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -144,7 +144,7 @@ export const generateDeviceId = (): string => {
     }
     
     return deviceId;
-  } catch (error) {
+  } catch {
     // Fallback if localStorage is not available
     return `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
@@ -153,12 +153,12 @@ export const generateDeviceId = (): string => {
 export const isNetworkAvailable = (): boolean => {
   try {
     return navigator.onLine;
-  } catch (error) {
+  } catch {
     return true; // Assume network is available if we can't detect
   }
 };
 
-export const debugFirebaseAuth = (message: string, data?: any): void => {
+export const debugFirebaseAuth = (message: string, data?: unknown): void => {
   if (process.env.NODE_ENV === 'development') {
     console.log(`[Firebase Auth Debug] ${message}`, data);
   }

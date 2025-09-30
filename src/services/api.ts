@@ -5,7 +5,7 @@ import therapistSlice from '@/store/slices/therapistSlice';
 import bookingSlice from '@/store/slices/bookingSlice';
 
 // Type definitions
-interface MarketplaceAuthDto {
+interface _MarketplaceAuthDto {
   phone: string;
   otp: string;
   full_name?: string;

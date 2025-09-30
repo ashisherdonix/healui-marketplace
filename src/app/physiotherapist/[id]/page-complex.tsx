@@ -106,9 +106,9 @@ const PhysiotherapistDetailPage: React.FC = () => {
       } else {
         setError('Failed to load physiotherapist profile');
       }
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       console.error('Error loading profile:', err);
-      setError(err.message || 'Failed to load profile');
+      setError((err as Error)?.message || 'Failed to load profile');
     } finally {
       setLoading(false);
     }
@@ -129,7 +129,7 @@ const PhysiotherapistDetailPage: React.FC = () => {
         setAvailability(response.data.slots || []);
         setSelectedSlot(null);
       }
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       console.error('Error loading availability:', err);
       setAvailability([]);
     } finally {
@@ -151,7 +151,7 @@ const PhysiotherapistDetailPage: React.FC = () => {
       if (response.success && response.data) {
         setTodayAvailability(response.data.slots || []);
       }
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       console.error('Error loading today availability:', err);
       setTodayAvailability([]);
     }
@@ -192,13 +192,13 @@ const PhysiotherapistDetailPage: React.FC = () => {
         const onlineResponse = responses[index * 2 + 1];
         
         newDateSlotCounts[dateString] = {
-          HOME_VISIT: homeVisitResponse.success ? (homeVisitResponse.data?.slots?.filter((slot: any) => slot.is_available)?.length || 0) : 0,
-          ONLINE: onlineResponse.success ? (onlineResponse.data?.slots?.filter((slot: any) => slot.is_available)?.length || 0) : 0
+          HOME_VISIT: homeVisitResponse.success ? (homeVisitResponse.data?.slots?.filter((slot: AvailabilitySlot) => slot.is_available)?.length || 0) : 0,
+          ONLINE: onlineResponse.success ? (onlineResponse.data?.slots?.filter((slot: AvailabilitySlot) => slot.is_available)?.length || 0) : 0
         };
       });
       
       setDateSlotCounts(newDateSlotCounts);
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       console.error('Error loading date slot counts:', err);
     }
   };
@@ -571,7 +571,7 @@ const PhysiotherapistDetailPage: React.FC = () => {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as 'availability' | 'reviews')}
                   style={{
                     flex: 1,
                     padding: '12px 16px',

@@ -464,7 +464,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 </div>
                 <select
                   value={searchParams.service_type}
-                  onChange={(e) => handleInputChange('service_type', e.target.value as any)}
+                  onChange={(e) => handleInputChange('service_type', e.target.value)}
                   style={{
                     width: '100%',
                     padding: '0.75rem',
@@ -593,7 +593,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 </div>
                 <select
                   value={searchParams.gender}
-                  onChange={(e) => handleInputChange('gender', e.target.value as any)}
+                  onChange={(e) => handleInputChange('gender', e.target.value)}
                   style={{
                     width: '100%',
                     padding: '0.75rem',

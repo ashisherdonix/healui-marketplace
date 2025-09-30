@@ -44,8 +44,8 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
       setStep('otp');
       setLocalConfirmationResult(result.confirmationResult);
       
-    } catch (error: any) {
-      setLocalError(error.message || 'Failed to send OTP');
+    } catch (error) {
+      setLocalError((error as Error).message || 'Failed to send OTP');
       firebaseAuthService.clearRecaptcha();
     } finally {
       setIsLoading(false);
@@ -85,8 +85,8 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
       } else {
         setLocalError(response.message || 'Login failed');
       }
-    } catch (error: any) {
-      setLocalError(error.message || 'OTP verification failed');
+    } catch (error) {
+      setLocalError((error as Error).message || 'OTP verification failed');
     } finally {
       setIsLoading(false);
     }
@@ -506,7 +506,12 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
 };
 
 // User Menu Dropdown
-const UserMenu = ({ user, onLogout }: { user: any; onLogout: () => void }) => {
+interface User {
+  full_name?: string;
+  name?: string;
+}
+
+const UserMenu = ({ user, onLogout }: { user: User; onLogout: () => void }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

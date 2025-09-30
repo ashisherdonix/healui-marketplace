@@ -4,7 +4,6 @@ import {
   CreateBookingDto, 
   UpdateBookingDto, 
   BookingStatus,
-  PaginatedResponse,
   BookingFilters,
   AvailableSlot 
 } from '@/lib/types';
@@ -91,8 +90,8 @@ export const getBookings = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch bookings');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to fetch bookings');
     }
   }
 );
@@ -103,8 +102,8 @@ export const getBooking = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch booking');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to fetch booking');
     }
   }
 );
@@ -115,8 +114,8 @@ export const createBooking = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to create booking');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to create booking');
     }
   }
 );
@@ -127,8 +126,8 @@ export const updateBooking = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to update booking');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to update booking');
     }
   }
 );
@@ -139,8 +138,8 @@ export const cancelBooking = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to cancel booking');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to cancel booking');
     }
   }
 );
@@ -151,8 +150,8 @@ export const rescheduleBooking = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to reschedule booking');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to reschedule booking');
     }
   }
 );
@@ -163,8 +162,8 @@ export const getAvailableSlots = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch available slots');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to fetch available slots');
     }
   }
 );

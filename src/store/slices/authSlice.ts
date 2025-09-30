@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { User, AuthResponse, LoginDto, RegisterDto, OTPDto } from '@/lib/types';
+import { User, AuthResponse, LoginDto, RegisterDto } from '@/lib/types';
 import { setAuthTokens, removeAuthTokens } from '@/lib/utils/helpers';
 import { firebaseAuthService, ConfirmationResult } from '@/services/firebase-auth';
 import { formatPhoneNumber, validatePhoneNumber, getFirebaseErrorMessage } from '@/utils/firebase-helper';
@@ -38,8 +38,8 @@ export const loginUser = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Login failed');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Login failed');
     }
   }
 );
@@ -50,8 +50,8 @@ export const registerUser = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Registration failed');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Registration failed');
     }
   }
 );
@@ -79,8 +79,9 @@ export const sendOTP = createAsyncThunk(
         confirmationResult: result.confirmationResult,
         phoneNumber: formattedPhone
       };
-    } catch (error: any) {
-      const errorMessage = getFirebaseErrorMessage(error.code) || error.message || 'Failed to send OTP';
+    } catch (error) {
+      const firebaseError = error as { code?: string; message?: string };
+      const errorMessage = getFirebaseErrorMessage(firebaseError.code) || firebaseError.message || 'Failed to send OTP';
       return rejectWithValue(errorMessage);
     }
   }
@@ -115,8 +116,9 @@ export const verifyOTP = createAsyncThunk(
       } else {
         throw new Error(response.message || 'Login failed');
       }
-    } catch (error: any) {
-      const errorMessage = getFirebaseErrorMessage(error.code) || error.message || 'OTP verification failed';
+    } catch (error) {
+      const firebaseError = error as { code?: string; message?: string };
+      const errorMessage = getFirebaseErrorMessage(firebaseError.code) || firebaseError.message || 'OTP verification failed';
       return rejectWithValue(errorMessage);
     }
   }
@@ -138,9 +140,9 @@ export const getCurrentUser = createAsyncThunk(
         // Don't throw error, just return rejection to handle gracefully
         return rejectWithValue(response.message || 'Failed to get user data');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('❌ getCurrentUser - Error occurred:', error);
-      return rejectWithValue(error.message || 'Failed to get user data');
+      return rejectWithValue((error as Error).message || 'Failed to get user data');
     }
   }
 );
@@ -152,8 +154,8 @@ export const logoutUser = createAsyncThunk(
       // Will be implemented in services/api.ts
       removeAuthTokens();
       return true;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Logout failed');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Logout failed');
     }
   }
 );

@@ -45,7 +45,7 @@ export const ENDPOINTS = {
   },
 
   // Search
-  SEARCH_PHYSIOTHERAPISTS: (params?: Record<string, any>) => {
+  SEARCH_PHYSIOTHERAPISTS: (params?: Record<string, string | number | boolean>) => {
     let url = 'marketplace/physiotherapists/search';
     if (params) {
       const searchParams = new URLSearchParams();
@@ -90,7 +90,7 @@ export const ENDPOINTS = {
   },
 
   GET_PHYSIOTHERAPIST_AVAILABILITY: (physioId: string, params: { date: string; service_type?: string; duration?: number }) => {
-    let url = `marketplace/physiotherapists/${physioId}/availability`;
+    const url = `marketplace/physiotherapists/${physioId}/availability`;
     const searchParams = new URLSearchParams();
     searchParams.append('date', params.date);
     if (params.service_type) searchParams.append('service_type', params.service_type);

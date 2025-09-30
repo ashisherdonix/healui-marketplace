@@ -44,8 +44,8 @@ export const updateUserProfile = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to update profile');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to update profile');
     }
   }
 );
@@ -56,8 +56,8 @@ export const updateUserPreferences = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to update preferences');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to update preferences');
     }
   }
 );
@@ -68,8 +68,8 @@ export const uploadProfileImage = createAsyncThunk(
     try {
       // Will be implemented in services/api.ts
       throw new Error('Not implemented yet');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to upload image');
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to upload image');
     }
   }
 );
@@ -109,9 +109,9 @@ const userSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    updateUserField: (state, action: PayloadAction<{ field: keyof User; value: any }>) => {
+    updateUserField: (state, action: PayloadAction<{ field: keyof User; value: unknown }>) => {
       if (state.userData) {
-        (state.userData as any)[action.payload.field] = action.payload.value;
+        (state.userData as Record<string, unknown>)[action.payload.field] = action.payload.value;
       }
     },
   },
