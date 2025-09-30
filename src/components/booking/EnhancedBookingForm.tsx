@@ -51,7 +51,7 @@ const EnhancedBookingForm: React.FC<EnhancedBookingFormProps> = ({
   onSuccess
 }) => {
   const dispatch = useAppDispatch();
-  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
   const { bookingContext } = useAppSelector((state) => state.booking);
   
   const [showLoginModal, setShowLoginModal] = useState(!isAuthenticated);
@@ -68,17 +68,17 @@ const EnhancedBookingForm: React.FC<EnhancedBookingFormProps> = ({
         scheduled_time: selectedSlot.start_time,
         visit_mode: selectedSlot.visit_mode,
         selectedSlot: {
-          id: selectedSlot.slot_id,
           date: selectedDate,
           startTime: selectedSlot.start_time,
           endTime: selectedSlot.end_time,
-          type: selectedSlot.visit_mode,
-          available: selectedSlot.is_available,
-          price: selectedSlot.fee,
-          therapistId: physiotherapist.id,
-          therapist: physiotherapist.full_name,
-          service: selectedSlot.visit_mode === 'HOME_VISIT' ? 'Home Visit' : 'Online Consultation'
-        } as any,
+          type: selectedSlot.visit_mode === 'HOME_VISIT' ? 'home_visit' : 'online',
+          therapist: {
+            id: physiotherapist.id,
+            full_name: physiotherapist.full_name,
+          } as any,
+          service: {} as any,
+          price: selectedSlot.fee
+        },
         consultation_fee: selectedSlot.fee,
         travel_fee: selectedSlot.visit_mode === 'HOME_VISIT' ? 100 : 0,
         total_amount: selectedSlot.fee + (selectedSlot.visit_mode === 'HOME_VISIT' ? 100 : 0)
@@ -132,7 +132,11 @@ const EnhancedBookingForm: React.FC<EnhancedBookingFormProps> = ({
           scheduled_date: selectedDate,
           scheduled_time: selectedSlot.start_time,
           visit_mode: selectedSlot.visit_mode,
-          selectedSlot
+          selectedSlot: {
+            start_time: selectedSlot.start_time,
+            end_time: selectedSlot.end_time,
+            visit_mode: selectedSlot.visit_mode
+          }
         }}
         urgencyMessage="Quick login to secure this appointment"
       />
