@@ -71,12 +71,52 @@ const EnhancedBookingForm: React.FC<EnhancedBookingFormProps> = ({
           date: selectedDate,
           startTime: selectedSlot.start_time,
           endTime: selectedSlot.end_time,
-          type: selectedSlot.visit_mode === 'HOME_VISIT' ? 'home_visit' : 'online',
+          type: (selectedSlot.visit_mode === 'HOME_VISIT' ? 'home_visit' : 'online') as 'home_visit' | 'clinic' | 'online',
           therapist: {
             id: physiotherapist.id,
-            full_name: physiotherapist.full_name,
-          } as any,
-          service: {} as any,
+            user: {
+              id: physiotherapist.id,
+              full_name: physiotherapist.full_name,
+              phone: '',
+              account_type: 'PRIMARY' as 'PRIMARY' | 'FAMILY_MEMBER',
+              createdAt: '',
+              updatedAt: ''
+            },
+            licenseNumber: '',
+            specializations: [],
+            experience: 0,
+            rating: 0,
+            reviewCount: 0,
+            bio: '',
+            qualifications: [],
+            availability: [],
+            services: [],
+            languages: [],
+            homeVisitAreas: [],
+            onlineConsultation: true,
+            verificationStatus: 'verified' as 'pending' | 'verified' | 'rejected',
+            isActive: true,
+            createdAt: '',
+            updatedAt: ''
+          },
+          service: {
+            id: 'service-1',
+            name: selectedSlot.visit_mode === 'HOME_VISIT' ? 'Home Visit' : 'Online Consultation',
+            description: '',
+            category: {
+              id: 'cat-1',
+              name: 'Physiotherapy',
+              description: '',
+              isActive: true,
+              createdAt: '',
+              updatedAt: ''
+            },
+            basePrice: selectedSlot.fee,
+            baseDuration: 60,
+            isActive: true,
+            createdAt: '',
+            updatedAt: ''
+          },
           price: selectedSlot.fee
         },
         consultation_fee: selectedSlot.fee,
@@ -126,7 +166,18 @@ const EnhancedBookingForm: React.FC<EnhancedBookingFormProps> = ({
         onClose={handleClose}
         onSuccess={handleLoginSuccess}
         context="booking"
-        bookingContext={bookingContext || {
+        bookingContext={(bookingContext ? {
+          physiotherapist_id: bookingContext.physiotherapist_id,
+          physiotherapist_name: bookingContext.physiotherapist_name,
+          scheduled_date: bookingContext.scheduled_date,
+          scheduled_time: bookingContext.scheduled_time,
+          visit_mode: bookingContext.visit_mode,
+          selectedSlot: {
+            start_time: bookingContext.scheduled_time,
+            end_time: selectedSlot.end_time,
+            visit_mode: bookingContext.visit_mode
+          }
+        } : {
           physiotherapist_id: physiotherapist.id,
           physiotherapist_name: physiotherapist.full_name,
           scheduled_date: selectedDate,
@@ -137,7 +188,7 @@ const EnhancedBookingForm: React.FC<EnhancedBookingFormProps> = ({
             end_time: selectedSlot.end_time,
             visit_mode: selectedSlot.visit_mode
           }
-        }}
+        }) as any}
         urgencyMessage="Quick login to secure this appointment"
       />
     );
