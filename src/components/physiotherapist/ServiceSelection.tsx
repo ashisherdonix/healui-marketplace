@@ -11,7 +11,7 @@ interface ServiceSelectionProps {
   };
   consultationType: 'HOME_VISIT' | 'ONLINE';
   setConsultationType: (type: 'HOME_VISIT' | 'ONLINE') => void;
-  setSelectedSlot: (slot: { time: string; date: string } | null) => void;
+  setSelectedSlot: (slot: null) => void;
   availabilityLoading: boolean;
   dateSlotCounts: {[key: string]: {HOME_VISIT: number, ONLINE: number}};
 }

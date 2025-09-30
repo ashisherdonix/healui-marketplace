@@ -146,16 +146,17 @@ const HomePage: React.FC = () => {
       
       console.log('📊 Featured physiotherapists response:', {
         success: featuredResponse.success,
-        status: featuredResponse.status,
+        statusCode: featuredResponse.statusCode,
         message: featuredResponse.message,
-        dataLength: featuredResponse.data ? featuredResponse.data.length : 'null/undefined',
+        dataLength: featuredResponse.data ? (featuredResponse.data as unknown[]).length : 'null/undefined',
         fullResponse: featuredResponse
       });
       
-      if (featuredResponse.success && featuredResponse.data && featuredResponse.data.length > 0) {
-        console.log('✅ Featured physiotherapists loaded successfully:', featuredResponse.data.length, 'items');
-        console.log('📋 First physiotherapist sample:', featuredResponse.data[0]);
-        setAllPhysiotherapists(featuredResponse.data);
+      if (featuredResponse.success && featuredResponse.data && (featuredResponse.data as Physiotherapist[]).length > 0) {
+        const physiotherapists = featuredResponse.data as Physiotherapist[];
+        console.log('✅ Featured physiotherapists loaded successfully:', physiotherapists.length, 'items');
+        console.log('📋 First physiotherapist sample:', physiotherapists[0]);
+        setAllPhysiotherapists(physiotherapists);
         return;
       }
 
@@ -167,16 +168,17 @@ const HomePage: React.FC = () => {
       
       console.log('📊 Search physiotherapists response:', {
         success: searchResponse.success,
-        status: searchResponse.status,
+        statusCode: searchResponse.statusCode,
         message: searchResponse.message,
-        dataLength: searchResponse.data ? searchResponse.data.length : 'null/undefined',
+        dataLength: searchResponse.data ? (searchResponse.data as unknown[]).length : 'null/undefined',
         fullResponse: searchResponse
       });
       
-      if (searchResponse.success && searchResponse.data && searchResponse.data.length > 0) {
-        console.log('✅ Search physiotherapists loaded successfully:', searchResponse.data.length, 'items');
-        console.log('📋 First physiotherapist sample:', searchResponse.data[0]);
-        setAllPhysiotherapists(searchResponse.data);
+      if (searchResponse.success && searchResponse.data && (searchResponse.data as Physiotherapist[]).length > 0) {
+        const physiotherapists = searchResponse.data as Physiotherapist[];
+        console.log('✅ Search physiotherapists loaded successfully:', physiotherapists.length, 'items');
+        console.log('📋 First physiotherapist sample:', physiotherapists[0]);
+        setAllPhysiotherapists(physiotherapists);
         return;
       }
 
@@ -224,18 +226,19 @@ const HomePage: React.FC = () => {
       
       console.log('📊 Search response:', {
         success: response.success,
-        status: response.status,
+        statusCode: response.statusCode,
         message: response.message,
-        dataLength: response.data ? response.data.length : 'null/undefined',
+        dataLength: response.data ? (response.data as unknown[]).length : 'null/undefined',
         fullResponse: response
       });
       
       if (response.success && response.data) {
-        console.log('✅ Search successful, found:', response.data.length, 'physiotherapists');
-        if (response.data.length > 0) {
-          console.log('📋 First search result sample:', response.data[0]);
+        const physiotherapists = response.data as Physiotherapist[];
+        console.log('✅ Search successful, found:', physiotherapists.length, 'physiotherapists');
+        if (physiotherapists.length > 0) {
+          console.log('📋 First search result sample:', physiotherapists[0]);
         }
-        setSearchResults(response.data);
+        setSearchResults(physiotherapists);
         setError('');
       } else {
         console.log('❌ Search failed:', response.message);
@@ -559,7 +562,7 @@ const HomePage: React.FC = () => {
 
               {/* Error State */}
               {error && (
-                <Card variant="fill" scaleFactor="headline">
+                <Card variant="fill" scaleFactor="heading">
                   <div className="p-xl" style={{ textAlign: 'center' }}>
                     <div className="lk-typography-body-medium" style={{ color: 'var(--lk-error)', marginBottom: '1rem' }}>
                       {error}
@@ -592,7 +595,7 @@ const HomePage: React.FC = () => {
 
               {/* No Results */}
               {!loading && !error && searchResults.length === 0 && (
-                <Card variant="fill" scaleFactor="headline">
+                <Card variant="fill" scaleFactor="heading">
                   <div className="p-xl" style={{ textAlign: 'center' }}>
                     <Search style={{ 
                       width: '4rem', 
@@ -661,7 +664,7 @@ const HomePage: React.FC = () => {
 
               {/* Error State */}
               {error && (
-                <Card variant="fill" scaleFactor="headline">
+                <Card variant="fill" scaleFactor="heading">
                   <div className="p-xl" style={{ textAlign: 'center' }}>
                     <div className="lk-typography-body-medium" style={{ color: 'var(--lk-error)', marginBottom: '1rem' }}>
                       {error}
@@ -694,7 +697,7 @@ const HomePage: React.FC = () => {
 
               {/* No Results */}
               {!loading && allPhysiotherapists.length === 0 && !error && (
-                <Card variant="fill" scaleFactor="headline">
+                <Card variant="fill" scaleFactor="heading">
                   <div className="p-xl" style={{ textAlign: 'center' }}>
                     <Users style={{ 
                       width: '4rem', 

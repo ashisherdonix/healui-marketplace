@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Header from "@/components/layout/Header";
 import Link from "next/link";
-import { Video, Globe, Clock, Shield, Smartphone, Headphones } from "lucide-react";
+import { Video, Globe, Clock, Shield, Smartphone, Headphones, Calendar } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Online Physiotherapy Consultation | Healui - Virtual Physio Sessions",

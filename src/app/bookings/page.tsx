@@ -114,7 +114,7 @@ const BookingsPage: React.FC = () => {
       setLoading(true);
       const response = await ApiManager.getMyBookings();
       if (response.success && response.data) {
-        setBookings(response.data);
+        setBookings(response.data as Booking[]);
       }
     } catch (error) {
       console.error('Failed to load bookings:', error);

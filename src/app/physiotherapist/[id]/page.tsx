@@ -107,9 +107,9 @@ const PhysiotherapistResponsivePage: React.FC = () => {
       });
       
       if (response.success && response.data) {
-        setProfile(response.data);
-        if (response.data.recent_reviews) {
-          setReviews(response.data.recent_reviews);
+        setProfile(response.data as PhysiotherapistProfile);
+        if ((response.data as {recent_reviews?: Review[]}).recent_reviews) {
+          setReviews((response.data as {recent_reviews: Review[]}).recent_reviews);
         }
       } else {
         setError('Failed to load physiotherapist profile');
@@ -134,7 +134,9 @@ const PhysiotherapistResponsivePage: React.FC = () => {
       });
       
       if (response.success && response.data) {
-        const slots = response.data.slots || response.data.available_slots || response.data || [];
+        const slots = (response.data as {slots?: AvailabilitySlot[]}).slots || 
+                     (response.data as {available_slots?: AvailabilitySlot[]}).available_slots || 
+                     (response.data as AvailabilitySlot[]) || [];
         setAvailability(slots);
         setSelectedSlot(null);
       } else {
@@ -183,9 +185,13 @@ const PhysiotherapistResponsivePage: React.FC = () => {
         const onlineResponse = responses[index * 2 + 1];
         
         const homeVisitSlots = homeVisitResponse.success ? 
-          (homeVisitResponse.data?.slots || homeVisitResponse.data?.available_slots || homeVisitResponse.data || []) : [];
+          ((homeVisitResponse.data as {slots?: AvailabilitySlot[]})?.slots || 
+           (homeVisitResponse.data as {available_slots?: AvailabilitySlot[]})?.available_slots || 
+           (homeVisitResponse.data as AvailabilitySlot[]) || []) : [];
         const onlineSlots = onlineResponse.success ? 
-          (onlineResponse.data?.slots || onlineResponse.data?.available_slots || onlineResponse.data || []) : [];
+          ((onlineResponse.data as {slots?: AvailabilitySlot[]})?.slots || 
+           (onlineResponse.data as {available_slots?: AvailabilitySlot[]})?.available_slots || 
+           (onlineResponse.data as AvailabilitySlot[]) || []) : [];
         
         newDateSlotCounts[dateString] = {
           HOME_VISIT: Array.isArray(homeVisitSlots) ? homeVisitSlots.filter((slot: AvailabilitySlot) => 

@@ -45,7 +45,7 @@ const ProfilePage: React.FC = () => {
       try {
         const response = await ApiManager.getMyProfile();
         if (response.success && response.data) {
-          setProfileData(response.data);
+          setProfileData(response.data as User);
         }
       } catch (error) {
         console.error('Failed to load profile data:', error);
@@ -167,7 +167,7 @@ const ProfilePage: React.FC = () => {
           {/* Main Content */}
           <div style={{ minHeight: '400px' }}>
             {loading ? (
-              <Card variant="fill" scaleFactor="headline">
+              <Card variant="fill" scaleFactor="heading">
                 <div className="p-xl" style={{ textAlign: 'center' }}>
                   <div style={{
                     width: '32px',

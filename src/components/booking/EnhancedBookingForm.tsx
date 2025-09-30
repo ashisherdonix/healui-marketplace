@@ -67,7 +67,18 @@ const EnhancedBookingForm: React.FC<EnhancedBookingFormProps> = ({
         scheduled_date: selectedDate,
         scheduled_time: selectedSlot.start_time,
         visit_mode: selectedSlot.visit_mode,
-        selectedSlot,
+        selectedSlot: {
+          id: selectedSlot.slot_id,
+          date: selectedDate,
+          startTime: selectedSlot.start_time,
+          endTime: selectedSlot.end_time,
+          type: selectedSlot.visit_mode,
+          available: selectedSlot.is_available,
+          price: selectedSlot.fee,
+          therapistId: physiotherapist.id,
+          therapist: physiotherapist.full_name,
+          service: selectedSlot.visit_mode === 'HOME_VISIT' ? 'Home Visit' : 'Online Consultation'
+        } as any,
         consultation_fee: selectedSlot.fee,
         travel_fee: selectedSlot.visit_mode === 'HOME_VISIT' ? 100 : 0,
         total_amount: selectedSlot.fee + (selectedSlot.visit_mode === 'HOME_VISIT' ? 100 : 0)

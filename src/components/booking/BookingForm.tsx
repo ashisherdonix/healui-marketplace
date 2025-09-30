@@ -12,6 +12,7 @@ import {
   Home,
   Video
 } from 'lucide-react';
+import type { User as UserType } from '@/lib/types';
 
 interface AvailabilitySlot {
   slot_id: string;
@@ -64,7 +65,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   
   // Handle nested user structure - user.user.id is the actual ID
-  const actualUser = user?.user || user;
+  const actualUser = (user as {user?: UserType})?.user || user;
   const userId = actualUser?.id;
   
   console.log('🔍 BookingForm - Auth state:', { user, isAuthenticated, userId, actualUser });
@@ -118,7 +119,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       setLoading(true);
       const response = await ApiManager.getFamilyMembers();
       if (response.success && response.data) {
-        setFamilyMembers(response.data);
+        setFamilyMembers(response.data as FamilyMember[]);
         console.log('✅ Family members loaded:', response.data);
       } else {
         console.log('⚠️ No family members found or API call failed:', response);
@@ -193,7 +194,16 @@ const BookingForm: React.FC<BookingFormProps> = ({
       
       if (response.success) {
         // Pass the booking data to the success callback
-        onSuccess(response.data);
+        onSuccess(response.data as {
+          id: string;
+          patient_user_id: string;
+          physiotherapist_id: string;
+          scheduled_date: string;
+          scheduled_time: string;
+          visit_mode: 'HOME_VISIT' | 'ONLINE';
+          total_amount: number;
+          status: string;
+        });
       } else {
         setError(response.message || 'Failed to create booking');
       }

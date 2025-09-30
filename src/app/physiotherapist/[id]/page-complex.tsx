@@ -2,13 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import ApiManager from '@/services/api';
 import { Calendar, Star, CheckCircle } from 'lucide-react';
 import EnhancedBookingForm from '@/components/booking/EnhancedBookingForm';
 
 // Import the new components
-import ProfileHeader from '@/components/physiotherapist/ProfileHeader';
 import ServiceSelection from '@/components/physiotherapist/ServiceSelection';
 import DateSelection from '@/components/physiotherapist/DateSelection';
 import TimeSlots from '@/components/physiotherapist/TimeSlots';
@@ -101,8 +99,8 @@ const PhysiotherapistDetailPage: React.FC = () => {
       });
       
       if (response.success && response.data) {
-        setProfile(response.data.profile);
-        setReviews(response.data.reviews || []);
+        setProfile((response.data as {profile: PhysiotherapistProfile}).profile);
+        setReviews((response.data as {reviews?: Review[]}).reviews || []);
       } else {
         setError('Failed to load physiotherapist profile');
       }
@@ -126,7 +124,7 @@ const PhysiotherapistDetailPage: React.FC = () => {
       });
       
       if (response.success && response.data) {
-        setAvailability(response.data.slots || []);
+        setAvailability((response.data as {slots?: AvailabilitySlot[]}).slots || []);
         setSelectedSlot(null);
       }
     } catch (err: Error | unknown) {
@@ -149,7 +147,7 @@ const PhysiotherapistDetailPage: React.FC = () => {
       });
       
       if (response.success && response.data) {
-        setTodayAvailability(response.data.slots || []);
+        setTodayAvailability((response.data as {slots?: AvailabilitySlot[]}).slots || []);
       }
     } catch (err: Error | unknown) {
       console.error('Error loading today availability:', err);
@@ -192,8 +190,8 @@ const PhysiotherapistDetailPage: React.FC = () => {
         const onlineResponse = responses[index * 2 + 1];
         
         newDateSlotCounts[dateString] = {
-          HOME_VISIT: homeVisitResponse.success ? (homeVisitResponse.data?.slots?.filter((slot: AvailabilitySlot) => slot.is_available)?.length || 0) : 0,
-          ONLINE: onlineResponse.success ? (onlineResponse.data?.slots?.filter((slot: AvailabilitySlot) => slot.is_available)?.length || 0) : 0
+          HOME_VISIT: homeVisitResponse.success ? ((homeVisitResponse.data as {slots?: AvailabilitySlot[]})?.slots?.filter((slot: AvailabilitySlot) => slot.is_available)?.length || 0) : 0,
+          ONLINE: onlineResponse.success ? ((onlineResponse.data as {slots?: AvailabilitySlot[]})?.slots?.filter((slot: AvailabilitySlot) => slot.is_available)?.length || 0) : 0
         };
       });
       

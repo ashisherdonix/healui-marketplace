@@ -9,7 +9,11 @@ interface SearchParams {
   query: string;
   location: string;
   specialization: string;
+  service_type: 'HOME_VISIT' | 'ONLINE' | '';
   available_date: string;
+  min_rating: string;
+  max_price: string;
+  gender: 'M' | 'F' | '';
 }
 
 interface LocationSuggestion {
@@ -29,7 +33,11 @@ const CleanSearchBar: React.FC<CleanSearchBarProps> = ({ onSearch, loading = fal
     query: '',
     location: '',
     specialization: '',
-    available_date: ''
+    service_type: '',
+    available_date: '',
+    min_rating: '',
+    max_price: '',
+    gender: ''
   });
 
   const [showFilters, setShowFilters] = useState(false);
@@ -99,7 +107,11 @@ const CleanSearchBar: React.FC<CleanSearchBarProps> = ({ onSearch, loading = fal
       query: '',
       location: '',
       specialization: '',
-      available_date: ''
+      service_type: '',
+      available_date: '',
+      min_rating: '',
+      max_price: '',
+      gender: ''
     });
   };
 

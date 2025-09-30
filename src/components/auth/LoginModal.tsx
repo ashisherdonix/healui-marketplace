@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { clearError } from '@/store/slices/authSlice';
+import type { User } from '@/lib/types';
 import { firebaseAuthService } from '@/services/firebase-auth';
 import { ConfirmationResult } from 'firebase/auth';
 import ApiManager from '@/services/api';
@@ -138,9 +139,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
       if (response.success && response.data) {
         // Manually dispatch login success to Redux since API no longer does it
         const authData = {
-          user: response.data.user,
-          accessToken: response.data.access_token,
-          refreshToken: response.data.refresh_token
+          user: (response.data as {user: User}).user,
+          accessToken: (response.data as {access_token: string}).access_token,
+          refreshToken: (response.data as {refresh_token: string}).refresh_token
         };
         
         // Import the action dynamically to avoid circular dependency

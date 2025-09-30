@@ -69,13 +69,13 @@ const PhysiotherapistDetailPage: React.FC = () => {
       loadProfile();
       loadDateSlotCounts();
     }
-  }, [physioId, loadProfile, loadDateSlotCounts]);
+  }, [physioId]);
 
   useEffect(() => {
     if (profile && selectedDate) {
       loadAvailability();
     }
-  }, [profile, selectedDate, consultationType, loadAvailability]);
+  }, [profile, selectedDate, consultationType]);
 
   const loadProfile = async () => {
     try {
@@ -86,10 +86,11 @@ const PhysiotherapistDetailPage: React.FC = () => {
       });
       
       if (response.success && response.data) {
-        setProfile(response.data);
+        const profileData = response.data as PhysiotherapistProfile;
+        setProfile(profileData);
         // Reviews might be in a separate field or embedded
-        if (response.data.reviews) {
-          setReviews(response.data.reviews);
+        if ((profileData as unknown as {reviews?: Review[]}).reviews) {
+          setReviews((profileData as unknown as {reviews: Review[]}).reviews);
         }
       } else {
         setError('Failed to load physiotherapist profile');
@@ -114,7 +115,7 @@ const PhysiotherapistDetailPage: React.FC = () => {
       });
       
       if (response.success && response.data) {
-        setAvailability(response.data.slots || []);
+        setAvailability((response.data as {slots?: AvailabilitySlot[]}).slots || []);
         setSelectedSlot(null);
       }
     } catch (err) {
@@ -160,8 +161,8 @@ const PhysiotherapistDetailPage: React.FC = () => {
         const onlineResponse = responses[index * 2 + 1];
         
         newDateSlotCounts[dateString] = {
-          HOME_VISIT: homeVisitResponse.success ? (homeVisitResponse.data?.slots?.filter((slot: AvailabilitySlot) => slot.is_available)?.length || 0) : 0,
-          ONLINE: onlineResponse.success ? (onlineResponse.data?.slots?.filter((slot: AvailabilitySlot) => slot.is_available)?.length || 0) : 0
+          HOME_VISIT: homeVisitResponse.success ? ((homeVisitResponse.data as {slots?: AvailabilitySlot[]})?.slots?.filter((slot: AvailabilitySlot) => slot.is_available)?.length || 0) : 0,
+          ONLINE: onlineResponse.success ? ((onlineResponse.data as {slots?: AvailabilitySlot[]})?.slots?.filter((slot: AvailabilitySlot) => slot.is_available)?.length || 0) : 0
         };
       });
       

@@ -40,7 +40,7 @@ const BookingDemo: React.FC = () => {
 
   return (
     <div style={{ padding: '2rem' }}>
-      <Card variant="fill" scaleFactor="headline">
+      <Card variant="fill" scaleFactor="heading">
         <div className="p-xl">
           <div className="lk-typography-headline-medium" style={{ 
             color: 'var(--lk-onsurface)',
