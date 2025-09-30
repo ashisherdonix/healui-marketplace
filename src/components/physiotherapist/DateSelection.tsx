@@ -37,10 +37,11 @@ const DateSelection: React.FC<DateSelectionProps> = ({
     return slotData[consultationType];
   };
 
+  const [currentMonth, setCurrentMonth] = React.useState(new Date());
+
   const getDaysOfMonth = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
     
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -62,6 +63,23 @@ const DateSelection: React.FC<DateSelectionProps> = ({
     }
     
     return days;
+  };
+
+  const goToPreviousMonth = () => {
+    const today = new Date();
+    const newMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+    if (newMonth >= new Date(today.getFullYear(), today.getMonth(), 1)) {
+      setCurrentMonth(newMonth);
+    }
+  };
+
+  const goToNextMonth = () => {
+    const newMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+    const sixMonthsLater = new Date();
+    sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+    if (newMonth <= sixMonthsLater) {
+      setCurrentMonth(newMonth);
+    }
   };
 
   return (
@@ -238,11 +256,51 @@ const DateSelection: React.FC<DateSelectionProps> = ({
         }}>
           <div style={{
             padding: '16px',
-            backgroundColor: '#F3F4F6',
+            backgroundColor: '#1e5f79',
             textAlign: 'center',
-            fontWeight: '600'
+            fontWeight: '600',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
           }}>
-            {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            <button
+              onClick={goToPreviousMonth}
+              disabled={currentMonth <= new Date(new Date().getFullYear(), new Date().getMonth(), 1)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontSize: '18px',
+                cursor: 'pointer',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                opacity: currentMonth <= new Date(new Date().getFullYear(), new Date().getMonth(), 1) ? 0.5 : 1,
+                transition: 'opacity 0.2s ease'
+              }}
+            >
+              ←
+            </button>
+            <span>
+              {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            </span>
+            <button
+              onClick={goToNextMonth}
+              disabled={currentMonth >= new Date(new Date().getFullYear(), new Date().getMonth() + 6, 1)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontSize: '18px',
+                cursor: 'pointer',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                opacity: currentMonth >= new Date(new Date().getFullYear(), new Date().getMonth() + 6, 1) ? 0.5 : 1,
+                transition: 'opacity 0.2s ease'
+              }}
+            >
+              →
+            </button>
           </div>
           
           <div style={{
@@ -280,7 +338,9 @@ const DateSelection: React.FC<DateSelectionProps> = ({
               
               const isSelected = selectedDate === dayInfo.dateString;
               const slotCount = getSlotCountForDate(dayInfo.dateString);
-              const isToday = dayInfo.dateString === new Date().toISOString().split('T')[0];
+              const today = new Date();
+              const todayString = today.toISOString().split('T')[0];
+              const isToday = dayInfo.dateString === todayString;
               
               return (
                 <button
@@ -289,7 +349,7 @@ const DateSelection: React.FC<DateSelectionProps> = ({
                   disabled={dayInfo.isPast || slotCount === 0}
                   style={{
                     padding: '12px 8px',
-                    backgroundColor: isSelected ? '#2563EB' : isToday ? '#F0F9FF' : 'white',
+                    backgroundColor: isSelected ? '#1e5f79' : isToday ? '#c8eaeb' : 'white',
                     border: 'none',
                     cursor: dayInfo.isPast || slotCount === 0 ? 'not-allowed' : 'pointer',
                     opacity: dayInfo.isPast ? 0.4 : 1,
@@ -298,12 +358,12 @@ const DateSelection: React.FC<DateSelectionProps> = ({
                   }}
                   onMouseEnter={(e) => {
                     if (!dayInfo.isPast && slotCount > 0 && !isSelected) {
-                      e.currentTarget.style.backgroundColor = '#F0F9FF';
+                      e.currentTarget.style.backgroundColor = '#eff8ff';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!dayInfo.isPast && slotCount > 0 && !isSelected) {
-                      e.currentTarget.style.backgroundColor = isToday ? '#F0F9FF' : 'white';
+                      e.currentTarget.style.backgroundColor = isToday ? '#c8eaeb' : 'white';
                     }
                   }}
                 >
@@ -318,10 +378,10 @@ const DateSelection: React.FC<DateSelectionProps> = ({
                     <div style={{
                       fontSize: '10px',
                       marginTop: '2px',
-                      color: isSelected ? 'white' : '#2563EB',
+                      color: isSelected ? 'white' : '#1e5f79',
                       fontWeight: '600'
                     }}>
-                      {slotCount}
+                      {slotCount} slots
                     </div>
                   )}
                 </button>

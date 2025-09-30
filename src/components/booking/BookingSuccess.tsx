@@ -75,245 +75,287 @@ const BookingSuccess: React.FC<BookingSuccessProps> = ({
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      background: 'rgba(0, 0, 0, 0.5)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 1000,
-      padding: '1rem'
+      zIndex: 2000,
+      padding: '20px'
     }}>
       <div style={{
+        background: '#ffffff',
+        borderRadius: '12px',
+        boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
         maxWidth: '500px',
         width: '100%',
         maxHeight: '90vh',
-        overflow: 'auto',
-        backgroundColor: 'var(--lk-surface)',
-        borderRadius: '1rem'
+        overflow: 'hidden',
+        position: 'relative'
       }}>
-        <Card variant="fill" scaleFactor="headline">
-          <div className="p-xl">
-            {/* Header with Close Button */}
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              marginBottom: '2rem'
-            }}>
-              <div />
-              <Button
-                variant="text"
-                size="sm"
-                onClick={onClose}
-                style={{ padding: '0.5rem', minWidth: 'auto' }}
-                startIcon="X"
-              />
-            </div>
+        {/* Header */}
+        <div style={{
+          background: '#c8eaeb',
+          padding: '24px 20px',
+          position: 'relative'
+        }}>
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              background: 'rgba(0, 0, 0, 0.15)',
+              border: 'none',
+              borderRadius: '6px',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              zIndex: 10
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.25)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.15)';
+            }}
+          >
+            <X style={{ 
+              width: '16px', 
+              height: '16px', 
+              color: '#000000',
+              strokeWidth: 2
+            }} />
+          </button>
 
-            {/* Success Icon and Message */}
-            <div style={{ 
-              textAlign: 'center',
-              marginBottom: '2rem'
-            }}>
-              <div style={{
-                width: '4rem',
-                height: '4rem',
-                margin: '0 auto 1rem',
-                backgroundColor: 'var(--lk-primarycontainer)',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <CheckCircle style={{ 
-                  width: '2rem', 
-                  height: '2rem', 
-                  color: 'var(--lk-primary)' 
-                }} />
-              </div>
-              <div className="lk-typography-headline-medium" style={{ 
-                color: 'var(--lk-onsurface)',
-                marginBottom: '0.5rem'
-              }}>
-                Booking Confirmed!
-              </div>
-              <div className="lk-typography-body-medium" style={{ 
-                color: 'var(--lk-onsurfacevariant)',
-                maxWidth: '300px',
-                margin: '0 auto'
-              }}>
-                Your appointment has been successfully booked. You will receive a confirmation SMS shortly.
-              </div>
-            </div>
-
-            {/* Appointment Details Card */}
-            <Card variant="outline" scaleFactor="headline">
-              <div className="p-lg">
-                <div className="lk-typography-title-medium" style={{ 
-                  color: 'var(--lk-onsurface)',
-                  marginBottom: '1.5rem'
-                }}>
-                  Appointment Details
-                </div>
-                
-                <div style={{ display: 'grid', gap: '1rem' }}>
-                  {/* Physiotherapist */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <User style={{ width: '1.25rem', height: '1.25rem', color: 'var(--lk-primary)' }} />
-                    <div>
-                      <div className="lk-typography-body-large" style={{ fontWeight: '500' }}>
-                        Dr. {bookingData.physiotherapist_name}
-                      </div>
-                      {bookingData.physiotherapist_phone && (
-                        <div className="lk-typography-body-small" style={{ color: 'var(--lk-onsurfacevariant)' }}>
-                          {bookingData.physiotherapist_phone}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Date & Time */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <Calendar style={{ width: '1.25rem', height: '1.25rem', color: 'var(--lk-primary)' }} />
-                    <div>
-                      <div className="lk-typography-body-large" style={{ fontWeight: '500' }}>
-                        {dateFormatted.full}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <Clock style={{ width: '1.25rem', height: '1.25rem', color: 'var(--lk-primary)' }} />
-                    <div>
-                      <div className="lk-typography-body-large" style={{ fontWeight: '500' }}>
-                        {formatTime(bookingData.scheduled_time)} - {formatTime(bookingData.end_time)}
-                      </div>
-                      <div className="lk-typography-body-small" style={{ color: 'var(--lk-onsurfacevariant)' }}>
-                        60 minutes session
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Visit Mode */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    {bookingData.visit_mode === 'HOME_VISIT' ? (
-                      <Home style={{ width: '1.25rem', height: '1.25rem', color: 'var(--lk-primary)' }} />
-                    ) : (
-                      <Video style={{ width: '1.25rem', height: '1.25rem', color: 'var(--lk-primary)' }} />
-                    )}
-                    <div>
-                      <div className="lk-typography-body-large" style={{ fontWeight: '500' }}>
-                        {bookingData.visit_mode === 'HOME_VISIT' ? 'Home Visit' : 'Online Consultation'}
-                      </div>
-                      {bookingData.visit_mode === 'HOME_VISIT' && bookingData.patient_address && (
-                        <div className="lk-typography-body-small" style={{ color: 'var(--lk-onsurfacevariant)' }}>
-                          {bookingData.patient_address}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Payment Summary */}
-            <Card variant="outline" scaleFactor="headline" style={{ marginTop: '1rem' }}>
-              <div className="p-lg">
-                <div className="lk-typography-title-medium" style={{ 
-                  color: 'var(--lk-onsurface)',
-                  marginBottom: '1rem'
-                }}>
-                  Payment Summary
-                </div>
-                
-                <div style={{ display: 'grid', gap: '0.75rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span className="lk-typography-body-medium">Consultation Fee</span>
-                    <span className="lk-typography-body-medium">₹{bookingData.consultation_fee}</span>
-                  </div>
-                  
-                  {bookingData.travel_fee && bookingData.travel_fee > 0 && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span className="lk-typography-body-medium">Travel Fee</span>
-                      <span className="lk-typography-body-medium">₹{bookingData.travel_fee}</span>
-                    </div>
-                  )}
-                  
-                  <hr style={{ border: 'none', borderTop: '1px solid var(--lk-outline)', margin: '0.5rem 0' }} />
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span className="lk-typography-title-medium">Total Paid</span>
-                    <span className="lk-typography-title-medium" style={{ color: 'var(--lk-primary)' }}>
-                      ₹{bookingData.total_amount}
-                    </span>
-                  </div>
-                  
-                  <div className="lk-typography-body-small" style={{ 
-                    color: 'var(--lk-onsurfacevariant)',
-                    textAlign: 'center',
-                    marginTop: '0.5rem',
-                    padding: '0.75rem',
-                    backgroundColor: 'var(--lk-surfacecontainerhighest)',
-                    borderRadius: '0.5rem'
-                  }}>
-                    💳 Payment will be collected at the time of service
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Next Steps */}
+          <div style={{ textAlign: 'center' }}>
+            {/* Success Icon */}
             <div style={{
-              marginTop: '1.5rem',
-              padding: '1rem',
-              backgroundColor: 'var(--lk-surfacecontainerhighest)',
-              borderRadius: '0.5rem'
+              width: '60px',
+              height: '60px',
+              margin: '0 auto 16px',
+              background: '#10b981',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 20px rgba(16, 185, 129, 0.3)'
             }}>
-              <div className="lk-typography-title-small" style={{ 
-                color: 'var(--lk-onsurface)',
-                marginBottom: '0.75rem'
-              }}>
-                What happens next?
-              </div>
-              <div style={{ display: 'grid', gap: '0.5rem' }}>
-                <div className="lk-typography-body-small" style={{ color: 'var(--lk-onsurfacevariant)' }}>
-                  • You will receive an SMS confirmation with appointment details
-                </div>
-                <div className="lk-typography-body-small" style={{ color: 'var(--lk-onsurfacevariant)' }}>
-                  • The physiotherapist will call you 15 minutes before the session
-                </div>
-                <div className="lk-typography-body-small" style={{ color: 'var(--lk-onsurfacevariant)' }}>
-                  • You can reschedule or cancel up to 2 hours before the appointment
-                </div>
-              </div>
+              <CheckCircle style={{ 
+                width: '32px', 
+                height: '32px', 
+                color: '#ffffff'
+              }} />
             </div>
 
-            {/* Action Buttons */}
-            <div style={{ 
-              display: 'flex', 
-              gap: '1rem',
-              marginTop: '2rem'
+            <h2 style={{
+              fontSize: '20px',
+              fontWeight: '600',
+              color: '#000000',
+              margin: 0,
+              marginBottom: '8px'
             }}>
-              {onViewBookings && (
-                <Button
-                  variant="outline"
-                  color="primary"
-                  size="lg"
-                  onClick={onViewBookings}
-                  style={{ flex: 1 }}
-                  label="View All Bookings"
-                />
-              )}
-              <Button
-                variant="fill"
-                color="primary"
-                size="lg"
-                onClick={onClose}
-                style={{ flex: 1 }}
-                label="Done"
-              />
+              Booking Confirmed!
+            </h2>
+            <p style={{
+              fontSize: '14px',
+              color: '#000000',
+              margin: 0,
+              fontWeight: '500',
+              opacity: 0.8
+            }}>
+              Your appointment has been successfully booked
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div style={{ 
+          padding: '20px',
+          maxHeight: 'calc(90vh - 120px)',
+          overflow: 'auto'
+        }}>
+          {/* Appointment Details */}
+          <div style={{
+            background: '#eff8ff',
+            border: '1px solid #c8eaeb',
+            borderRadius: '8px',
+            padding: '16px',
+            marginBottom: '20px'
+          }}>
+            <h3 style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#1e5f79',
+              margin: '0 0 12px 0'
+            }}>
+              Appointment Details
+            </h3>
+            
+            <div style={{ display: 'grid', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <User style={{ width: '16px', height: '16px', color: '#1e5f79' }} />
+                <span style={{ fontSize: '14px', color: '#000000' }}>Dr. {bookingData.physiotherapist_name}</span>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Calendar style={{ width: '16px', height: '16px', color: '#1e5f79' }} />
+                <span style={{ fontSize: '14px', color: '#000000' }}>{dateFormatted.short} • {formatTime(bookingData.scheduled_time)}</span>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {bookingData.visit_mode === 'HOME_VISIT' ? (
+                  <Home style={{ width: '16px', height: '16px', color: '#1e5f79' }} />
+                ) : (
+                  <Video style={{ width: '16px', height: '16px', color: '#1e5f79' }} />
+                )}
+                <span style={{ fontSize: '14px', color: '#000000' }}>
+                  {bookingData.visit_mode === 'HOME_VISIT' ? 'Home Visit' : 'Online Consultation'}
+                </span>
+              </div>
             </div>
           </div>
-        </Card>
+
+          {/* Payment Summary */}
+          <div style={{
+            background: '#eff8ff',
+            border: '1px solid #c8eaeb',
+            borderRadius: '8px',
+            padding: '16px',
+            marginBottom: '20px'
+          }}>
+            <h4 style={{
+              fontSize: '15px',
+              fontWeight: '600',
+              color: '#1e5f79',
+              margin: '0 0 12px 0'
+            }}>
+              Fee Breakdown
+            </h4>
+            
+            <div style={{ display: 'grid', gap: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '14px', color: '#000000' }}>Consultation Fee</span>
+                <span style={{ fontSize: '14px', color: '#000000', fontWeight: '500' }}>₹{bookingData.consultation_fee}</span>
+              </div>
+              
+              {bookingData.travel_fee && bookingData.travel_fee > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '14px', color: '#000000' }}>Travel Fee</span>
+                  <span style={{ fontSize: '14px', color: '#000000', fontWeight: '500' }}>₹{bookingData.travel_fee}</span>
+                </div>
+              )}
+              
+              <hr style={{ border: 'none', borderTop: '1px solid #c8eaeb', margin: '8px 0' }} />
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '16px', fontWeight: '600', color: '#000000' }}>Total Amount</span>
+                <span style={{ fontSize: '16px', fontWeight: '700', color: '#1e5f79' }}>
+                  ₹{bookingData.total_amount}
+                </span>
+              </div>
+              
+              <div style={{
+                fontSize: '12px',
+                color: '#6b7280',
+                textAlign: 'center',
+                marginTop: '8px',
+                padding: '8px',
+                backgroundColor: 'rgba(200, 234, 235, 0.3)',
+                borderRadius: '6px'
+              }}>
+                💳 Payment will be collected at the time of service
+              </div>
+            </div>
+          </div>
+
+          {/* Next Steps */}
+          <div style={{
+            background: '#eff8ff',
+            border: '1px solid #c8eaeb',
+            borderRadius: '8px',
+            padding: '16px',
+            marginBottom: '20px'
+          }}>
+            <h4 style={{
+              fontSize: '15px',
+              fontWeight: '600',
+              color: '#1e5f79',
+              margin: '0 0 12px 0'
+            }}>
+              What happens next?
+            </h4>
+            <div style={{ display: 'grid', gap: '6px' }}>
+              <div style={{ fontSize: '13px', color: '#000000' }}>
+                • You will receive an SMS confirmation shortly
+              </div>
+              <div style={{ fontSize: '13px', color: '#000000' }}>
+                • The physiotherapist will call you 15 minutes before the session
+              </div>
+              <div style={{ fontSize: '13px', color: '#000000' }}>
+                • You can reschedule or cancel up to 2 hours before the appointment
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {onViewBookings && (
+              <button
+                onClick={onViewBookings}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  background: 'none',
+                  color: '#1e5f79',
+                  border: '1px solid #c8eaeb',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#eff8ff';
+                  e.currentTarget.style.borderColor = '#1e5f79';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = '#c8eaeb';
+                }}
+              >
+                View All Bookings
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              style={{
+                flex: 1,
+                padding: '14px',
+                background: '#1e5f79',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#000000';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#1e5f79';
+              }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

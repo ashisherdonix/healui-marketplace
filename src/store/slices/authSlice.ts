@@ -135,7 +135,8 @@ export const getCurrentUser = createAsyncThunk(
         return response.data; // Return user data directly
       } else {
         console.log('❌ getCurrentUser - API call failed:', response);
-        throw new Error(response.message || 'Failed to get user data');
+        // Don't throw error, just return rejection to handle gracefully
+        return rejectWithValue(response.message || 'Failed to get user data');
       }
     } catch (error: any) {
       console.error('❌ getCurrentUser - Error occurred:', error);
@@ -283,11 +284,12 @@ const authSlice = createSlice({
         state.otpSent = false;
         state.initializing = false;
         state.isAuthenticated = true;
+        // Extract the user data from the login response
         state.user = action.payload.user;
         state.error = null;
         state.confirmationResult = null;
         state.phoneNumber = null;
-        setAuthTokens(action.payload.accessToken, action.payload.refreshToken);
+        setAuthTokens(action.payload.accessToken || action.payload.access_token, action.payload.refreshToken || action.payload.refresh_token);
       })
       .addCase(verifyOTP.rejected, (state, action) => {
         state.otpVerifying = false;

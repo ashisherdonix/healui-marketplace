@@ -108,90 +108,110 @@ const CleanSearchBar: React.FC<CleanSearchBarProps> = ({ onSearch, loading = fal
   return (
     <div>
       {/* Main Search Bar */}
-      <div style={{
+      <div className="search-bar" style={{
         backgroundColor: theme.colors.white,
-        borderRadius: '50px',
-        boxShadow: '0 8px 32px rgba(30, 95, 121, 0.12)',
+        borderRadius: 'clamp(1rem, 4vw, 3.125rem)',
+        boxShadow: '0 0.5rem 2rem rgba(30, 95, 121, 0.12)',
         overflow: 'hidden',
-        border: `3px solid ${theme.colors.secondary}`,
-        transition: 'all 0.3s ease'
+        border: `clamp(1px, 0.5vw, 3px) solid ${theme.colors.secondary}`,
+        transition: 'all 0.3s ease',
+        position: 'relative'
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 12px 40px rgba(30, 95, 121, 0.18)';
+        e.currentTarget.style.boxShadow = '0 0.75rem 2.5rem rgba(30, 95, 121, 0.18)';
         e.currentTarget.style.borderColor = theme.colors.primary;
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '0 8px 32px rgba(30, 95, 121, 0.12)';
+        e.currentTarget.style.boxShadow = '0 0.5rem 2rem rgba(30, 95, 121, 0.12)';
         e.currentTarget.style.borderColor = theme.colors.secondary;
       }}>
-        <div style={{
+        <div className="search-container" style={{
           display: 'flex',
           alignItems: 'center',
-          padding: '6px'
+          padding: 'clamp(0.25rem, 1vw, 0.375rem)',
+          flexDirection: 'row',
+          gap: '0'
         }}>
           {/* Search Input */}
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+          <div className="search-input-section" style={{ 
+            flex: 3, 
+            display: 'flex', 
+            alignItems: 'center',
+            minWidth: 0
+          }}>
             <Search style={{
-              width: '22px',
-              height: '22px',
+              width: 'clamp(1rem, 3vw, 1.375rem)',
+              height: 'clamp(1rem, 3vw, 1.375rem)',
               color: theme.colors.primary,
-              marginLeft: '20px',
-              marginRight: '14px'
+              marginLeft: 'clamp(0.75rem, 3vw, 1.25rem)',
+              marginRight: 'clamp(0.5rem, 2vw, 0.875rem)',
+              flexShrink: 0
             }} />
             <input
               type="text"
               value={searchParams.query}
               onChange={(e) => handleInputChange('query', e.target.value)}
-              placeholder="Search physiotherapists, conditions, or treatments"
+              placeholder="Search condition, specialization or physiotherapist"
               style={{
                 flex: 1,
-                height: '50px',
+                height: 'clamp(2.5rem, 6vw, 3.125rem)',
                 border: 'none',
                 outline: 'none',
-                fontSize: '16px',
+                fontSize: 'clamp(0.875rem, 3vw, 1rem)',
                 color: theme.colors.text,
                 backgroundColor: 'transparent',
-                fontWeight: '500'
+                fontWeight: '500',
+                minWidth: 0
               }}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
 
           {/* Divider */}
-          <div style={{
+          <div className="search-divider" style={{
             width: '2px',
-            height: '32px',
+            height: 'clamp(1.5rem, 4vw, 2rem)',
             background: `linear-gradient(to bottom, transparent, ${theme.colors.secondary}, transparent)`,
-            margin: '0 12px'
+            margin: '0 clamp(0.5rem, 2vw, 0.75rem)',
+            flexShrink: 0
           }} />
 
-          {/* Location Input */}
-          <div ref={locationRef} style={{ 
+          {/* Pincode Input */}
+          <div ref={locationRef} className="location-input-section" style={{ 
             position: 'relative', 
             display: 'flex', 
             alignItems: 'center',
-            minWidth: '200px'
+            width: 'clamp(5.5rem, 12vw, 7.5rem)',
+            flex: '0 0 auto'
           }}>
             <MapPin style={{
-              width: '20px',
-              height: '20px',
+              width: 'clamp(0.875rem, 2.5vw, 1rem)',
+              height: 'clamp(0.875rem, 2.5vw, 1rem)',
               color: theme.colors.primary,
-              marginRight: '10px'
+              marginRight: 'clamp(0.25rem, 1vw, 0.375rem)',
+              flexShrink: 0
             }} />
             <input
-              type="text"
+              type="tel"
               value={searchParams.location}
-              onChange={(e) => handleInputChange('location', e.target.value)}
-              placeholder="Location"
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                handleInputChange('location', value);
+              }}
+              placeholder="6-digit pincode"
+              maxLength={6}
               style={{
                 width: '100%',
-                height: '50px',
+                height: 'clamp(2.5rem, 6vw, 3.125rem)',
                 border: 'none',
                 outline: 'none',
-                fontSize: '16px',
+                fontSize: 'clamp(0.875rem, 3vw, 1rem)',
                 color: theme.colors.text,
                 backgroundColor: 'transparent',
-                fontWeight: '500'
+                fontWeight: '500',
+                minWidth: 0,
+                textAlign: 'center',
+                letterSpacing: '1px'
               }}
               onFocus={() => searchParams.location.length >= 2 && setShowLocationDropdown(true)}
             />
@@ -249,54 +269,60 @@ const CleanSearchBar: React.FC<CleanSearchBarProps> = ({ onSearch, loading = fal
 
           {/* Search Button */}
           <button
+            className="search-button"
             onClick={handleSearch}
             disabled={loading}
             style={{
-              marginLeft: '12px',
-              marginRight: '6px',
-              padding: '0 28px',
-              height: '44px',
+              marginLeft: 'clamp(0.5rem, 2vw, 0.75rem)',
+              marginRight: 'clamp(0.25rem, 1vw, 0.375rem)',
+              padding: '0 clamp(1rem, 4vw, 1.75rem)',
+              height: 'clamp(2.25rem, 5vw, 2.75rem)',
               background: theme.gradients.primary,
               color: theme.colors.white,
               border: 'none',
-              borderRadius: '22px',
-              fontSize: '16px',
+              borderRadius: 'clamp(1.125rem, 3vw, 1.375rem)',
+              fontSize: 'clamp(0.875rem, 3vw, 1rem)',
               fontWeight: '700',
               cursor: loading ? 'wait' : 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: 'clamp(0.375rem, 1.5vw, 0.5rem)',
               transition: 'all 0.2s ease',
               opacity: loading ? 0.8 : 1,
-              boxShadow: '0 4px 16px rgba(30, 95, 121, 0.3)'
+              boxShadow: '0 0.25rem 1rem rgba(30, 95, 121, 0.3)',
+              flexShrink: 0,
+              whiteSpace: 'nowrap'
             }}
             onMouseEnter={(e) => {
               if (!loading) {
                 e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(30, 95, 121, 0.4)';
+                e.currentTarget.style.boxShadow = '0 0.375rem 1.25rem rgba(30, 95, 121, 0.4)';
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 16px rgba(30, 95, 121, 0.3)';
+              e.currentTarget.style.boxShadow = '0 0.25rem 1rem rgba(30, 95, 121, 0.3)';
             }}
           >
             {loading ? (
               <>
                 <div style={{
-                  width: '16px',
-                  height: '16px',
+                  width: 'clamp(0.875rem, 2.5vw, 1rem)',
+                  height: 'clamp(0.875rem, 2.5vw, 1rem)',
                   border: '2px solid white',
                   borderTopColor: 'transparent',
                   borderRadius: '50%',
                   animation: 'spin 0.8s linear infinite'
                 }} />
-                Searching
+                <span className="search-button-text">Searching</span>
               </>
             ) : (
               <>
-                <Search style={{ width: '18px', height: '18px' }} />
-                Search
+                <Search style={{ 
+                  width: 'clamp(0.875rem, 2.5vw, 1.125rem)', 
+                  height: 'clamp(0.875rem, 2.5vw, 1.125rem)' 
+                }} />
+                <span className="search-button-text">Search</span>
               </>
             )}
           </button>
@@ -314,6 +340,79 @@ const CleanSearchBar: React.FC<CleanSearchBarProps> = ({ onSearch, loading = fal
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+          .search-container {
+            flex-direction: column !important;
+            gap: 0.75rem !important;
+            padding: 1rem !important;
+          }
+          
+          .search-divider {
+            display: none !important;
+          }
+          
+          .search-input-section,
+          .location-input-section {
+            width: 100% !important;
+            min-width: 100% !important;
+            flex: none !important;
+          }
+          
+          .search-button {
+            width: 100% !important;
+            margin: 0 !important;
+            justify-content: center !important;
+          }
+          
+          .search-bar {
+            border-radius: 1rem !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .search-container {
+            padding: 0.75rem !important;
+            gap: 0.5rem !important;
+          }
+          
+          .search-input-section input::placeholder,
+          .location-input-section input::placeholder {
+            font-size: 0.8rem !important;
+          }
+          
+          .search-input-section input::placeholder {
+            content: "Search condition" !important;
+          }
+          
+          .location-input-section input::placeholder {
+            content: "Pincode" !important;
+          }
+          
+          .search-button-text {
+            display: none !important;
+          }
+          
+          .search-button {
+            padding: 0 1rem !important;
+          }
+        }
+        
+        @media (max-width: 360px) {
+          .search-container {
+            padding: 0.625rem !important;
+            gap: 0.375rem !important;
+          }
+          
+          .search-input-section input::placeholder {
+            content: "Search" !important;
+          }
+          
+          .location-input-section input::placeholder {
+            content: "Pincode" !important;
+          }
         }
       `}</style>
     </div>

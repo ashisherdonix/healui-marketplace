@@ -74,88 +74,46 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({ physioth
 
   return (
     <div style={{
-      backgroundColor: 'white',
-      borderRadius: '16px',
-      border: '1px solid #E5E7EB',
+      backgroundColor: '#eff8ff',
+      borderRadius: '12px',
+      border: '1px solid #c8eaeb',
       overflow: 'hidden',
-      transition: 'all 0.3s ease',
+      transition: 'all 0.2s ease',
       cursor: 'pointer',
-      height: '100%',
+      height: '320px', // Reduced height for better content ratio
       display: 'flex',
       flexDirection: 'column',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+      boxShadow: '0 2px 8px rgba(30, 95, 121, 0.08)',
+      padding: '20px'
     }}
     onClick={handleBookAppointment}
     onMouseEnter={(e) => {
-      e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-      e.currentTarget.style.transform = 'translateY(-4px)';
-      e.currentTarget.style.borderColor = theme.colors.primary;
+      e.currentTarget.style.boxShadow = '0 4px 16px rgba(30, 95, 121, 0.12)';
+      e.currentTarget.style.transform = 'translateY(-2px)';
+      e.currentTarget.style.borderColor = 'rgba(30, 95, 121, 0.3)';
     }}
     onMouseLeave={(e) => {
-      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+      e.currentTarget.style.boxShadow = '0 2px 8px rgba(30, 95, 121, 0.08)';
       e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.borderColor = theme.colors.gray[200];
+      e.currentTarget.style.borderColor = '#c8eaeb';
     }}>
-      {/* Header with Cover Image */}
+      {/* Profile Section */}
       <div style={{ 
-        position: 'relative',
-        height: '120px',
-        background: theme.gradients.card,
-        overflow: 'hidden'
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+        marginBottom: '12px'
       }}>
-        {physiotherapist.cover_photo_url && (
-          <Image
-            src={physiotherapist.cover_photo_url}
-            alt="Cover"
-            fill
-            style={{ objectFit: 'cover' }}
-            sizes="400px"
-          />
-        )}
-        
-        {/* Gradient Overlay */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: theme.gradients.overlay
-        }} />
-
-        {/* Verification Badge */}
-        {physiotherapist.is_verified && (
-          <div style={{
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            borderRadius: '20px',
-            padding: '6px 12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            fontSize: '12px',
-            fontWeight: '600',
-            color: theme.colors.primary
-          }}>
-            <CheckCircle2 style={{ width: '14px', height: '14px' }} />
-            Verified
-          </div>
-        )}
-
         {/* Profile Image */}
         <div style={{
-          position: 'absolute',
-          bottom: '-30px',
-          left: '20px',
-          width: '80px',
-          height: '80px',
-          borderRadius: '16px',
+          width: '64px',
+          height: '64px',
+          borderRadius: '50%',
           overflow: 'hidden',
           backgroundColor: '#F3F4F6',
-          border: '4px solid white',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+          border: '3px solid #c8eaeb',
+          position: 'relative',
+          flexShrink: 0
         }}>
           {physiotherapist.profile_photo_url ? (
             <Image
@@ -163,7 +121,7 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({ physioth
               alt={physiotherapist.full_name}
               fill
               style={{ objectFit: 'cover' }}
-              sizes="80px"
+              sizes="64px"
             />
           ) : (
             <div style={{
@@ -175,283 +133,263 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({ physioth
               backgroundColor: '#F3F4F6'
             }}>
               <User style={{
-                width: '32px',
-                height: '32px',
+                width: '24px',
+                height: '24px',
                 color: '#9CA3AF'
               }} />
             </div>
           )}
           
-          {/* Availability Indicator */}
-          <div style={{
-            position: 'absolute',
-            bottom: '4px',
-            right: '4px',
-            width: '16px',
-            height: '16px',
-            borderRadius: '50%',
-            backgroundColor: getAvailabilityColor(),
-            border: '2px solid white',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-          }} />
+          {/* Verification Badge - only if verified */}
+          {physiotherapist.is_verified && (
+            <div style={{
+              position: 'absolute',
+              bottom: '-2px',
+              right: '-2px',
+              width: '18px',
+              height: '18px',
+              borderRadius: '50%',
+              backgroundColor: '#1e5f79',
+              border: '2px solid #eff8ff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <CheckCircle2 style={{ width: '10px', height: '10px', color: '#ffffff' }} />
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Card Content */}
-      <div style={{ padding: '20px', paddingTop: '40px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        {/* Name and Rating */}
-        <div style={{ marginBottom: '16px' }}>
+        {/* Name and Experience */}
+        <div style={{ flex: 1 }}>
           <h3 style={{
-            fontSize: '20px',
-            fontWeight: '700',
-            color: theme.colors.text,
+            fontSize: '18px',
+            fontWeight: '600',
+            color: '#000000',
             margin: 0,
-            marginBottom: '4px'
+            marginBottom: '4px',
+            fontFamily: 'Inter, "IBM Plex Sans", system-ui, sans-serif'
           }}>
             Dr. {physiotherapist.full_name}
           </h3>
           
-          {/* Rating and Reviews */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Star style={{
-                width: '16px',
-                height: '16px',
-                color: '#F59E0B',
-                fill: '#F59E0B'
-              }} />
+          {/* Experience */}
+          {physiotherapist.years_of_experience && (
+            <div style={{
+              fontSize: '13px',
+              color: '#1e5f79',
+              fontWeight: '500'
+            }}>
+              {physiotherapist.years_of_experience} years experience
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Location */}
+      {physiotherapist.practice_address && (
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '6px',
+          marginBottom: '12px'
+        }}>
+          <MapPin style={{ width: '14px', height: '14px', color: '#6B7280' }} />
+          <span style={{
+            fontSize: '13px',
+            color: '#4B5563',
+            fontWeight: '500'
+          }}>
+            {physiotherapist.practice_address}
+          </span>
+        </div>
+      )}
+
+      {/* Specializations */}
+      {physiotherapist.specializations && physiotherapist.specializations.length > 0 && (
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '6px'
+          }}>
+            {physiotherapist.specializations.slice(0, 3).map((spec, index) => (
+              <span 
+                key={index} 
+                style={{
+                  backgroundColor: 'rgba(200, 234, 235, 0.4)',
+                  color: '#1e5f79',
+                  padding: '3px 10px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  transition: 'all 0.15s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#1e5f79';
+                  e.currentTarget.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(200, 234, 235, 0.4)';
+                  e.currentTarget.style.color = '#1e5f79';
+                }}
+              >
+                {formatSpecialization(spec)}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Pricing Section */}
+      <div style={{ 
+        marginBottom: '16px',
+        padding: '8px 0'
+      }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px'
+        }}>
+          {/* Home Visit Price */}
+          {(physiotherapist.home_visit_available !== false && physiotherapist.home_visit_fee) && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <Home style={{ width: '12px', height: '12px', color: '#1e5f79' }} />
+                <span style={{
+                  fontSize: '12px',
+                  color: '#4B5563',
+                  fontWeight: '500'
+                }}>
+                  Home Visit
+                </span>
+              </div>
               <span style={{
                 fontSize: '14px',
                 fontWeight: '600',
-                color: '#1F2937'
+                color: '#1e5f79'
               }}>
-                {physiotherapist.average_rating > 0 ? physiotherapist.average_rating.toFixed(1) : 'New'}
+                ₹{parseFloat(physiotherapist.home_visit_fee).toLocaleString()}
               </span>
             </div>
-            <span style={{
-              fontSize: '13px',
-              color: '#6B7280'
+          )}
+          
+          {/* Online Consultation Price */}
+          {(physiotherapist.online_consultation_available !== false && physiotherapist.consultation_fee) && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
             }}>
-              ({physiotherapist.total_reviews} reviews)
-            </span>
-            
-            {/* Experience Badge */}
-            {physiotherapist.years_of_experience && (
               <div style={{
-                backgroundColor: theme.colors.background,
-                color: theme.colors.primary,
-                padding: '2px 8px',
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: '500',
-                marginLeft: 'auto'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
               }}>
-                <Award style={{ width: '12px', height: '12px', display: 'inline', marginRight: '4px' }} />
-                {physiotherapist.years_of_experience}y exp
-              </div>
-            )}
-          </div>
-
-          {/* Availability Status */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Calendar style={{ width: '14px', height: '14px', color: getAvailabilityColor() }} />
-            <span style={{ 
-              fontSize: '13px', 
-              color: getAvailabilityColor(),
-              fontWeight: '500'
-            }}>
-              {getAvailabilityText()}
-            </span>
-          </div>
-        </div>
-
-        {/* Specializations */}
-        {physiotherapist.specializations && physiotherapist.specializations.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              {physiotherapist.specializations.slice(0, 3).map((spec, index) => (
-                <span key={index} style={{
-                  padding: '4px 10px',
-                  backgroundColor: theme.colors.secondary,
-                  color: theme.colors.primary,
-                  borderRadius: '16px',
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  border: `1px solid ${theme.colors.primary}`
-                }}>
-                  {formatSpecialization(spec)}
-                </span>
-              ))}
-              {physiotherapist.specializations.length > 3 && (
+                <Video style={{ width: '12px', height: '12px', color: '#1e5f79' }} />
                 <span style={{
-                  padding: '4px 10px',
-                  backgroundColor: '#F3F4F6',
-                  color: '#6B7280',
-                  borderRadius: '16px',
                   fontSize: '12px',
+                  color: '#4B5563',
                   fontWeight: '500'
                 }}>
-                  +{physiotherapist.specializations.length - 3}
+                  Online
                 </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Location and Service Areas */}
-        <div style={{ marginBottom: '16px' }}>
-          {physiotherapist.practice_address && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-              <MapPin style={{ width: '14px', height: '14px', color: '#6B7280' }} />
-              <span style={{ 
-                fontSize: '13px', 
-                color: '#4B5563',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
+              </div>
+              <span style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#1e5f79'
               }}>
-                {physiotherapist.practice_address}
+                ₹{parseFloat(physiotherapist.consultation_fee).toLocaleString()}
               </span>
             </div>
           )}
-          {physiotherapist.service_areas && (
-            <div style={{ 
-              fontSize: '12px', 
-              color: '#6B7280',
-              marginLeft: '20px'
+          
+          {/* Fallback if no pricing */}
+          {(!physiotherapist.home_visit_fee && !physiotherapist.consultation_fee) && (
+            <div style={{
+              textAlign: 'center',
+              fontSize: '12px',
+              color: 'rgba(0, 0, 0, 0.5)',
+              fontStyle: 'italic'
             }}>
-              Service areas: {physiotherapist.service_areas}
+              Contact for pricing
             </div>
           )}
         </div>
+      </div>
 
-        {/* Bio Preview */}
-        {physiotherapist.bio && (
-          <div style={{ marginBottom: '16px' }}>
-            <p style={{
-              fontSize: '13px',
-              color: '#6B7280',
-              lineHeight: '1.4',
-              margin: 0,
-              overflow: 'hidden',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical'
-            }}>
-              {physiotherapist.bio}
-            </p>
-          </div>
-        )}
-
-        {/* Services & Pricing */}
-        <div style={{ 
-          borderTop: '1px solid #F3F4F6',
-          paddingTop: '16px',
-          marginTop: 'auto'
-        }}>
-          {/* Services Available */}
-          <div style={{ 
-            display: 'flex', 
-            gap: '8px',
-            marginBottom: '12px'
-          }}>
-            {physiotherapist.home_visit_available !== false && (
-              <div style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '4px 8px',
-                backgroundColor: theme.colors.background,
-                color: theme.colors.primary,
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: '500'
-              }}>
-                <Home style={{ width: '12px', height: '12px' }} />
-                Home Visit
-              </div>
-            )}
-            {physiotherapist.online_consultation_available !== false && (
-              <div style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '4px 8px',
-                backgroundColor: theme.colors.secondary,
-                color: theme.colors.primary,
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: '500'
-              }}>
-                <Video style={{ width: '12px', height: '12px' }} />
-                Online
-              </div>
-            )}
-          </div>
-
-          {/* Pricing */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '16px'
-          }}>
-            <div>
-              <div style={{ fontSize: '12px', color: '#6B7280' }}>Starting from</div>
-              <div style={{
-                fontSize: '18px',
-                fontWeight: '700',
-                color: '#1F2937'
-              }}>
-                {formatPrice(physiotherapist.consultation_fee)}
-              </div>
-            </div>
-            
-            {physiotherapist.home_visit_fee && physiotherapist.home_visit_fee !== physiotherapist.consultation_fee && (
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '12px', color: '#6B7280' }}>Home visit</div>
-                <div style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: theme.colors.primary
-                }}>
-                  {formatPrice(physiotherapist.home_visit_fee)}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Book Button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleBookAppointment();
-            }}
-            style={{
-              width: '100%',
-              padding: '14px',
-              background: theme.gradients.primary,
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '15px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: `0 4px 12px rgba(30, 95, 121, 0.3)`
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 6px 16px rgba(30, 95, 121, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(30, 95, 121, 0.3)';
-            }}
-          >
-            Book Appointment
-          </button>
-        </div>
+      {/* CTA Buttons */}
+      <div style={{ 
+        display: 'flex',
+        gap: '12px',
+        marginTop: 'auto',
+        flexShrink: 0 // Prevents buttons from shrinking
+      }}>
+        {/* Primary Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleBookAppointment();
+          }}
+          style={{
+            flex: 1,
+            height: '40px',
+            backgroundColor: '#1e5f79',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#1a5469'; // 10% darker
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#1e5f79';
+          }}
+        >
+          Book Now
+        </button>
+        
+        {/* Secondary Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleBookAppointment();
+          }}
+          style={{
+            flex: 1,
+            height: '40px',
+            backgroundColor: 'transparent',
+            color: '#1e5f79',
+            border: '1px solid #1e5f79',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#eff8ff';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
+          View Profile
+        </button>
       </div>
     </div>
   );

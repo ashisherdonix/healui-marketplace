@@ -37,15 +37,10 @@ const AuthInitializer = () => {
         } catch (error: any) {
           console.log('❌ AuthInitializer - Failed to restore auth state:', error);
           
-          // Only set initializing to false if it's not a network error
-          // Network errors during page load are common and shouldn't log out the user
-          const errorMessage = error?.toString() || '';
-          if (errorMessage.includes('NetworkError') || errorMessage.includes('NS_BINDING_ABORTED')) {
-            console.log('⚠️ AuthInitializer - Network error during initialization, keeping current state');
-            // Keep the current auth state and try again later
-            dispatch(setInitializing(false));
-          }
-          // For other errors (like 401), getCurrentUser.rejected will handle it
+          // For any error during initialization, just gracefully continue without auth
+          // This ensures the app works without authentication
+          console.log('ℹ️ AuthInitializer - Continuing without authentication, app will work in guest mode');
+          dispatch(setInitializing(false));
         }
       } else {
         console.log('ℹ️ AuthInitializer - No access token found, user needs to login');

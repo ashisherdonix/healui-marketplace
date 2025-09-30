@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ApiManager from '@/services/api';
-import { Calendar, Star, CheckCircle, ArrowLeft, MapPin, Clock, Phone, Video, ChevronLeft, ChevronRight, Home } from 'lucide-react';
+import { Calendar, Star, CheckCircle, ArrowLeft, MapPin, Clock, Phone, Video, ChevronLeft, ChevronRight, Home, User } from 'lucide-react';
 import EnhancedBookingForm from '@/components/booking/EnhancedBookingForm';
 import Header from '@/components/layout/Header';
 import { PhysiotherapistProfileSkeleton } from '@/components/shared/SkeletonLoader';
+import DateSelection from '@/components/physiotherapist/DateSelection';
 import { theme } from '@/utils/theme';
 
 interface AvailabilitySlot {
@@ -65,7 +66,7 @@ interface PhysiotherapistProfile {
   };
 }
 
-const PhysiotherapistEnhancedPage: React.FC = () => {
+const PhysiotherapistResponsivePage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const physioId = params.id as string;
@@ -81,9 +82,8 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
   const [selectedSlot, setSelectedSlot] = useState<AvailabilitySlot | null>(null);
   const [consultationType, setConsultationType] = useState<'HOME_VISIT' | 'ONLINE'>('HOME_VISIT');
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const [dateViewMode, setDateViewMode] = useState<'quick' | 'calendar'>('quick');
   const [dateSlotCounts, setDateSlotCounts] = useState<{[key: string]: {HOME_VISIT: number, ONLINE: number}}>({});
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [dateViewMode, setDateViewMode] = useState<'quick' | 'calendar'>('quick');
 
   useEffect(() => {
     if (physioId) {
@@ -134,7 +134,6 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
       });
       
       if (response.success && response.data) {
-        // Check different possible data structures
         const slots = response.data.slots || response.data.available_slots || response.data || [];
         setAvailability(slots);
         setSelectedSlot(null);
@@ -156,8 +155,7 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
       const promises = [];
       const dates = [];
       
-      // Load slots for next 42 days (6 weeks)
-      for (let i = 0; i < 42; i++) {
+      for (let i = 0; i < 14; i++) {
         const date = new Date();
         date.setDate(date.getDate() + i);
         const dateString = date.toISOString().split('T')[0];
@@ -184,7 +182,6 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
         const homeVisitResponse = responses[index * 2];
         const onlineResponse = responses[index * 2 + 1];
         
-        // Handle different possible data structures for slot counts
         const homeVisitSlots = homeVisitResponse.success ? 
           (homeVisitResponse.data?.slots || homeVisitResponse.data?.available_slots || homeVisitResponse.data || []) : [];
         const onlineSlots = onlineResponse.success ? 
@@ -208,18 +205,10 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
     }
   };
 
-  const handleBookAppointment = () => {
-    if (selectedSlot && profile) {
-      setShowBookingForm(true);
-    }
-  };
-
   const formatTime = (time: string) => {
     if (!time) return 'N/A';
     try {
-      // Handle different time formats
       if (time.includes('T')) {
-        // ISO datetime format
         const date = new Date(time);
         return date.toLocaleTimeString('en-US', { 
           hour: 'numeric', 
@@ -227,7 +216,6 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
           hour12: true 
         });
       } else {
-        // HH:MM format
         const [hours, minutes] = time.split(':');
         const hour = parseInt(hours);
         const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -236,7 +224,7 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Error formatting time:', time, error);
-      return time; // Return original if formatting fails
+      return time;
     }
   };
 
@@ -245,127 +233,24 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
     return Math.floor(numPrice || 0);
   };
 
-  const formatDate = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = { 
-      weekday: 'short', 
-      month: 'short', 
-      day: 'numeric' 
-    };
-    return date.toLocaleDateString('en-US', options);
-  };
-
   const getSlotCountForDate = (dateString: string) => {
     const slotData = dateSlotCounts[dateString];
     if (!slotData) return 0;
     return slotData[consultationType];
   };
 
-  const renderCalendar = () => {
-    const year = selectedMonth.getFullYear();
-    const month = selectedMonth.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const days = [];
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
+  const findNextAvailableSlot = () => {
+    for (let i = 0; i < 30; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() + i);
+      const dateString = date.toISOString().split('T')[0];
+      const slotCount = getSlotCountForDate(dateString);
+      
+      if (slotCount > 0) {
+        setSelectedDate(dateString);
+        break;
+      }
     }
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(i);
-    }
-
-    return (
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <button
-            onClick={() => setSelectedMonth(new Date(year, month - 1))}
-            style={{
-              padding: '8px',
-              border: '1px solid #E5E7EB',
-              borderRadius: '8px',
-              backgroundColor: 'white',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            <ChevronLeft style={{ width: '20px', height: '20px' }} />
-          </button>
-          <h3 style={{ fontSize: '16px', fontWeight: '600' }}>
-            {selectedMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-          </h3>
-          <button
-            onClick={() => setSelectedMonth(new Date(year, month + 1))}
-            style={{
-              padding: '8px',
-              border: '1px solid #E5E7EB',
-              borderRadius: '8px',
-              backgroundColor: 'white',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            <ChevronRight style={{ width: '20px', height: '20px' }} />
-          </button>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} style={{ textAlign: 'center', fontSize: '12px', fontWeight: '600', color: '#6B7280', padding: '8px' }}>
-              {day}
-            </div>
-          ))}
-          {days.map((day, index) => {
-            if (!day) {
-              return <div key={`empty-${index}`} />;
-            }
-            const date = new Date(year, month, day);
-            const dateString = date.toISOString().split('T')[0];
-            const isPast = date < today;
-            const isSelected = selectedDate === dateString;
-            const slotCount = getSlotCountForDate(dateString);
-            const hasSlots = slotCount > 0;
-
-            return (
-              <button
-                key={day}
-                onClick={() => !isPast && setSelectedDate(dateString)}
-                disabled={isPast}
-                style={{
-                  padding: '8px',
-                  border: `2px solid ${isSelected ? '#2563EB' : isPast ? '#E5E7EB' : hasSlots ? '#D1D5DB' : '#E5E7EB'}`,
-                  borderRadius: '8px',
-                  backgroundColor: isSelected ? '#EFF6FF' : isPast ? '#F9FAFB' : hasSlots ? 'white' : '#F9FAFB',
-                  cursor: isPast ? 'not-allowed' : 'pointer',
-                  opacity: isPast ? 0.5 : 1,
-                  position: 'relative'
-                }}
-              >
-                <div style={{ 
-                  fontSize: '14px', 
-                  fontWeight: isSelected ? '600' : '400',
-                  color: isSelected ? '#1E40AF' : '#1F2937'
-                }}>{day}</div>
-                {hasSlots && !isPast && (
-                  <div style={{ 
-                    position: 'absolute', 
-                    bottom: '2px', 
-                    right: '2px', 
-                    width: '6px', 
-                    height: '6px', 
-                    backgroundColor: '#10B981', 
-                    borderRadius: '50%' 
-                  }} />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    );
   };
 
   if (loading) {
@@ -379,7 +264,7 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="bg-background" style={{ minHeight: '100vh' }}>
+      <div style={{ minHeight: '100vh', backgroundColor: theme.colors.background }}>
         <Header />
         <div style={{ padding: '2rem' }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
@@ -412,96 +297,77 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
 
   if (!profile) return null;
 
-  const coverImage = profile.cover_photo_url || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop';
-
   return (
     <div style={{ minHeight: '100vh', backgroundColor: theme.colors.background }}>
-      {/* Header */}
       <Header />
       
-      {/* Cover Image with Doctor Info Overlay */}
-      <div style={{ position: 'relative', height: '500px', overflow: 'hidden' }}>
-        {/* Cover Image */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `url(${coverImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }} />
-        
-        {/* Gradient Overlay */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(30, 95, 121, 0.8), rgba(200, 234, 235, 0.6))'
-        }} />
-
-        {/* Breadcrumb */}
-        <div style={{
-          position: 'absolute',
-          top: '20px',
-          left: '0',
-          right: '0',
-          zIndex: 2
-        }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                onClick={() => router.push('/')}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  transition: 'background-color 0.2s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <Home style={{ width: '14px', height: '14px' }} />
-                Home
-              </button>
-              <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>→</span>
-              <button
-                onClick={() => router.back()}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  transition: 'background-color 0.2s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                Search Results
-              </button>
-              <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>→</span>
-              <span style={{ color: 'white', fontSize: '14px', fontWeight: '500' }}>
-                Dr. {profile.full_name}
-              </span>
-            </div>
+      {/* Breadcrumb */}
+      <div style={{ backgroundColor: theme.colors.white, borderBottom: `1px solid ${theme.colors.secondary}` }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px 16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => router.push('/')}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: theme.colors.primary,
+                fontSize: '14px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '4px 8px',
+                borderRadius: '6px'
+              }}
+            >
+              <Home style={{ width: '14px', height: '14px' }} />
+              Home
+            </button>
+            <span style={{ color: theme.colors.gray[400] }}>→</span>
+            <button
+              onClick={() => router.back()}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: theme.colors.primary,
+                fontSize: '14px',
+                cursor: 'pointer',
+                padding: '4px 8px',
+                borderRadius: '6px'
+              }}
+            >
+              Search
+            </button>
+            <span style={{ color: theme.colors.gray[400] }}>→</span>
+            <span style={{ color: theme.colors.gray[600], fontSize: '14px' }}>
+              Dr. {profile.full_name}
+            </span>
           </div>
         </div>
+      </div>
 
-        {/* Doctor Information Overlay */}
+      {/* Desktop Cover Section - Hidden on Mobile */}
+      <div className="desktop-only" style={{ position: 'relative', height: '400px', overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url(${profile.cover_photo_url || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop'})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }} />
+        
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(30, 95, 121, 0.8))'
+        }} />
+
         <div style={{
           position: 'absolute',
           bottom: '40px',
@@ -510,27 +376,20 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
           zIndex: 2
         }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-            <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-              {/* Profile Image */}
+            <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-end' }}>
               <div style={{
-                width: '140px',
-                height: '140px',
-                borderRadius: '20px',
+                width: '120px',
+                height: '120px',
+                borderRadius: '16px',
                 overflow: 'hidden',
                 border: '4px solid rgba(255, 255, 255, 0.2)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)'
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
               }}>
                 {profile.profile_photo_url ? (
                   <img
                     src={profile.profile_photo_url}
                     alt={profile.full_name}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                 ) : (
                   <div style={{
@@ -540,7 +399,7 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: 'white',
-                    fontSize: '48px',
+                    fontSize: '36px',
                     fontWeight: '600'
                   }}>
                     {profile.full_name?.charAt(0) || 'D'}
@@ -548,572 +407,533 @@ const PhysiotherapistEnhancedPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Doctor Info */}
-              <div style={{ flex: 1 }}>
-                <div style={{ marginBottom: '16px' }}>
-                  <h1 style={{
-                    fontSize: '36px',
-                    fontWeight: '700',
-                    color: 'white',
-                    margin: 0,
-                    marginBottom: '12px',
-                    textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
-                  }}>
-                    Dr. {profile.full_name}
-                  </h1>
+              <div style={{ flex: 1, color: 'white' }}>
+                <h1 style={{
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  margin: 0,
+                  marginBottom: '8px'
+                }}>
+                  Dr. {profile.full_name}
+                </h1>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Star style={{ width: '18px', height: '18px', fill: '#f59e0b', color: '#f59e0b' }} />
+                    <span style={{ fontSize: '18px', fontWeight: '600' }}>
+                      {profile.average_rating || 0}
+                    </span>
+                    <span style={{ fontSize: '14px', opacity: 0.9 }}>
+                      ({profile.total_reviews || 0} reviews)
+                    </span>
+                  </div>
                   
-                  {/* Verification Badge */}
-                  {profile.is_verified && (
-                    <div style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      backgroundColor: 'rgba(16, 185, 129, 0.9)',
-                      color: 'white',
-                      padding: '6px 12px',
-                      borderRadius: '20px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      marginBottom: '16px'
-                    }}>
-                      <CheckCircle style={{ width: '16px', height: '16px' }} />
-                      Verified Doctor
-                    </div>
-                  )}
-                  
-                  {/* Rating */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Star style={{ width: '20px', height: '20px', fill: '#f59e0b', color: '#f59e0b' }} />
-                      <span style={{ fontSize: '20px', fontWeight: '700', color: 'white' }}>
-                        {profile.average_rating || 0}
-                      </span>
-                      <span style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '16px' }}>
-                        ({profile.total_reviews || 0} reviews)
+                  {profile.years_of_experience && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Clock style={{ width: '16px', height: '16px' }} />
+                      <span style={{ fontSize: '14px' }}>
+                        {profile.years_of_experience} years exp
                       </span>
                     </div>
-                    
-                    {profile.years_of_experience && (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                        color: 'white',
-                        padding: '8px 16px',
-                        borderRadius: '20px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        backdropFilter: 'blur(10px)'
-                      }}>
-                        <Clock style={{ width: '16px', height: '16px' }} />
-                        {profile.years_of_experience} years experience
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Specializations */}
-                  {profile.specializations && profile.specializations.length > 0 && (
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                      {profile.specializations.slice(0, 4).map((spec, index) => (
-                        <span
-                          key={index}
-                          style={{
-                            padding: '8px 14px',
-                            backgroundColor: 'rgba(200, 234, 235, 0.9)',
-                            color: theme.colors.primary,
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            borderRadius: '20px',
-                            backdropFilter: 'blur(10px)'
-                          }}
-                        >
-                          {spec.replace(/_/g, ' ')}
-                        </span>
-                      ))}
-                    </div>
                   )}
-
-                  {/* Location and Services */}
-                  <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                    {profile.practice_address && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <MapPin style={{ width: '18px', height: '18px', color: 'rgba(255, 255, 255, 0.9)' }} />
-                        <span style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '16px' }}>
-                          {profile.practice_address}
-                        </span>
-                      </div>
-                    )}
-                    
-                    {/* Service Types */}
-                    <div style={{ display: 'flex', gap: '12px' }}>
-                      {profile.home_visit_available !== false && (
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                          color: 'white',
-                          padding: '6px 12px',
-                          borderRadius: '16px',
-                          fontSize: '13px',
-                          fontWeight: '500',
-                          backdropFilter: 'blur(10px)'
-                        }}>
-                          <Home style={{ width: '14px', height: '14px' }} />
-                          Home Visit
-                        </div>
-                      )}
-                      {profile.online_consultation_available !== false && (
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                          color: 'white',
-                          padding: '6px 12px',
-                          borderRadius: '16px',
-                          fontSize: '13px',
-                          fontWeight: '500',
-                          backdropFilter: 'blur(10px)'
-                        }}>
-                          <Video style={{ width: '14px', height: '14px' }} />
-                          Online
-                        </div>
-                      )}
-                    </div>
-                  </div>
                 </div>
-              </div>
 
-              {/* Pricing Card */}
-              <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                borderRadius: '20px',
-                padding: '24px',
-                minWidth: '200px',
-                textAlign: 'center',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-                backdropFilter: 'blur(10px)'
-              }}>
-                <div style={{ marginBottom: '12px' }}>
-                  <div style={{ fontSize: '14px', color: theme.colors.gray[600], marginBottom: '4px' }}>
-                    Consultation Fee
-                  </div>
-                  <div style={{
-                    fontSize: '32px',
-                    fontWeight: '800',
-                    color: theme.colors.primary
-                  }}>
-                    ₹{formatPrice(profile.consultation_fee || '800')}
-                  </div>
-                </div>
-                
-                {profile.home_visit_fee && profile.home_visit_fee !== profile.consultation_fee && (
-                  <div style={{
-                    paddingTop: '12px',
-                    borderTop: `1px solid ${theme.colors.secondary}`
-                  }}>
-                    <div style={{ fontSize: '14px', color: theme.colors.gray[600], marginBottom: '4px' }}>
-                      Home Visit
-                    </div>
-                    <div style={{
-                      fontSize: '24px',
-                      fontWeight: '700',
-                      color: theme.colors.text
-                    }}>
-                      ₹{formatPrice(profile.home_visit_fee)}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px 40px 24px' }}>
-        <div style={{ display: 'grid', gap: '40px', gridTemplateColumns: '2fr 1fr' }}>
-          {/* Left Column - About & Reviews */}
-          <div>
-            {/* About Section */}
-            {profile.bio && (
-              <div style={{ 
-                backgroundColor: theme.colors.white,
-                padding: '24px',
-                marginBottom: '24px'
-              }}>
-                <h2 style={{
-                  fontSize: '20px',
-                  fontWeight: '600',
-                  color: theme.colors.text,
-                  marginBottom: '16px'
-                }}>
-                  About
-                </h2>
-                <p style={{
-                  fontSize: '16px',
-                  lineHeight: '1.6',
-                  color: theme.colors.gray[600],
-                  margin: 0
-                }}>
-                  {profile.bio}
-                </p>
-              </div>
-            )}
-
-            {/* Education */}
-            {profile.education && profile.education.length > 0 && (
-              <div style={{ 
-                backgroundColor: theme.colors.white,
-                padding: '24px',
-                marginBottom: '24px'
-              }}>
-                <h3 style={{ 
-                  fontSize: '18px', 
-                  fontWeight: '600', 
-                  color: theme.colors.text, 
-                  marginBottom: '16px' 
-                }}>
-                  Education
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {profile.education.map((edu, index) => (
-                    <div key={index} style={{ borderBottom: index < profile.education.length - 1 ? `1px solid ${theme.colors.secondary}` : 'none', paddingBottom: '12px' }}>
-                      <div style={{ fontWeight: '600', color: theme.colors.text }}>{edu.degree}</div>
-                      <div style={{ fontSize: '14px', color: theme.colors.gray[600] }}>{edu.institution}, {edu.year}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Techniques */}
-            {profile.techniques && profile.techniques.length > 0 && (
-              <div style={{ 
-                backgroundColor: theme.colors.white,
-                padding: '24px',
-                marginBottom: '24px'
-              }}>
-                <h3 style={{ 
-                  fontSize: '18px', 
-                  fontWeight: '600', 
-                  color: theme.colors.text, 
-                  marginBottom: '16px' 
-                }}>
-                  Techniques & Treatments
-                </h3>
-                <div style={{ display: 'grid', gap: '8px' }}>
-                  {profile.techniques.map((technique, index) => (
-                    <div key={index} style={{ padding: '12px 0', borderBottom: index < profile.techniques.length - 1 ? `1px solid ${theme.colors.secondary}` : 'none' }}>
-                      <div style={{ fontWeight: '500', color: theme.colors.text }}>{technique.name}</div>
-                      {technique.description && (
-                        <div style={{ fontSize: '14px', color: theme.colors.gray[600], marginTop: '4px' }}>
-                          {technique.description}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right Column - Booking */}
-          <div>
-            <div style={{
-              backgroundColor: theme.colors.white,
-              padding: '24px',
-              position: 'sticky',
-              top: '20px'
-            }}>
-              <h2 style={{ 
-                fontSize: '20px', 
-                fontWeight: '600', 
-                marginBottom: '20px', 
-                color: theme.colors.text 
-              }}>
-                Book Appointment
-              </h2>
-              
-{/* Consultation Type Selection */}
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    onClick={() => setConsultationType('HOME_VISIT')}
-                    style={{
-                      flex: 1,
-                      padding: '12px',
-                      backgroundColor: consultationType === 'HOME_VISIT' ? theme.colors.primary : theme.colors.white,
-                      color: consultationType === 'HOME_VISIT' ? theme.colors.white : theme.colors.text,
-                      border: `2px solid ${consultationType === 'HOME_VISIT' ? theme.colors.primary : theme.colors.secondary}`,
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <Home style={{ width: '16px', height: '16px' }} />
-                    Home Visit
-                  </button>
-                  <button
-                    onClick={() => setConsultationType('ONLINE')}
-                    style={{
-                      flex: 1,
-                      padding: '12px',
-                      backgroundColor: consultationType === 'ONLINE' ? theme.colors.primary : theme.colors.white,
-                      color: consultationType === 'ONLINE' ? theme.colors.white : theme.colors.text,
-                      border: `2px solid ${consultationType === 'ONLINE' ? theme.colors.primary : theme.colors.secondary}`,
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <Video style={{ width: '16px', height: '16px' }} />
-                    Online
-                  </button>
-                </div>
-              </div>
-
-              {/* Date Selection */}
-              <div style={{ marginBottom: '20px' }}>
-                <h3 style={{ 
-                  fontSize: '16px', 
-                  fontWeight: '600', 
-                  color: theme.colors.text, 
-                  marginBottom: '12px' 
-                }}>
-                  Select Date
-                </h3>
-                
-                {/* Quick Date Selection */}
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', overflowX: 'auto' }}>
-                  {Array.from({ length: 7 }, (_, i) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() + i);
-                    const dateString = date.toISOString().split('T')[0];
-                    const isSelected = selectedDate === dateString;
-                    const slotCount = getSlotCountForDate(dateString);
-                    
-                    return (
-                      <button
-                        key={dateString}
-                        onClick={() => setSelectedDate(dateString)}
+                {profile.specializations && profile.specializations.length > 0 && (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {profile.specializations.slice(0, 3).map((spec, index) => (
+                      <span
+                        key={index}
                         style={{
-                          minWidth: '80px',
-                          padding: '12px 8px',
-                          backgroundColor: isSelected ? theme.colors.primary : theme.colors.white,
-                          color: isSelected ? theme.colors.white : theme.colors.text,
-                          border: `1px solid ${isSelected ? theme.colors.primary : theme.colors.secondary}`,
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          textAlign: 'center',
-                          fontSize: '13px',
-                          fontWeight: isSelected ? '600' : '500'
+                          padding: '6px 12px',
+                          backgroundColor: 'rgba(200, 234, 235, 0.9)',
+                          color: theme.colors.primary,
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          borderRadius: '16px'
                         }}
                       >
-                        <div style={{ fontWeight: '600' }}>
-                          {date.toLocaleDateString('en-US', { weekday: 'short' })}
-                        </div>
-                        <div style={{ fontSize: '12px', opacity: 0.8 }}>
-                          {date.getDate()}
-                        </div>
-                        <div style={{ fontSize: '11px', marginTop: '2px' }}>
-                          {slotCount > 0 ? `${slotCount} slots` : 'No slots'}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Time Slots */}
-              <div style={{ marginBottom: '20px' }}>
-                <h3 style={{ 
-                  fontSize: '16px', 
-                  fontWeight: '600', 
-                  color: theme.colors.text, 
-                  marginBottom: '12px' 
-                }}>
-                  Available Times
-                </h3>
-                
-                {availabilityLoading ? (
-                  <div style={{ 
-                    padding: '20px', 
-                    textAlign: 'center',
-                    color: theme.colors.gray[500]
-                  }}>
-                    Loading slots...
-                  </div>
-                ) : availability.length > 0 ? (
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
-                    gap: '8px' 
-                  }}>
-                    {availability.map((slot, index) => {
-                      const isSelected = selectedSlot === slot;
-                      const slotKey = slot.slot_id || slot.id || `${slot.start_time}-${index}`;
-                      
-                      return (
-                        <button
-                          key={slotKey}
-                          onClick={() => setSelectedSlot(slot)}
-                          style={{
-                            padding: '12px 8px',
-                            backgroundColor: isSelected ? theme.colors.primary : theme.colors.white,
-                            color: isSelected ? theme.colors.white : theme.colors.text,
-                            border: `1px solid ${isSelected ? theme.colors.primary : theme.colors.secondary}`,
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            textAlign: 'center',
-                            fontSize: '13px',
-                            fontWeight: isSelected ? '600' : '500',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isSelected) {
-                              e.currentTarget.style.borderColor = theme.colors.primary;
-                              e.currentTarget.style.backgroundColor = theme.colors.background;
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isSelected) {
-                              e.currentTarget.style.borderColor = theme.colors.secondary;
-                              e.currentTarget.style.backgroundColor = theme.colors.white;
-                            }
-                          }}
-                        >
-                          <div>{formatTime(slot.start_time)}</div>
-                          <div style={{ fontSize: '11px', opacity: 0.8 }}>
-                            ₹{formatPrice(slot.fee || slot.price || slot.consultation_fee || profile.consultation_fee || '800')}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div style={{ 
-                    padding: '20px', 
-                    textAlign: 'center',
-                    color: theme.colors.gray[500],
-                    backgroundColor: theme.colors.background,
-                    borderRadius: '8px'
-                  }}>
-                    No slots available for this date
+                        {spec.replace(/_/g, ' ')}
+                      </span>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {/* Book Button */}
-              {selectedSlot ? (
-                <button
-                  onClick={() => setShowBookingForm(true)}
-                  style={{
-                    width: '100%',
-                    padding: '16px',
-                    backgroundColor: theme.colors.primary,
-                    color: theme.colors.white,
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = theme.colors.primaryDark;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = theme.colors.primary;
-                  }}
-                >
-                  Book {formatTime(selectedSlot.start_time)} - ₹{formatPrice(selectedSlot.fee || selectedSlot.price || selectedSlot.consultation_fee || profile.consultation_fee || '800')}
-                </button>
-              ) : (
-                <div style={{ 
-                  padding: '16px',
-                  textAlign: 'center',
-                  color: theme.colors.gray[500],
-                  backgroundColor: theme.colors.background,
-                  borderRadius: '8px',
-                  fontSize: '14px'
-                }}>
-                  Select a date and time slot to book
+              <div style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                borderRadius: '12px',
+                padding: '16px',
+                backdropFilter: 'blur(10px)',
+                textAlign: 'center'
+              }}>
+                <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '12px', marginBottom: '4px' }}>
+                  Consultation Fee
                 </div>
-              )}
-
-              {/* Enhanced Booking Form Modal */}
-              {showBookingForm && selectedSlot && (
-                <div style={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  zIndex: 1000,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '20px'
-                }}>
-                  <div style={{
-                    backgroundColor: theme.colors.white,
-                    borderRadius: '12px',
-                    maxWidth: '500px',
-                    width: '100%',
-                    maxHeight: '90vh',
-                    overflowY: 'auto'
-                  }}>
-                    <EnhancedBookingForm
-                      physiotherapist={{
-                        id: profile.id,
-                        full_name: profile.full_name,
-                        consultation_fee: parseFloat(profile.consultation_fee || '800'),
-                        location: profile.practice_address || 'Location not specified'
-                      }}
-                      selectedSlot={{
-                        slot_id: selectedSlot.slot_id || selectedSlot.id || '',
-                        start_time: selectedSlot.start_time,
-                        end_time: selectedSlot.end_time,
-                        is_available: selectedSlot.is_available !== false && selectedSlot.available !== false,
-                        visit_mode: selectedSlot.visit_mode || selectedSlot.service_type || consultationType,
-                        fee: selectedSlot.fee || selectedSlot.price || selectedSlot.consultation_fee || parseFloat(profile.consultation_fee || '800')
-                      }}
-                      selectedDate={selectedDate}
-                      onClose={() => {
-                        setSelectedSlot(null);
-                        setShowBookingForm(false);
-                      }}
-                      onSuccess={() => {
-                        setSelectedSlot(null);
-                        setShowBookingForm(false);
-                        loadAvailability();
-                      }}
-                    />
-                  </div>
+                <div style={{ color: 'white', fontSize: '20px', fontWeight: '700' }}>
+                  ₹{formatPrice(profile.consultation_fee || '800')}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Mobile Profile Header */}
+      <div className="mobile-only" style={{ backgroundColor: theme.colors.white, padding: '20px 16px' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            overflow: 'hidden',
+            margin: '0 auto 16px',
+            backgroundColor: theme.colors.secondary,
+            border: `3px solid ${theme.colors.primary}`
+          }}>
+            {profile.profile_photo_url ? (
+              <img
+                src={profile.profile_photo_url}
+                alt={profile.full_name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <div style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: theme.colors.primary,
+                fontSize: '28px',
+                fontWeight: '600'
+              }}>
+                {profile.full_name?.charAt(0) || 'D'}
+              </div>
+            )}
+          </div>
+
+          <h1 style={{
+            fontSize: '24px',
+            fontWeight: '700',
+            color: theme.colors.text,
+            margin: 0,
+            marginBottom: '8px'
+          }}>
+            Dr. {profile.full_name}
+          </h1>
+
+          {profile.is_verified && (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#10B981',
+              color: 'white',
+              padding: '4px 8px',
+              borderRadius: '12px',
+              fontSize: '12px',
+              fontWeight: '600',
+              marginBottom: '12px'
+            }}>
+              <CheckCircle style={{ width: '12px', height: '12px' }} />
+              Verified
+            </div>
+          )}
+
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            gap: '16px', 
+            marginBottom: '16px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Star style={{ width: '16px', height: '16px', fill: '#f59e0b', color: '#f59e0b' }} />
+              <span style={{ fontSize: '16px', fontWeight: '600', color: theme.colors.text }}>
+                {profile.average_rating || 0}
+              </span>
+              <span style={{ fontSize: '14px', color: theme.colors.gray[600] }}>
+                ({profile.total_reviews || 0})
+              </span>
+            </div>
+            
+            {profile.years_of_experience && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Clock style={{ width: '16px', height: '16px', color: theme.colors.primary }} />
+                <span style={{ fontSize: '14px', color: theme.colors.gray[600] }}>
+                  {profile.years_of_experience} years
+                </span>
+              </div>
+            )}
+          </div>
+
+          {profile.practice_address && (
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              gap: '6px', 
+              marginBottom: '16px' 
+            }}>
+              <MapPin style={{ width: '14px', height: '14px', color: theme.colors.primary }} />
+              <span style={{ fontSize: '14px', color: theme.colors.gray[600] }}>
+                {profile.practice_address}
+              </span>
+            </div>
+          )}
+
+          {profile.specializations && profile.specializations.length > 0 && (
+            <div style={{ 
+              display: 'flex', 
+              gap: '6px', 
+              flexWrap: 'wrap', 
+              justifyContent: 'center',
+              marginBottom: '16px'
+            }}>
+              {profile.specializations.slice(0, 3).map((spec, index) => (
+                <span
+                  key={index}
+                  style={{
+                    padding: '4px 8px',
+                    backgroundColor: theme.colors.secondary,
+                    color: theme.colors.primary,
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    borderRadius: '12px'
+                  }}
+                >
+                  {spec.replace(/_/g, ' ')}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div style={{
+            backgroundColor: theme.colors.background,
+            padding: '12px 16px',
+            borderRadius: '12px',
+            display: 'inline-block'
+          }}>
+            <div style={{ fontSize: '12px', color: theme.colors.gray[600], marginBottom: '2px' }}>
+              Consultation Fee
+            </div>
+            <div style={{ fontSize: '18px', fontWeight: '700', color: theme.colors.primary }}>
+              ₹{formatPrice(profile.consultation_fee || '800')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bio Section - Both Mobile and Desktop */}
+      {profile.bio && (
+        <div style={{ backgroundColor: theme.colors.white, padding: '20px 16px', borderTop: `1px solid ${theme.colors.secondary}` }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: theme.colors.text,
+              marginBottom: '12px'
+            }}>
+              About Dr. {profile.full_name}
+            </h3>
+            <p style={{
+              fontSize: '15px',
+              lineHeight: '1.6',
+              color: theme.colors.gray[700],
+              margin: 0
+            }}>
+              {profile.bio}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Booking Section */}
+      <div style={{ backgroundColor: theme.colors.background, padding: '24px 16px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          
+          {/* Consultation Types */}
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: theme.colors.text,
+              marginBottom: '16px',
+              textAlign: 'center'
+            }}>
+              Choose Consultation Type
+            </h3>
+            
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+              gap: '12px',
+              maxWidth: '600px',
+              margin: '0 auto'
+            }}>
+              <button
+                onClick={() => setConsultationType('HOME_VISIT')}
+                style={{
+                  padding: '16px',
+                  backgroundColor: consultationType === 'HOME_VISIT' ? theme.colors.primary : theme.colors.white,
+                  color: consultationType === 'HOME_VISIT' ? theme.colors.white : theme.colors.text,
+                  border: `2px solid ${consultationType === 'HOME_VISIT' ? theme.colors.primary : theme.colors.secondary}`,
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <Home style={{ width: '20px', height: '20px' }} />
+                  <span style={{ fontSize: '16px', fontWeight: '600' }}>Home Visit</span>
+                </div>
+                <div style={{ fontSize: '13px', opacity: 0.8, marginBottom: '8px' }}>
+                  Physiotherapist visits your home
+                </div>
+                <div style={{ fontSize: '16px', fontWeight: '700' }}>
+                  ₹{formatPrice(profile.home_visit_fee || profile.consultation_fee || '800')}
+                </div>
+              </button>
+              
+              <button
+                onClick={() => setConsultationType('ONLINE')}
+                style={{
+                  padding: '16px',
+                  backgroundColor: consultationType === 'ONLINE' ? theme.colors.primary : theme.colors.white,
+                  color: consultationType === 'ONLINE' ? theme.colors.white : theme.colors.text,
+                  border: `2px solid ${consultationType === 'ONLINE' ? theme.colors.primary : theme.colors.secondary}`,
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <Video style={{ width: '20px', height: '20px' }} />
+                  <span style={{ fontSize: '16px', fontWeight: '600' }}>Online Consultation</span>
+                </div>
+                <div style={{ fontSize: '13px', opacity: 0.8, marginBottom: '8px' }}>
+                  Video call consultation
+                </div>
+                <div style={{ fontSize: '16px', fontWeight: '700' }}>
+                  ₹{formatPrice(profile.consultation_fee || '800')}
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Date Selection Component */}
+          <DateSelection
+            dateViewMode={dateViewMode}
+            setDateViewMode={setDateViewMode}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            dateSlotCounts={dateSlotCounts}
+            consultationType={consultationType}
+            findNextAvailableSlot={findNextAvailableSlot}
+          />
+
+          {/* Time Slots */}
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: theme.colors.text,
+              marginBottom: '16px',
+              textAlign: 'center'
+            }}>
+              Available Times
+            </h3>
+            
+            {availabilityLoading ? (
+              <div style={{ 
+                padding: '40px', 
+                textAlign: 'center',
+                color: theme.colors.gray[500]
+              }}>
+                Loading slots...
+              </div>
+            ) : availability.length > 0 ? (
+              <div style={{ 
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                gap: '8px',
+                maxWidth: '800px',
+                margin: '0 auto'
+              }}>
+                {availability.map((slot, index) => {
+                  const isSelected = selectedSlot === slot;
+                  const slotKey = slot.slot_id || slot.id || `${slot.start_time}-${index}`;
+                  
+                  return (
+                    <button
+                      key={slotKey}
+                      onClick={() => setSelectedSlot(slot)}
+                      style={{
+                        padding: '12px 8px',
+                        backgroundColor: isSelected ? theme.colors.primary : theme.colors.white,
+                        color: isSelected ? theme.colors.white : theme.colors.text,
+                        border: `2px solid ${isSelected ? theme.colors.primary : theme.colors.secondary}`,
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        fontWeight: isSelected ? '600' : '500',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {formatTime(slot.start_time)}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ 
+                padding: '40px', 
+                textAlign: 'center',
+                color: theme.colors.gray[500],
+                backgroundColor: theme.colors.white,
+                borderRadius: '12px',
+                border: `1px solid ${theme.colors.secondary}`
+              }}>
+                No slots available for this date
+              </div>
+            )}
+          </div>
+
+          {/* Book Button */}
+          <div style={{ textAlign: 'center' }}>
+            {selectedSlot ? (
+              <button
+                onClick={() => setShowBookingForm(true)}
+                style={{
+                  width: '100%',
+                  maxWidth: '400px',
+                  padding: '16px 24px',
+                  background: theme.gradients.primary,
+                  color: theme.colors.white,
+                  border: 'none',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 16px rgba(30, 95, 121, 0.3)'
+                }}
+              >
+                Book Appointment - ₹{formatPrice(selectedSlot.fee || selectedSlot.price || selectedSlot.consultation_fee || profile.consultation_fee || '800')}
+              </button>
+            ) : (
+              <div style={{ 
+                padding: '16px',
+                color: theme.colors.gray[500],
+                backgroundColor: theme.colors.white,
+                borderRadius: '12px',
+                border: `1px solid ${theme.colors.secondary}`,
+                fontSize: '14px',
+                maxWidth: '400px',
+                margin: '0 auto'
+              }}>
+                Select a date and time slot to book
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Booking Form Modal */}
+      {showBookingForm && selectedSlot && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: theme.colors.white,
+            borderRadius: '12px',
+            maxWidth: '500px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <EnhancedBookingForm
+              physiotherapist={{
+                id: profile.id,
+                full_name: profile.full_name,
+                consultation_fee: parseFloat(profile.consultation_fee || '800'),
+                location: profile.practice_address || 'Location not specified'
+              }}
+              selectedSlot={{
+                slot_id: selectedSlot.slot_id || selectedSlot.id || '',
+                start_time: selectedSlot.start_time,
+                end_time: selectedSlot.end_time,
+                is_available: selectedSlot.is_available !== false && selectedSlot.available !== false,
+                visit_mode: selectedSlot.visit_mode || selectedSlot.service_type || consultationType,
+                fee: selectedSlot.fee || selectedSlot.price || selectedSlot.consultation_fee || parseFloat(profile.consultation_fee || '800')
+              }}
+              selectedDate={selectedDate}
+              onClose={() => {
+                setSelectedSlot(null);
+                setShowBookingForm(false);
+              }}
+              onSuccess={() => {
+                setSelectedSlot(null);
+                setShowBookingForm(false);
+                loadAvailability();
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Responsive CSS */}
+      <style jsx>{`
+        .desktop-only {
+          display: block;
+        }
+        
+        .mobile-only {
+          display: none;
+        }
+        
+        @media (max-width: 768px) {
+          .desktop-only {
+            display: none !important;
+          }
+          
+          .mobile-only {
+            display: block !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .consultation-grid {
+            grid-template-columns: 1fr !important;
+          }
+          
+          .date-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 6px !important;
+          }
+          
+          .time-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 6px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
-export default PhysiotherapistEnhancedPage;
+export default PhysiotherapistResponsivePage;

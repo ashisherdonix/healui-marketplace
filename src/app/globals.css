@@ -298,3 +298,108 @@ textarea:focus {
 ::-webkit-scrollbar-thumb:hover {
   background: #1e607a;
 }
+
+/* Mobile-first responsive base styles */
+@media (max-width: 768px) {
+  /* Ensure full width on mobile */
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* Prevent horizontal scroll */
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  /* Mobile typography adjustments */
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  /* Touch targets minimum size */
+  button, input, select, textarea, a {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Mobile spacing helpers */
+  .mobile-padding {
+    padding: clamp(1rem, 4vw, 1.5rem);
+  }
+  
+  .mobile-margin {
+    margin: clamp(0.5rem, 2vw, 1rem) 0;
+  }
+  
+  /* Responsive images */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Better mobile form controls */
+  input, select, textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    width: 100%;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  /* Smaller typography on very small screens */
+  body {
+    font-size: clamp(14px, 3.5vw, 16px);
+  }
+  
+  /* Ensure cards don't overflow */
+  .card, [class*="card"], [style*="grid"] {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  
+  /* Stack grid items on small screens */
+  [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Reduce padding on small screens */
+  .compact-mobile {
+    padding: clamp(0.5rem, 2vw, 1rem);
+  }
+}
+
+/* Very small devices */
+@media (max-width: 360px) {
+  /* Even smaller base font */
+  body {
+    font-size: clamp(13px, 3vw, 14px);
+  }
+  
+  /* Extra compact padding for very small screens */
+  .ultra-compact-mobile {
+    padding: clamp(0.25rem, 1vw, 0.5rem);
+  }
+  
+  /* Ensure buttons aren't too small */
+  button {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+}
+
+/* Landscape mobile orientation fixes */
+@media (max-width: 768px) and (orientation: landscape) {
+  /* Reduce vertical spacing in landscape */
+  section {
+    padding-top: clamp(1rem, 4vh, 2rem) !important;
+    padding-bottom: clamp(1rem, 4vh, 2rem) !important;
+  }
+  
+  /* Adjust hero height for landscape */
+  .hero-section {
+    min-height: 70vh;
+  }
+}

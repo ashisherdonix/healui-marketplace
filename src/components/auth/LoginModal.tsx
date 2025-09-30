@@ -8,6 +8,7 @@ import { ConfirmationResult } from 'firebase/auth';
 import ApiManager from '@/services/api';
 import Card from '@/components/card';
 import Button from '@/components/button';
+import Image from 'next/image';
 import { 
   X, 
   Phone, 
@@ -207,290 +208,429 @@ const LoginModal: React.FC<LoginModalProps> = ({
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      background: 'rgba(0, 0, 0, 0.5)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 2000,
-      padding: '1rem'
+      padding: '20px'
     }}>
       <div style={{
-        maxWidth: '400px',
+        background: '#ffffff',
+        borderRadius: '12px',
+        boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
+        maxWidth: '340px',
         width: '100%',
-        maxHeight: '90vh',
-        overflow: 'auto',
-        backgroundColor: 'var(--lk-surface)',
-        borderRadius: '1rem'
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <Card variant="fill" scaleFactor="headline">
-          <div className="p-xl">
-            {/* Header */}
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              marginBottom: '1.5rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                {step === 'otp' && (
-                  <Button
-                    variant="text"
-                    size="sm"
-                    onClick={handleBack}
-                    style={{ padding: '0.5rem', minWidth: 'auto' }}
-                    startIcon="ArrowLeft"
-                  />
-                )}
-                <div className="lk-typography-title-large" style={{ color: 'var(--lk-onsurface)' }}>
-                  {step === 'phone' ? 'Quick Login' : 'Enter OTP'}
-                </div>
-              </div>
-              <Button
-                variant="text"
-                size="sm"
-                onClick={handleClose}
-                style={{ padding: '0.5rem', minWidth: 'auto' }}
-                startIcon="X"
-              />
-            </div>
+        {/* Simple Header */}
+        <div style={{
+          background: '#c8eaeb',
+          padding: '24px 20px',
+          position: 'relative'
+        }}>
 
-            {/* Booking Context - Show urgency */}
-            {context === 'booking' && bookingContext && (
-              <Card variant="outline" scaleFactor="headline">
-                <div className="p-md" style={{ 
-                  backgroundColor: 'var(--lk-primarycontainer)', 
-                  borderRadius: '0.5rem',
-                  marginBottom: '1.5rem'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <Timer style={{ width: '1rem', height: '1rem', color: 'var(--lk-primary)' }} />
-                    <div className="lk-typography-body-medium" style={{ 
-                      color: 'var(--lk-onprimarycontainer)',
-                      fontWeight: '500'
-                    }}>
-                      {urgencyMessage}
-                    </div>
-                  </div>
-                  <div className="lk-typography-body-small" style={{ color: 'var(--lk-onprimarycontainer)' }}>
-                    Dr. {bookingContext.physiotherapist_name} • {formatDate(bookingContext.scheduled_date)} • {formatTime(bookingContext.scheduled_time)}
-                  </div>
-                </div>
-              </Card>
-            )}
+          {/* Close Button */}
+          <button
+            onClick={handleClose}
+            style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              background: 'rgba(0, 0, 0, 0.15)',
+              border: 'none',
+              borderRadius: '6px',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              zIndex: 10
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.25)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.15)';
+            }}
+          >
+            <X style={{ 
+              width: '16px', 
+              height: '16px', 
+              color: '#000000',
+              strokeWidth: 2
+            }} />
+          </button>
 
-            {/* Error Message */}
-            {(error || localError) && (
-              <div style={{
+          {/* Back Button for OTP Step */}
+          {step === 'otp' && (
+            <button
+              onClick={handleBack}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                left: '12px',
+                background: 'rgba(0, 0, 0, 0.15)',
+                border: 'none',
+                borderRadius: '6px',
+                width: '28px',
+                height: '28px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                padding: '1rem',
-                backgroundColor: 'var(--lk-errorcontainer)',
-                borderRadius: '0.5rem',
-                marginBottom: '1.5rem'
-              }}>
-                <AlertCircle style={{ width: '1.25rem', height: '1.25rem', color: 'var(--lk-error)' }} />
-                <div className="lk-typography-body-medium" style={{ color: 'var(--lk-onerrorcontainer)' }}>
-                  {error || localError}
-                </div>
-              </div>
-            )}
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                zIndex: 10
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.25)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.15)';
+              }}
+            >
+              <ArrowLeft style={{ 
+                width: '16px', 
+                height: '16px', 
+                color: '#000000',
+                strokeWidth: 2
+              }} />
+            </button>
+          )}
 
-            {/* Phone Step */}
-            {step === 'phone' && (
-              <form onSubmit={handleSendOTP}>
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <div className="lk-typography-body-medium" style={{ 
-                    color: 'var(--lk-onsurface)',
-                    marginBottom: '0.5rem',
-                    fontWeight: '500'
-                  }}>
-                    Phone Number
-                  </div>
-                  <div style={{ position: 'relative' }}>
-                    <Phone style={{ 
-                      position: 'absolute', 
-                      left: '0.75rem', 
-                      top: '50%', 
-                      transform: 'translateY(-50%)',
-                      width: '1.25rem', 
-                      height: '1.25rem', 
-                      color: 'var(--lk-onsurfacevariant)' 
-                    }} />
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        // Ensure +91 prefix is always present
-                        if (value.startsWith('+91 ')) {
-                          setPhone(value);
-                        } else if (value.length < 4) {
-                          setPhone('+91 ');
-                        }
-                      }}
-                      placeholder="+91 98765 43210"
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem 0.75rem 0.75rem 3rem',
-                        border: '2px solid var(--lk-outline)',
-                        borderRadius: '0.5rem',
-                        fontSize: '1rem',
-                        backgroundColor: 'var(--lk-surface)',
-                        color: 'var(--lk-onsurface)',
-                        fontFamily: 'inherit'
-                      }}
-                      autoFocus
-                      required
-                    />
-                  </div>
-                  <div className="lk-typography-body-small" style={{ 
-                    color: 'var(--lk-onsurfacevariant)', 
-                    marginTop: '0.5rem' 
-                  }}>
-                    We'll send you a 6-digit OTP via SMS
-                  </div>
-                </div>
+          {/* HealUI Logo */}
+          <div style={{ 
+            textAlign: 'center',
+            marginBottom: '16px'
+          }}>
+            <Image
+              src="/Healui Logo/Healui Logo Final-02.png"
+              alt="HealUI"
+              width={80}
+              height={26}
+              style={{ 
+                height: 'auto',
+                width: '80px'
+              }}
+            />
+          </div>
 
-                <Button
-                  variant="fill"
-                  color="primary"
-                  size="lg"
-                  disabled={phone.length < 8 || isLoading}
-                  style={{ width: '100%' }}
-                  label={isLoading ? 'Sending OTP...' : 'Send OTP'}
-                  onClick={(e) => {
-                    // Create a fake form submit event and call our handler
-                    const fakeEvent = {
-                      preventDefault: () => {}
-                    } as React.FormEvent;
-                    handleSendOTP(fakeEvent);
-                  }}
-                />
-
-                <div className="lk-typography-body-small" style={{ 
-                  color: 'var(--lk-onsurfacevariant)',
-                  textAlign: 'center',
-                  marginTop: '1rem'
-                }}>
-                  Login takes just 30 seconds
-                </div>
-              </form>
-            )}
-
-            {/* OTP Step */}
-            {step === 'otp' && (
-              <form onSubmit={handleVerifyOTP}>
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <div className="lk-typography-body-medium" style={{ 
-                    color: 'var(--lk-onsurface)',
-                    marginBottom: '0.5rem',
-                    fontWeight: '500'
-                  }}>
-                    Enter 6-digit OTP
-                  </div>
-                  <div className="lk-typography-body-small" style={{ 
-                    color: 'var(--lk-onsurfacevariant)', 
-                    marginBottom: '1rem' 
-                  }}>
-                    Sent to {phone}
-                  </div>
-
-                  <div style={{ position: 'relative' }}>
-                    <ShieldCheck style={{ 
-                      position: 'absolute', 
-                      left: '0.75rem', 
-                      top: '50%', 
-                      transform: 'translateY(-50%)',
-                      width: '1.25rem', 
-                      height: '1.25rem', 
-                      color: 'var(--lk-onsurfacevariant)' 
-                    }} />
-                    <input
-                      type="text"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                      placeholder="6-digit OTP"
-                      maxLength={6}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem 0.75rem 0.75rem 3rem',
-                        border: '2px solid var(--lk-outline)',
-                        borderRadius: '0.5rem',
-                        fontSize: '1.125rem',
-                        backgroundColor: 'var(--lk-surface)',
-                        color: 'var(--lk-onsurface)',
-                        fontFamily: 'monospace',
-                        letterSpacing: '0.5rem',
-                        textAlign: 'center'
-                      }}
-                      autoFocus
-                      required
-                    />
-                  </div>
-
-                  {countdown > 0 && (
-                    <div className="lk-typography-body-small" style={{ 
-                      color: 'var(--lk-onsurfacevariant)', 
-                      marginTop: '0.5rem',
-                      textAlign: 'center'
-                    }}>
-                      Resend OTP in {countdown}s
-                    </div>
-                  )}
-                </div>
-
-                <Button
-                  variant="fill"
-                  color="primary"
-                  size="lg"
-                  disabled={otp.length !== 6 || isLoading}
-                  style={{ width: '100%' }}
-                  label={isLoading ? 'Verifying...' : 'Verify & Continue'}
-                  onClick={(e) => {
-                    // Create a fake form submit event and call our handler
-                    const fakeEvent = {
-                      preventDefault: () => {}
-                    } as React.FormEvent;
-                    handleVerifyOTP(fakeEvent);
-                  }}
-                />
-
-                {countdown === 0 && (
-                  <Button
-                    variant="text"
-                    color="primary"
-                    size="md"
-                    onClick={handleBack}
-                    style={{ width: '100%', marginTop: '0.5rem' }}
-                    label="Change Phone Number"
-                  />
-                )}
-              </form>
-            )}
-
-            {/* Trust Indicators */}
-            <div style={{
-              marginTop: '1.5rem',
-              padding: '1rem',
-              backgroundColor: 'var(--lk-surfacecontainerhighest)',
-              borderRadius: '0.5rem'
+          {/* Title Section */}
+          <div style={{ textAlign: 'center' }}>
+            <p style={{
+              fontSize: '14px',
+              color: '#000000',
+              margin: 0,
+              fontWeight: '500',
+              opacity: 0.8
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <CheckCircle style={{ width: '1rem', height: '1rem', color: 'var(--lk-primary)' }} />
-                <div className="lk-typography-body-small" style={{ color: 'var(--lk-onsurface)' }}>
-                  Secure & Private
-                </div>
-              </div>
-              <div className="lk-typography-body-small" style={{ color: 'var(--lk-onsurfacevariant)' }}>
-                Your booking details are saved. Complete login in 30 seconds to secure your appointment.
+              {step === 'phone' 
+                ? 'Secure your appointment' 
+                : `Code sent to ${phone}`
+              }
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div style={{ padding: '20px' }}>
+          {/* Booking Context */}
+          {context === 'booking' && bookingContext && (
+            <div style={{
+              fontSize: '13px',
+              color: '#1e5f79',
+              fontWeight: '500',
+              marginBottom: '16px',
+              textAlign: 'center',
+              lineHeight: '1.4'
+            }}>
+              Quick login to secure this appointment<br />
+              <span style={{ color: '#000000', fontSize: '12px' }}>
+                Dr. {bookingContext.physiotherapist_name} • {formatDate(bookingContext.scheduled_date)} • {formatTime(bookingContext.scheduled_time)}
+              </span>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {(error || localError) && (
+            <div style={{
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: '8px',
+              padding: '12px',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <AlertCircle style={{ 
+                width: '16px', 
+                height: '16px', 
+                color: '#dc2626', 
+                flexShrink: 0 
+              }} />
+              <div style={{
+                fontSize: '14px',
+                color: '#dc2626',
+                fontWeight: '500'
+              }}>
+                {error || localError}
               </div>
             </div>
+          )}
 
-            {/* reCAPTCHA Container */}
-            <div id="recaptcha-container" style={{ marginTop: '1rem' }}></div>
-          </div>
-        </Card>
+          {/* Phone Step */}
+          {step === 'phone' && (
+            <form onSubmit={handleSendOTP}>
+              <div style={{ marginBottom: '16px' }}>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.startsWith('+91 ')) {
+                      setPhone(value);
+                    } else if (value.length < 4) {
+                      setPhone('+91 ');
+                    }
+                  }}
+                  placeholder="+91 98765 43210"
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    border: '1px solid #c8eaeb',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    backgroundColor: '#ffffff',
+                    color: '#000000',
+                    outline: 'none',
+                    transition: 'all 0.2s ease',
+                    fontFamily: 'inherit'
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = '#1e5f79';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(30, 95, 121, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = '#c8eaeb';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                  autoFocus
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={phone.length < 8 || isLoading}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: phone.length < 8 || isLoading 
+                    ? '#9ca3af' 
+                    : '#1e5f79',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: phone.length < 8 || isLoading ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}
+                onMouseEnter={(e) => {
+                  if (phone.length >= 8 && !isLoading) {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (phone.length >= 8 && !isLoading) {
+                    e.currentTarget.style.backgroundColor = '#1e5f79';
+                  }
+                }}
+              >
+                {isLoading ? (
+                  <>
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid white',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                    Sending OTP...
+                  </>
+                ) : (
+                  'Send OTP'
+                )}
+              </button>
+
+              <div style={{
+                textAlign: 'center',
+                marginTop: '12px',
+                fontSize: '11px',
+                color: '#6b7280'
+              }}>
+                Quick & secure verification
+              </div>
+            </form>
+          )}
+
+          {/* OTP Step */}
+          {step === 'otp' && (
+            <form onSubmit={handleVerifyOTP}>
+              <div style={{ marginBottom: '16px' }}>
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="Enter 6-digit code"
+                  maxLength={6}
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    border: '1px solid #c8eaeb',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    textAlign: 'center',
+                    letterSpacing: '2px',
+                    backgroundColor: '#ffffff',
+                    color: '#000000',
+                    outline: 'none',
+                    transition: 'all 0.2s ease',
+                    fontFamily: 'monospace'
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = '#1e5f79';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(30, 95, 121, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = '#c8eaeb';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                  autoFocus
+                  required
+                />
+                
+                {countdown > 0 && (
+                  <div style={{
+                    textAlign: 'center',
+                    marginTop: '8px',
+                    fontSize: '11px',
+                    color: '#1e5f79',
+                    fontWeight: '500'
+                  }}>
+                    Resend in {countdown}s
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={otp.length !== 6 || isLoading}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: otp.length !== 6 || isLoading 
+                    ? '#9ca3af' 
+                    : '#1e5f79',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: otp.length !== 6 || isLoading ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  marginBottom: '10px'
+                }}
+                onMouseEnter={(e) => {
+                  if (otp.length === 6 && !isLoading) {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (otp.length === 6 && !isLoading) {
+                    e.currentTarget.style.backgroundColor = '#1e5f79';
+                  }
+                }}
+              >
+                {isLoading ? (
+                  <>
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid white',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                    Verifying...
+                  </>
+                ) : (
+                  'Verify & Continue'
+                )}
+              </button>
+
+              {countdown === 0 && (
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    background: 'none',
+                    color: '#1e5f79',
+                    border: '1px solid #c8eaeb',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#eff8ff';
+                    e.currentTarget.style.borderColor = '#1e5f79';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.borderColor = '#c8eaeb';
+                  }}
+                >
+                  Change Number
+                </button>
+              )}
+            </form>
+          )}
+
+
+          {/* reCAPTCHA Container */}
+          <div id="recaptcha-container" style={{ 
+            marginTop: '12px',
+            display: 'flex',
+            justifyContent: 'center'
+          }}></div>
+        </div>
+
+        {/* CSS for animations */}
+        <style jsx>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     </div>
   );
