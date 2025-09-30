@@ -57,7 +57,7 @@ class FirebaseAuthService {
       console.log('🔄 FirebaseAuth - Creating new RecaptchaVerifier');
       this.recaptchaVerifier = new RecaptchaVerifier(this.auth, containerId, {
         size: 'invisible',
-        callback: (_response: string) => {
+        callback: () => {
           console.log('✅ FirebaseAuth - reCAPTCHA solved');
         },
         'expired-callback': () => {

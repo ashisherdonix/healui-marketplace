@@ -4,12 +4,12 @@ import { store } from '@/store/store';
 import therapistSlice from '@/store/slices/therapistSlice';
 import bookingSlice from '@/store/slices/bookingSlice';
 
-// Type definitions
-interface _MarketplaceAuthDto {
-  phone: string;
-  otp: string;
-  full_name?: string;
-}
+// Type definitions (kept for future use)
+// interface MarketplaceAuthDto {
+//   phone: string;
+//   otp: string;
+//   full_name?: string;
+// }
 
 interface CreateBookingDto {
   patient_user_id: string;

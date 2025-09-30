@@ -261,7 +261,7 @@ const therapistSlice = createSlice({
         state.loading.services = true;
         state.error.services = null;
       })
-      .addCase(getTherapistAvailability.fulfilled, (state, _action) => {
+      .addCase(getTherapistAvailability.fulfilled, (state) => {
         state.loading.services = false;
         // Availability data would be handled in booking slice or separate availability slice
         state.error.services = null;

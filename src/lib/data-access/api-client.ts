@@ -26,6 +26,7 @@ const getHeaders = (additionalHeaders?: Record<string, string>, url?: string) =>
   if (typeof window !== 'undefined') {
     try {
       // Import store dynamically to avoid circular dependency
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { store } = require('@/store/store');
       const state = store.getState();
       const userData = state.user?.userData;
@@ -65,6 +66,7 @@ const getFileHeaders = (additionalHeaders?: Record<string, string>) => {
   
   if (typeof window !== 'undefined') {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { store } = require('@/store/store');
       const state = store.getState();
       const userData = state.user?.userData;
@@ -108,12 +110,15 @@ const responseMiddleware = async (response: Response, url?: string): Promise<Api
         
         // Clear invalid tokens
         if (typeof window !== 'undefined') {
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           const { removeAuthTokens } = require('@/lib/utils/helpers');
           removeAuthTokens();
           
           // Dispatch logout to Redux store if available
           try {
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
             const { store } = require('@/store/store');
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
             const { logoutSuccess } = require('@/store/slices/authSlice');
             store.dispatch(logoutSuccess());
           } catch (storeError) {

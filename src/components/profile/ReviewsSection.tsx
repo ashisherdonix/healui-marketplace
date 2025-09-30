@@ -350,7 +350,7 @@ const ReviewsSection: React.FC = () => {
                         lineHeight: '1.5',
                         fontStyle: 'italic'
                       }}>
-                        "{review.review_text}"
+                        &ldquo;{review.review_text}&rdquo;
                       </div>
                     </div>
                   )}

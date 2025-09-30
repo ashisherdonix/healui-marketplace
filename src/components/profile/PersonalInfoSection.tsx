@@ -13,6 +13,24 @@ interface PersonalInfoSectionProps {
   onUpdate: (updatedUser: User) => void;
 }
 
+interface PersonalInfoFormData {
+  full_name: string;
+  email: string;
+  address: string;
+  pincode: string;
+  date_of_birth: string;
+  gender: string;
+}
+
+interface ProfileUpdateData {
+  full_name: string;
+  address: string;
+  pincode: string;
+  email?: string;
+  date_of_birth?: string;
+  gender?: string;
+}
+
 const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ user, onUpdate }) => {
   const dispatch = useAppDispatch();
   const [isEditing, setIsEditing] = useState(false);
@@ -35,7 +53,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ user, onUpdat
     
     try {
       // Prepare data with proper formatting
-      const updateData: any = {
+      const updateData: ProfileUpdateData = {
         full_name: formData.full_name,
         address: formData.address,
         pincode: formData.pincode
@@ -92,9 +110,10 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ user, onUpdat
           setError(response.message || 'Failed to update profile');
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to update profile:', error);
-      setError(error.message || 'An unexpected error occurred. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

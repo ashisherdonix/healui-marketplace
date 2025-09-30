@@ -164,7 +164,7 @@ export const debugFirebaseAuth = (message: string, data?: unknown): void => {
   }
 };
 
-export default {
+const firebaseHelpers = {
   clearFirebaseCache,
   isMobileDevice,
   isIOSDevice,
@@ -177,3 +177,5 @@ export default {
   isNetworkAvailable,
   debugFirebaseAuth
 };
+
+export default firebaseHelpers;

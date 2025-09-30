@@ -19,6 +19,22 @@ interface FamilyMember {
   created_at: string;
 }
 
+interface FamilyMemberFormData {
+  full_name: string;
+  relationship: string;
+  date_of_birth: string;
+  gender: string;
+  address: string;
+  pincode: string;
+}
+
+interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string | string[];
+  statusCode?: number;
+}
+
 const FamilyMembersSection: React.FC = () => {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,14 +125,16 @@ const FamilyMembersSection: React.FC = () => {
           setError(response.message || 'Failed to add family member');
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to add family member:', error);
       
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      
       // Check for duplicate key errors in the error object
-      if (error.message?.includes('duplicate key') || error.message?.includes('unique constraint')) {
+      if (errorMessage.includes('duplicate key') || errorMessage.includes('unique constraint')) {
         setError('This family member has already been added. Please check your family members list.');
       } else {
-        setError(error.message || 'An unexpected error occurred. Please try again.');
+        setError(errorMessage || 'An unexpected error occurred. Please try again.');
       }
     } finally {
       setSubmitting(false);
@@ -135,9 +153,10 @@ const FamilyMembersSection: React.FC = () => {
         } else {
           setError(response.message || 'Failed to remove family member');
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error('Failed to remove family member:', error);
-        setError(error.message || 'An unexpected error occurred');
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+        setError(errorMessage);
       }
     }
   };

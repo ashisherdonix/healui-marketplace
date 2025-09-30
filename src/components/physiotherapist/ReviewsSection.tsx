@@ -106,7 +106,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ reviews, profile }) => 
                   color: '#374151',
                   marginBottom: '12px'
                 }}>
-                  "{review.review_text}"
+                  &ldquo;{review.review_text}&rdquo;
                 </div>
               )}
               

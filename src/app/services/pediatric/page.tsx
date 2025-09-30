@@ -316,9 +316,9 @@ export default function PediatricPage() {
                 lineHeight: "1.6",
                 marginBottom: "1.5rem"
               }}>
-                We believe parents are the most important part of a child's therapy team. 
+                We believe parents are the most important part of a child&apos;s therapy team. 
                 Our physiotherapists teach you techniques and exercises to continue supporting 
-                your child's development between sessions.
+                your child&apos;s development between sessions.
               </p>
               <div style={{ 
                 display: "grid",

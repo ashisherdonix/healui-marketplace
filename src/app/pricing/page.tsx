@@ -310,7 +310,7 @@ export default function PricingPage() {
               marginBottom: "3rem",
               color: "#000000"
             }}>
-              What's Included in Every Session
+              What&apos;s Included in Every Session
             </h2>
             <div style={{
               backgroundColor: "#ffffff",
