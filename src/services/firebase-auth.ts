@@ -239,3 +239,6 @@ class FirebaseAuthService {
 // Export singleton instance
 export const firebaseAuthService = new FirebaseAuthService();
 export default firebaseAuthService;
+
+// Re-export types that consumers might need
+export type { ConfirmationResult } from 'firebase/auth';

@@ -49,7 +49,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ userLocation }) => {
         limit: 8
       });
       
-      if (response.success && response.data && response.data.length > 0) {
+      if (response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
         setFeaturedTherapists(response.data);
       } else {
         // If no featured physiotherapists, try a general search
@@ -58,7 +58,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ userLocation }) => {
           limit: 8
         });
         
-        if (searchResponse.success && searchResponse.data && searchResponse.data.length > 0) {
+        if (searchResponse.success && searchResponse.data && Array.isArray(searchResponse.data) && searchResponse.data.length > 0) {
           setFeaturedTherapists(searchResponse.data);
         } else {
           setFeaturedTherapists([]);
@@ -92,7 +92,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ userLocation }) => {
             gap: '1.5rem' 
           }}>
             {[1, 2, 3, 4].map((i) => (
-              <Card key={i} variant="fill" scaleFactor="headline">
+              <Card key={i} variant="fill" scaleFactor="heading">
                 <div className="p-lg">
                   <div style={{
                     height: '200px',
@@ -124,7 +124,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ userLocation }) => {
     return (
       <section style={{ padding: '2rem 0' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
-          <Card variant="fill" scaleFactor="headline">
+          <Card variant="fill" scaleFactor="heading">
             <div className="p-xl" style={{ textAlign: 'center' }}>
               <div className="lk-typography-body-medium" style={{ color: 'var(--lk-error)' }}>
                 {error}
@@ -193,7 +193,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ userLocation }) => {
           gap: '1rem',
           marginBottom: '2rem'
         }}>
-          <Card variant="fill" scaleFactor="headline">
+          <Card variant="fill" scaleFactor="heading">
             <div className="p-md" style={{ textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Users style={{ width: '1.25rem', height: '1.25rem', color: 'var(--lk-primary)' }} />
@@ -207,7 +207,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ userLocation }) => {
             </div>
           </Card>
 
-          <Card variant="fill" scaleFactor="headline">
+          <Card variant="fill" scaleFactor="heading">
             <div className="p-md" style={{ textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Star style={{ width: '1.25rem', height: '1.25rem', color: '#FFB800', fill: '#FFB800' }} />
@@ -224,7 +224,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ userLocation }) => {
             </div>
           </Card>
 
-          <Card variant="fill" scaleFactor="headline">
+          <Card variant="fill" scaleFactor="heading">
             <div className="p-md" style={{ textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Award style={{ width: '1.25rem', height: '1.25rem', color: 'var(--lk-tertiary)' }} />
@@ -241,7 +241,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ userLocation }) => {
             </div>
           </Card>
 
-          <Card variant="fill" scaleFactor="headline">
+          <Card variant="fill" scaleFactor="heading">
             <div className="p-md" style={{ textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Clock style={{ width: '1.25rem', height: '1.25rem', color: 'var(--lk-secondary)' }} />
@@ -268,7 +268,8 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ userLocation }) => {
               key={therapist.id || index}
               physiotherapist={{
                 ...therapist,
-                is_verified: index < 4 // Mark first 4 as verified for demo
+                is_verified: index < 4, // Mark first 4 as verified for demo
+                total_reviews: Math.floor(Math.random() * 50) + 10 // Add missing property
               }}
               variant={index === 0 ? 'featured' : 'default'}
             />
@@ -277,7 +278,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps> = ({ userLocation }) => {
 
         {/* Call to Action */}
         {featuredTherapists.length > 6 && (
-          <Card variant="fill" scaleFactor="headline">
+          <Card variant="fill" scaleFactor="heading">
             <div className="p-xl" style={{ textAlign: 'center' }}>
               <div className="lk-typography-title-large" style={{ 
                 color: 'var(--lk-onsurface)',

@@ -37,7 +37,7 @@ export function ServiceCard({
   const colors = colorMap[color]
 
   return (
-    <Card variant={variant} scaleFactor="headline">
+    <Card variant={variant} scaleFactor="heading">
       <div className="p-lg">
         <div 
           className={`${colors.bg} mb-md`}
@@ -50,13 +50,13 @@ export function ServiceCard({
             justifyContent: 'center' 
           }}
         >
-          {React.cloneElement(icon as React.ReactElement, {
-            style: { 
-              width: '1.5rem', 
-              height: '1.5rem', 
-              color: colors.iconColor 
-            }
-          })}
+          <div style={{ 
+            width: '1.5rem', 
+            height: '1.5rem', 
+            color: colors.iconColor 
+          }}>
+            {icon}
+          </div>
         </div>
         <div className="lk-typography-headline-small mb-sm">{title}</div>
         <div className="lk-typography-body-medium mb-md" style={{ color: 'var(--lk-onsurfacevariant)' }}>

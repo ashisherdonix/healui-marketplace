@@ -81,7 +81,7 @@ const CleanSearchBar: React.FC<CleanSearchBarProps> = ({ onSearch, loading = fal
     try {
       const response = await ApiManager.searchLocations(query, 5);
       if (response.success && response.data) {
-        setLocationSuggestions(response.data);
+        setLocationSuggestions(response.data as LocationSuggestion[]);
         setShowLocationDropdown(true);
       }
     } catch (error) {

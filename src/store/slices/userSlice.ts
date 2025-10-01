@@ -124,7 +124,7 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.userData = action.payload;
+        state.userData = action.payload as unknown as User;
         state.error = null;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
@@ -160,7 +160,7 @@ const userSlice = createSlice({
       .addCase(uploadProfileImage.fulfilled, (state, action) => {
         state.loading = false;
         if (state.userData) {
-          state.userData.profileImage = action.payload.imageUrl;
+          (state.userData as unknown as { profileImage?: string }).profileImage = (action.payload as unknown as { imageUrl: string }).imageUrl;
         }
         state.error = null;
       })

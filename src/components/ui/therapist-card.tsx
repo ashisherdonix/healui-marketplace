@@ -33,7 +33,7 @@ export function TherapistCard({
   onViewProfile
 }: TherapistCardProps) {
   return (
-    <Card variant="fill" scaleFactor="headline" material="glass">
+    <Card variant="fill" scaleFactor="heading" material="glass">
       <div className="p-lg">
         <div className="display-flex align-items-start gap-md mb-md">
           <div 

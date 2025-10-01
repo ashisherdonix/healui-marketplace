@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import type { User as UserType } from '@/lib/types';
 import { clearError, sendOTP, verifyOTP } from '@/store/slices/authSlice';
 import { firebaseAuthService } from '@/services/firebase-auth';
 import { ConfirmationResult } from 'firebase/auth';
@@ -73,10 +74,16 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
       });
       
       if (response.success && response.data) {
+        const responseData = response.data as {
+          user: UserType;
+          access_token: string;
+          refresh_token: string;
+        };
+        
         const authData = {
-          user: response.data.user,
-          accessToken: response.data.access_token,
-          refreshToken: response.data.refresh_token
+          user: responseData.user,
+          accessToken: responseData.access_token,
+          refreshToken: responseData.refresh_token
         };
         
         const { loginSuccess } = await import('@/store/slices/authSlice');
@@ -506,12 +513,7 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
 };
 
 // User Menu Dropdown
-interface User {
-  full_name?: string;
-  name?: string;
-}
-
-const UserMenu = ({ user, onLogout }: { user: User; onLogout: () => void }) => {
+const UserMenu = ({ user, onLogout }: { user: UserType; onLogout: () => void }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -545,7 +547,7 @@ const UserMenu = ({ user, onLogout }: { user: User; onLogout: () => void }) => {
           justifyContent: 'center'
         }}>
           <span className="lk-typography-label-large" style={{ color: 'var(--lk-onprimary)' }}>
-            {user?.full_name?.charAt(0) || user?.name?.charAt(0) || 'U'}
+            {user?.full_name?.charAt(0) || 'U'}
           </span>
         </div>
       </button>
@@ -603,7 +605,7 @@ const UserMenu = ({ user, onLogout }: { user: User; onLogout: () => void }) => {
                       fontSize: '1.125rem',
                       fontWeight: '600'
                     }}>
-                      {user?.full_name?.charAt(0) || user?.name?.charAt(0) || 'U'}
+                      {user?.full_name?.charAt(0) || 'U'}
                     </span>
                   </div>
                   <div>
@@ -613,7 +615,7 @@ const UserMenu = ({ user, onLogout }: { user: User; onLogout: () => void }) => {
                       fontWeight: '600',
                       marginBottom: '0.125rem'
                     }}>
-                      {user?.full_name || user?.name || 'User'}
+                      {user?.full_name || 'User'}
                     </div>
                     <div style={{ 
                       color: '#1e5f79',

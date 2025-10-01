@@ -61,7 +61,7 @@ const FamilyMembersSection: React.FC = () => {
       setLoading(true);
       const response = await ApiManager.getFamilyMembers();
       if (response.success && response.data) {
-        setFamilyMembers(response.data);
+        setFamilyMembers(response.data as FamilyMember[]);
       }
     } catch (error) {
       console.error('Failed to load family members:', error);
@@ -101,7 +101,14 @@ const FamilyMembersSection: React.FC = () => {
         Object.entries(transformedData).filter(([_, value]) => value !== '')
       );
       
-      const response = await ApiManager.addFamilyMember(cleanedData);
+      const response = await ApiManager.addFamilyMember(cleanedData as {
+        full_name: string;
+        relationship: string;
+        date_of_birth?: string;
+        gender?: 'M' | 'F' | 'O';
+        address?: string;
+        pincode?: string;
+      });
       
       if (response.success) {
         setSuccessMessage('Family member added successfully!');
@@ -188,7 +195,7 @@ const FamilyMembersSection: React.FC = () => {
 
   if (loading) {
     return (
-      <Card variant="fill" scaleFactor="headline">
+      <Card variant="fill" scaleFactor="heading">
         <div className="p-xl" style={{ textAlign: 'center' }}>
           <div style={{
             width: '32px',
@@ -210,7 +217,7 @@ const FamilyMembersSection: React.FC = () => {
   return (
     <div style={{ display: 'grid', gap: '1.5rem' }}>
       {/* Header Card */}
-      <Card variant="fill" scaleFactor="headline">
+      <Card variant="fill" scaleFactor="heading">
         <div className="p-xl">
           <div style={{ 
             display: 'flex', 
@@ -305,7 +312,7 @@ const FamilyMembersSection: React.FC = () => {
 
       {/* Add Member Form */}
       {showAddForm && (
-        <Card variant="fill" scaleFactor="headline">
+        <Card variant="fill" scaleFactor="heading">
           <div className="p-xl">
             <div style={{ 
               display: 'flex', 
@@ -545,7 +552,7 @@ const FamilyMembersSection: React.FC = () => {
       {familyMembers.length > 0 ? (
         <div style={{ display: 'grid', gap: '1rem' }}>
           {familyMembers.map((member) => (
-            <Card key={member.id} variant="fill" scaleFactor="headline">
+            <Card key={member.id} variant="fill" scaleFactor="heading">
               <div className="p-lg">
                 <div style={{ 
                   display: 'flex', 
@@ -621,7 +628,7 @@ const FamilyMembersSection: React.FC = () => {
           ))}
         </div>
       ) : !showAddForm ? (
-        <Card variant="fill" scaleFactor="headline">
+        <Card variant="fill" scaleFactor="heading">
           <div className="p-xl" style={{ textAlign: 'center' }}>
             <Users style={{ 
               width: '4rem', 

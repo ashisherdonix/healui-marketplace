@@ -81,7 +81,7 @@ export const sendOTP = createAsyncThunk(
       };
     } catch (error) {
       const firebaseError = error as { code?: string; message?: string };
-      const errorMessage = getFirebaseErrorMessage(firebaseError.code) || firebaseError.message || 'Failed to send OTP';
+      const errorMessage = getFirebaseErrorMessage(firebaseError.code || '') || firebaseError.message || 'Failed to send OTP';
       return rejectWithValue(errorMessage);
     }
   }
@@ -107,7 +107,7 @@ export const verifyOTP = createAsyncThunk(
       
       // Send Firebase token to backend to get JWT tokens (Following EMR Pattern)
       const response = await ApiManager.login({
-        phone: result.user.phoneNumber || '',
+        phone: result.user?.phoneNumber || '',
         firebaseIdToken: firebaseToken
       });
       
@@ -118,7 +118,7 @@ export const verifyOTP = createAsyncThunk(
       }
     } catch (error) {
       const firebaseError = error as { code?: string; message?: string };
-      const errorMessage = getFirebaseErrorMessage(firebaseError.code) || firebaseError.message || 'OTP verification failed';
+      const errorMessage = getFirebaseErrorMessage(firebaseError.code || '') || firebaseError.message || 'OTP verification failed';
       return rejectWithValue(errorMessage);
     }
   }
@@ -223,9 +223,9 @@ const authSlice = createSlice({
         state.loading = false;
         state.initializing = false;
         state.isAuthenticated = true;
-        state.user = action.payload.user;
+        state.user = (action.payload as unknown as AuthResponse).user;
         state.error = null;
-        setAuthTokens(action.payload.accessToken, action.payload.refreshToken);
+        setAuthTokens((action.payload as unknown as AuthResponse).accessToken, (action.payload as unknown as AuthResponse).refreshToken);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -244,9 +244,9 @@ const authSlice = createSlice({
         state.loading = false;
         state.initializing = false;
         state.isAuthenticated = true;
-        state.user = action.payload.user;
+        state.user = (action.payload as unknown as AuthResponse).user;
         state.error = null;
-        setAuthTokens(action.payload.accessToken, action.payload.refreshToken);
+        setAuthTokens((action.payload as unknown as AuthResponse).accessToken, (action.payload as unknown as AuthResponse).refreshToken);
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
@@ -264,7 +264,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.otpSent = true;
         state.error = null;
-        state.confirmationResult = action.payload.confirmationResult;
+        state.confirmationResult = action.payload.confirmationResult || null;
         state.phoneNumber = action.payload.phoneNumber;
       })
       .addCase(sendOTP.rejected, (state, action) => {
@@ -287,11 +287,11 @@ const authSlice = createSlice({
         state.initializing = false;
         state.isAuthenticated = true;
         // Extract the user data from the login response
-        state.user = action.payload.user;
+        state.user = (action.payload as unknown as AuthResponse).user;
         state.error = null;
         state.confirmationResult = null;
         state.phoneNumber = null;
-        setAuthTokens(action.payload.accessToken || action.payload.access_token, action.payload.refreshToken || action.payload.refresh_token);
+        setAuthTokens((action.payload as unknown as AuthResponse).accessToken || (action.payload as unknown as {access_token?: string}).access_token || '', (action.payload as unknown as AuthResponse).refreshToken || (action.payload as unknown as {refresh_token?: string}).refresh_token || '');
       })
       .addCase(verifyOTP.rejected, (state, action) => {
         state.otpVerifying = false;
@@ -306,7 +306,7 @@ const authSlice = createSlice({
       .addCase(getCurrentUser.fulfilled, (state, action) => {
         state.loading = false;
         state.initializing = false;
-        state.user = action.payload;
+        state.user = action.payload as User;
         state.isAuthenticated = true;
         state.error = null;
       })

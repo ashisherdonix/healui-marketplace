@@ -58,7 +58,7 @@ const ReviewsSection: React.FC = () => {
       setLoading(true);
       const response = await ApiManager.getMyReviews();
       if (response.success && response.data) {
-        setReviews(response.data);
+        setReviews(response.data as Review[]);
       }
     } catch (error) {
       console.error('Failed to load reviews:', error);
@@ -107,7 +107,7 @@ const ReviewsSection: React.FC = () => {
 
   if (loading) {
     return (
-      <Card variant="fill" scaleFactor="headline">
+      <Card variant="fill" scaleFactor="heading">
         <div className="p-xl" style={{ textAlign: 'center' }}>
           <div style={{
             width: '32px',
@@ -132,7 +132,7 @@ const ReviewsSection: React.FC = () => {
   return (
     <div style={{ display: 'grid', gap: '1.5rem' }}>
       {/* Header Card */}
-      <Card variant="fill" scaleFactor="headline">
+      <Card variant="fill" scaleFactor="heading">
         <div className="p-xl">
           <div style={{ 
             display: 'flex', 
@@ -172,7 +172,7 @@ const ReviewsSection: React.FC = () => {
                 }}>
                   {avgRating}
                 </div>
-                {renderStars(parseFloat(avgRating), 'lg')}
+                {renderStars(parseFloat(String(avgRating)), 'lg')}
                 <div className="lk-typography-body-small" style={{ 
                   color: 'var(--lk-onprimarycontainer)',
                   marginTop: '0.5rem'
@@ -260,7 +260,7 @@ const ReviewsSection: React.FC = () => {
       {reviews.length > 0 ? (
         <div style={{ display: 'grid', gap: '1rem' }}>
           {reviews.map((review) => (
-            <Card key={review.id} variant="fill" scaleFactor="headline">
+            <Card key={review.id} variant="fill" scaleFactor="heading">
               <div className="p-lg">
                 <div style={{ 
                   display: 'grid',
@@ -448,7 +448,7 @@ const ReviewsSection: React.FC = () => {
           ))}
         </div>
       ) : (
-        <Card variant="fill" scaleFactor="headline">
+        <Card variant="fill" scaleFactor="heading">
           <div className="p-xl" style={{ textAlign: 'center' }}>
             <Star style={{ 
               width: '4rem', 

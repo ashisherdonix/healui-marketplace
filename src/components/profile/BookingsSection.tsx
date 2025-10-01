@@ -66,7 +66,7 @@ const BookingsSection: React.FC = () => {
       setLoading(true);
       const response = await ApiManager.getMyBookings();
       if (response.success && response.data) {
-        setBookings(response.data);
+        setBookings(response.data as Booking[]);
       }
     } catch (error) {
       console.error('Failed to load bookings:', error);
@@ -123,7 +123,7 @@ const BookingsSection: React.FC = () => {
 
   if (loading) {
     return (
-      <Card variant="fill" scaleFactor="headline">
+      <Card variant="fill" scaleFactor="heading">
         <div className="p-xl" style={{ textAlign: 'center' }}>
           <div style={{
             width: '32px',
@@ -145,7 +145,7 @@ const BookingsSection: React.FC = () => {
   return (
     <div style={{ display: 'grid', gap: '1.5rem' }}>
       {/* Header Card */}
-      <Card variant="fill" scaleFactor="headline">
+      <Card variant="fill" scaleFactor="heading">
         <div className="p-xl">
           <div style={{ 
             display: 'flex', 
@@ -216,7 +216,7 @@ const BookingsSection: React.FC = () => {
       </Card>
 
       {/* Filters */}
-      <Card variant="fill" scaleFactor="headline">
+      <Card variant="fill" scaleFactor="heading">
         <div className="p-lg">
           <div style={{ 
             display: 'grid', 
@@ -282,7 +282,7 @@ const BookingsSection: React.FC = () => {
       {filteredBookings.length > 0 ? (
         <div style={{ display: 'grid', gap: '1rem' }}>
           {filteredBookings.map((booking) => (
-            <Card key={booking.id} variant="fill" scaleFactor="headline">
+            <Card key={booking.id} variant="fill" scaleFactor="heading">
               <div className="p-lg">
                 <div style={{ 
                   display: 'grid',
@@ -434,7 +434,7 @@ const BookingsSection: React.FC = () => {
           ))}
         </div>
       ) : (
-        <Card variant="fill" scaleFactor="headline">
+        <Card variant="fill" scaleFactor="heading">
           <div className="p-xl" style={{ textAlign: 'center' }}>
             <Calendar style={{ 
               width: '4rem', 

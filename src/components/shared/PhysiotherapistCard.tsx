@@ -95,7 +95,7 @@ const PhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
 
   if (variant === 'compact') {
     return (
-      <Card variant="fill" scaleFactor="headline">
+      <Card variant="fill" scaleFactor="heading">
         <div className="p-md">
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             {/* Avatar */}
@@ -175,7 +175,7 @@ const PhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
 
   if (variant === 'featured') {
     return (
-      <Card variant="fill" scaleFactor="headline">
+      <Card variant="fill" scaleFactor="heading">
         <div className="p-lg">
           {/* Header with Badge */}
           <div style={{ position: 'relative', marginBottom: '1rem' }}>
@@ -346,7 +346,7 @@ const PhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
 
   // Default variant - Product Designer Enhanced
   return (
-    <Card variant="fill" scaleFactor="headline">
+    <Card variant="fill" scaleFactor="heading">
       <div style={{ position: 'relative', overflow: 'hidden' }}>
         {/* Modern Gradient Background */}
         <div style={{

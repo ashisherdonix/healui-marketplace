@@ -269,8 +269,22 @@ const bookingSlice = createSlice({
       })
       .addCase(getBookings.fulfilled, (state, action) => {
         state.loading.bookings = false;
-        state.bookings = action.payload.data;
-        state.pagination = action.payload.pagination;
+        state.bookings = (action.payload as unknown as {data: Booking[], pagination: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPages: number;
+          hasNext: boolean;
+          hasPrev: boolean;
+        }}).data;
+        state.pagination = (action.payload as unknown as {data: Booking[], pagination: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPages: number;
+          hasNext: boolean;
+          hasPrev: boolean;
+        }}).pagination;
         state.error.bookings = null;
       })
       .addCase(getBookings.rejected, (state, action) => {
@@ -286,7 +300,7 @@ const bookingSlice = createSlice({
       })
       .addCase(getBooking.fulfilled, (state, action) => {
         state.loading.bookings = false;
-        state.currentBooking = action.payload;
+        state.currentBooking = action.payload as unknown as Booking;
         state.error.bookings = null;
       })
       .addCase(getBooking.rejected, (state, action) => {
@@ -302,8 +316,8 @@ const bookingSlice = createSlice({
       })
       .addCase(createBooking.fulfilled, (state, action) => {
         state.loading.creating = false;
-        state.bookings.unshift(action.payload);
-        state.currentBooking = action.payload;
+        state.bookings.unshift(action.payload as unknown as Booking);
+        state.currentBooking = action.payload as unknown as Booking;
         state.error.creating = null;
       })
       .addCase(createBooking.rejected, (state, action) => {
@@ -319,12 +333,12 @@ const bookingSlice = createSlice({
       })
       .addCase(updateBooking.fulfilled, (state, action) => {
         state.loading.updating = false;
-        const index = state.bookings.findIndex(b => b.id === action.payload.id);
+        const index = state.bookings.findIndex(b => b.id === (action.payload as unknown as Booking).id);
         if (index !== -1) {
-          state.bookings[index] = action.payload;
+          state.bookings[index] = action.payload as unknown as Booking;
         }
-        if (state.currentBooking && state.currentBooking.id === action.payload.id) {
-          state.currentBooking = action.payload;
+        if (state.currentBooking && state.currentBooking.id === (action.payload as unknown as Booking).id) {
+          state.currentBooking = action.payload as unknown as Booking;
         }
         state.error.updating = null;
       })
@@ -341,12 +355,12 @@ const bookingSlice = createSlice({
       })
       .addCase(cancelBooking.fulfilled, (state, action) => {
         state.loading.cancelling = false;
-        const index = state.bookings.findIndex(b => b.id === action.payload.id);
+        const index = state.bookings.findIndex(b => b.id === (action.payload as unknown as Booking).id);
         if (index !== -1) {
-          state.bookings[index] = action.payload;
+          state.bookings[index] = action.payload as unknown as Booking;
         }
-        if (state.currentBooking && state.currentBooking.id === action.payload.id) {
-          state.currentBooking = action.payload;
+        if (state.currentBooking && state.currentBooking.id === (action.payload as unknown as Booking).id) {
+          state.currentBooking = action.payload as unknown as Booking;
         }
         state.error.cancelling = null;
       })
@@ -363,12 +377,12 @@ const bookingSlice = createSlice({
       })
       .addCase(rescheduleBooking.fulfilled, (state, action) => {
         state.loading.updating = false;
-        const index = state.bookings.findIndex(b => b.id === action.payload.id);
+        const index = state.bookings.findIndex(b => b.id === (action.payload as unknown as Booking).id);
         if (index !== -1) {
-          state.bookings[index] = action.payload;
+          state.bookings[index] = action.payload as unknown as Booking;
         }
-        if (state.currentBooking && state.currentBooking.id === action.payload.id) {
-          state.currentBooking = action.payload;
+        if (state.currentBooking && state.currentBooking.id === (action.payload as unknown as Booking).id) {
+          state.currentBooking = action.payload as unknown as Booking;
         }
         state.error.updating = null;
       })
@@ -385,7 +399,7 @@ const bookingSlice = createSlice({
       })
       .addCase(getAvailableSlots.fulfilled, (state, action) => {
         state.loading.slots = false;
-        state.availableSlots = action.payload;
+        state.availableSlots = action.payload as unknown as AvailableSlot[];
         state.error.slots = null;
       })
       .addCase(getAvailableSlots.rejected, (state, action) => {

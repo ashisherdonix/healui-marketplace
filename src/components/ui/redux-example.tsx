@@ -5,6 +5,7 @@ import { setUserData, setCurrentLocation, setUserMode } from '@/store/slices/use
 import { clearError as clearAuthError } from '@/store/slices/authSlice';
 import Button from '@/components/button';
 import Card from '@/components/card';
+import { User } from '@/lib/types';
 
 // Example component demonstrating Redux usage following clinic-web patterns
 export default function ReduxExample() {
@@ -21,15 +22,15 @@ export default function ReduxExample() {
     const mockUser = {
       id: '1',
       email: 'patient@healui.com',
-      firstName: 'John',
-      lastName: 'Doe',
-      role: 'patient' as const,
+      phone: '+91 9876543210',
+      full_name: 'John Doe',
+      account_type: 'PRIMARY' as const,
       isVerified: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
     
-    dispatch(setUserData(mockUser));
+    dispatch(setUserData(mockUser as User));
   };
 
   const handleSetLocation = () => {
@@ -61,7 +62,7 @@ export default function ReduxExample() {
             Loading: {authLoading ? 'Yes' : 'No'}
           </div>
           <div className="lk-typography-body-medium">
-            User: {authUser ? `${authUser.firstName} ${authUser.lastName}` : 'None'}
+            User: {authUser ? authUser.full_name : 'None'}
           </div>
         </div>
 
@@ -69,7 +70,7 @@ export default function ReduxExample() {
         <div className="mb-md">
           <div className="lk-typography-title-large mb-sm">User State</div>
           <div className="lk-typography-body-medium mb-xs">
-            Current User: {userData ? `${userData.firstName} ${userData.lastName} (${userData.role})` : 'None'}
+            Current User: {userData ? `${userData.full_name} (${userData.account_type})` : 'None'}
           </div>
           <div className="lk-typography-body-medium mb-xs">
             Location: {currentLocation || 'Not set'}

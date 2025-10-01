@@ -43,7 +43,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ user, onUpdat
     address: user.address || '',
     pincode: user.pincode || '',
     date_of_birth: user.date_of_birth ? new Date(user.date_of_birth).toISOString().split('T')[0] : '',
-    gender: user.gender === 'M' ? 'MALE' : user.gender === 'F' ? 'FEMALE' : user.gender || ''
+    gender: user.gender || ''
   });
 
   const handleSave = async () => {
@@ -83,20 +83,27 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ user, onUpdat
         } else if (formData.gender === 'OTHER') {
           updateData.gender = 'O';
         } else {
-          updateData.gender = formData.gender;
+          updateData.gender = undefined;
         }
       }
 
       console.log('Sending update data:', updateData);
 
-      const response = await ApiManager.updateMyProfile(updateData);
+      const response = await ApiManager.updateMyProfile(updateData as {
+        full_name: string;
+        email?: string;
+        date_of_birth?: string;
+        gender?: 'M' | 'F' | 'O';
+        address?: string;
+        pincode?: string;
+      });
       if (response.success && response.data) {
-        onUpdate(response.data);
+        onUpdate(response.data as User);
         setSuccessMessage('Profile updated successfully!');
         
         // Update Redux store manually since API no longer does it
         const { setUser } = await import('@/store/slices/authSlice');
-        dispatch(setUser(response.data));
+        dispatch(setUser(response.data as User));
         
         setTimeout(() => {
           setIsEditing(false);
@@ -126,7 +133,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ user, onUpdat
       address: user.address || '',
       pincode: user.pincode || '',
       date_of_birth: user.date_of_birth ? new Date(user.date_of_birth).toISOString().split('T')[0] : '',
-      gender: user.gender === 'M' ? 'MALE' : user.gender === 'F' ? 'FEMALE' : user.gender || ''
+      gender: user.gender || ''
     });
     setIsEditing(false);
   };
@@ -136,7 +143,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ user, onUpdat
   };
 
   return (
-    <Card variant="fill" scaleFactor="headline">
+    <Card variant="fill" scaleFactor="heading">
       <div className="p-lg">
         {/* Header */}
         <div style={{ 
@@ -274,7 +281,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ user, onUpdat
               color: 'var(--lk-onprimarycontainer)',
               opacity: 0.75
             }}>
-              Member since {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { 
+              Member since {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
                 year: 'numeric', 
                 month: 'short', 
                 day: 'numeric' 
@@ -434,7 +441,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({ user, onUpdat
                   color: 'var(--lk-onsurface)',
                   padding: '0.75rem 0'
                 }}>
-                  {user.gender === 'M' ? 'Male' : user.gender === 'F' ? 'Female' : user.gender || 'Not provided'}
+                  {user.gender === 'MALE' ? 'Male' : user.gender === 'FEMALE' ? 'Female' : user.gender === 'OTHER' ? 'Other' : 'Not provided'}
                 </div>
               )}
             </div>

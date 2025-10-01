@@ -109,7 +109,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       setLoadingSpecializations(true);
       const response = await ApiManager.getSpecializations();
       if (response.success && response.data) {
-        setSpecializations(response.data);
+        setSpecializations(response.data as Specialization[]);
       }
     } catch (error) {
       console.error('Failed to load specializations:', error);
@@ -123,7 +123,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       setLoadingLocations(true);
       const response = await ApiManager.searchLocations(query, 8);
       if (response.success && response.data) {
-        setLocationSuggestions(response.data);
+        setLocationSuggestions(response.data as LocationSuggestion[]);
         setShowLocationDropdown(true);
       }
     } catch (error) {
@@ -166,7 +166,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   if (variant === 'compact') {
     return (
-      <Card variant="fill" scaleFactor="headline">
+      <Card variant="fill" scaleFactor="heading">
         <div className="p-md">
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
             {/* Search Input */}
@@ -389,7 +389,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       {/* Advanced Filters - Mobile Responsive */}
       {showFilters && (
-        <Card variant="fill" scaleFactor="headline">
+        <Card variant="fill" scaleFactor="heading">
           <div className="p-lg">
             <div style={{ 
               display: 'flex', 

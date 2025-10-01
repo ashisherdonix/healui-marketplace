@@ -129,7 +129,7 @@ class ApiManager {
     const url = BASE_URL + ENDPOINTS.GET_MY_BOOKINGS();
     return ApiMethods.get(url).then((res) => {
       if (res.success && res.data) {
-        store.dispatch(bookingSlice.actions.setBookings(res.data));
+        store.dispatch(bookingSlice.actions.setBookings(res.data as unknown as never[]));
       }
       return res;
     });
@@ -139,7 +139,7 @@ class ApiManager {
     const url = BASE_URL + ENDPOINTS.GET_BOOKING(bookingId);
     return ApiMethods.get(url).then((res) => {
       if (res.success && res.data) {
-        store.dispatch(bookingSlice.actions.setCurrentBooking(res.data));
+        store.dispatch(bookingSlice.actions.setCurrentBooking(res.data as unknown as never));
       }
       return res;
     });
@@ -149,7 +149,7 @@ class ApiManager {
     const url = BASE_URL + ENDPOINTS.CREATE_BOOKING();
     return ApiMethods.post(url, data).then((res) => {
       if (res.success && res.data) {
-        store.dispatch(bookingSlice.actions.addBooking(res.data));
+        store.dispatch(bookingSlice.actions.addBooking(res.data as unknown as never));
       }
       return res;
     });
@@ -159,7 +159,7 @@ class ApiManager {
     const url = BASE_URL + ENDPOINTS.CANCEL_BOOKING(bookingId);
     return ApiMethods.put(url, { reason }).then((res) => {
       if (res.success && res.data) {
-        store.dispatch(bookingSlice.actions.updateBookingData(res.data));
+        store.dispatch(bookingSlice.actions.updateBookingData(res.data as unknown as never));
       }
       return res;
     });
@@ -183,7 +183,7 @@ class ApiManager {
     const url = BASE_URL + ENDPOINTS.GET_FEATURED_PHYSIOTHERAPISTS(params);
     return ApiMethods.get(url).then((res) => {
       if (res.success && res.data) {
-        store.dispatch(therapistSlice.actions.setTherapists(res.data));
+        store.dispatch(therapistSlice.actions.setTherapists(res.data as Record<string, unknown>[]));
       }
       return res;
     });
@@ -208,7 +208,7 @@ class ApiManager {
     const url = BASE_URL + ENDPOINTS.SEARCH_PHYSIOTHERAPISTS(params);
     return ApiMethods.get(url).then((res) => {
       if (res.success && res.data) {
-        store.dispatch(therapistSlice.actions.setTherapists(res.data));
+        store.dispatch(therapistSlice.actions.setTherapists(res.data as Record<string, unknown>[]));
       }
       return res;
     });
@@ -218,7 +218,7 @@ class ApiManager {
     const url = BASE_URL + ENDPOINTS.GET_PHYSIOTHERAPIST_PROFILE(physioId, options);
     return ApiMethods.get(url).then((res) => {
       if (res.success && res.data) {
-        store.dispatch(therapistSlice.actions.setCurrentTherapist(res.data));
+        store.dispatch(therapistSlice.actions.setCurrentTherapist(res.data as unknown as never));
       }
       return res;
     });

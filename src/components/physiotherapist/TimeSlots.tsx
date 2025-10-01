@@ -187,7 +187,6 @@ const TimeSlots: React.FC<TimeSlotsProps> = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '8px',
-                    height: '8px',
                     color: 'white'
                   }} />
                 )}

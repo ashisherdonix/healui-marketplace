@@ -196,13 +196,13 @@ const therapistSlice = createSlice({
     },
     // Direct setters for API responses
     setTherapists: (state, action: PayloadAction<Record<string, unknown>[]>) => {
-      state.therapists = action.payload;
+      state.therapists = action.payload as unknown as Therapist[];
     },
     setFeaturedTherapists: (state, action: PayloadAction<Record<string, unknown>[]>) => {
-      state.featuredTherapists = action.payload;
+      state.featuredTherapists = action.payload as unknown as Therapist[];
     },
     setTherapistReviews: (state, action: PayloadAction<Record<string, unknown>[]>) => {
-      state.therapistReviews = action.payload;
+      state.therapistReviews = action.payload as unknown as Review[];
     },
   },
   extraReducers: (builder) => {
@@ -214,8 +214,22 @@ const therapistSlice = createSlice({
       })
       .addCase(getTherapists.fulfilled, (state, action) => {
         state.loading.therapists = false;
-        state.therapists = action.payload.data;
-        state.pagination = action.payload.pagination;
+        state.therapists = (action.payload as unknown as {data: Therapist[], pagination: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPages: number;
+          hasNext: boolean;
+          hasPrev: boolean;
+        }}).data;
+        state.pagination = (action.payload as unknown as {data: Therapist[], pagination: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPages: number;
+          hasNext: boolean;
+          hasPrev: boolean;
+        }}).pagination;
         state.error.therapists = null;
       })
       .addCase(getTherapists.rejected, (state, action) => {
@@ -231,7 +245,7 @@ const therapistSlice = createSlice({
       })
       .addCase(getTherapist.fulfilled, (state, action) => {
         state.loading.current = false;
-        state.currentTherapist = action.payload;
+        state.currentTherapist = action.payload as unknown as Therapist;
         state.error.current = null;
       })
       .addCase(getTherapist.rejected, (state, action) => {
@@ -247,7 +261,7 @@ const therapistSlice = createSlice({
       })
       .addCase(getFeaturedTherapists.fulfilled, (state, action) => {
         state.loading.featured = false;
-        state.featuredTherapists = action.payload;
+        state.featuredTherapists = action.payload as unknown as Therapist[];
         state.error.featured = null;
       })
       .addCase(getFeaturedTherapists.rejected, (state, action) => {
@@ -279,7 +293,7 @@ const therapistSlice = createSlice({
       })
       .addCase(getTherapistReviews.fulfilled, (state, action) => {
         state.loading.reviews = false;
-        state.therapistReviews = action.payload.data;
+        state.therapistReviews = (action.payload as unknown as {data: Review[]}).data;
         state.error.reviews = null;
       })
       .addCase(getTherapistReviews.rejected, (state, action) => {
@@ -295,7 +309,7 @@ const therapistSlice = createSlice({
       })
       .addCase(searchTherapists.fulfilled, (state, action) => {
         state.loading.therapists = false;
-        state.therapists = action.payload.data;
+        state.therapists = (action.payload as unknown as {data: Therapist[]}).data;
         state.error.therapists = null;
       })
       .addCase(searchTherapists.rejected, (state, action) => {
