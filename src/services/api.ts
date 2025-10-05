@@ -253,6 +253,52 @@ class ApiManager {
     return ApiMethods.get(url);
   };
 
+  // ========== TREATMENT PROTOCOLS ==========
+  static getTreatmentProtocols = (params?: Record<string, any>) => {
+    const url = BASE_URL + ENDPOINTS.GET_TREATMENT_PROTOCOLS(params);
+    return ApiMethods.get(url);
+  };
+
+  static getTreatmentProtocol = (id: string) => {
+    const url = BASE_URL + ENDPOINTS.GET_TREATMENT_PROTOCOL(id);
+    return ApiMethods.get(url);
+  };
+
+  static getTreatmentProtocolByVisit = (visitId: string) => {
+    const url = BASE_URL + ENDPOINTS.GET_TREATMENT_PROTOCOL_BY_VISIT(visitId);
+    return ApiMethods.get(url);
+  };
+
+  static checkTreatmentProtocolExists = (visitId: string) => {
+    const url = BASE_URL + ENDPOINTS.CHECK_TREATMENT_PROTOCOL_EXISTS(visitId);
+    return ApiMethods.get(url);
+  };
+
+  static createTreatmentProtocol = (data: any) => {
+    const url = BASE_URL + ENDPOINTS.CREATE_TREATMENT_PROTOCOL();
+    return ApiMethods.post(url, data);
+  };
+
+  static updateTreatmentProtocol = (id: string, data: any) => {
+    const url = BASE_URL + ENDPOINTS.UPDATE_TREATMENT_PROTOCOL(id);
+    return ApiMethods.put(url, data);
+  };
+
+  static finalizeTreatmentProtocol = (id: string) => {
+    const url = BASE_URL + ENDPOINTS.FINALIZE_TREATMENT_PROTOCOL(id);
+    return ApiMethods.post(url, {});
+  };
+
+  static sendTreatmentProtocol = (id: string) => {
+    const url = BASE_URL + ENDPOINTS.SEND_TREATMENT_PROTOCOL(id);
+    return ApiMethods.post(url, {});
+  };
+
+  static generateTreatmentProtocolPDF = (id: string) => {
+    const url = BASE_URL + ENDPOINTS.GENERATE_TREATMENT_PROTOCOL_PDF(id);
+    return ApiMethods.get(url);
+  };
+
   // ========== NOT IMPLEMENTED YET ==========
   // TODO: Payment APIs, Conditions APIs, etc.
 

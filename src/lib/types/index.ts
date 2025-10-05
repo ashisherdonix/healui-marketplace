@@ -369,6 +369,107 @@ export interface BookingFilters {
   serviceId?: string;
 }
 
+// Treatment Protocol types
+export enum ProtocolStatus {
+  DRAFT = 'DRAFT',
+  FINALIZED = 'FINALIZED',
+  SENT_TO_PATIENT = 'SENT_TO_PATIENT',
+  ARCHIVED = 'ARCHIVED'
+}
+
+export interface TreatmentProtocolExercise {
+  id: string;
+  exercise_id?: string;
+  exercise_name: string;
+  exercise_description?: string;
+  custom_reps: number;
+  custom_sets: number;
+  custom_duration_seconds: number;
+  custom_notes?: string;
+  frequency?: string;
+  order_index: number;
+}
+
+export interface TreatmentProtocolArea {
+  id: string;
+  area_type: 'CONDITION' | 'ANATOMY';
+  area_name: string;
+  structure_type?: string;
+  structure_id?: string;
+  description?: string;
+  severity_level?: number;
+  notes?: string;
+  order_index: number;
+}
+
+export interface TreatmentProtocolRecommendation {
+  id: string;
+  recommendation_type: 'LIFESTYLE' | 'PRECAUTION' | 'MEDICATION' | 'FOLLOW_UP' | 'OTHER';
+  title: string;
+  description: string;
+  priority_level: number;
+  order_index: number;
+}
+
+export interface TreatmentProtocol extends BaseEntity {
+  visit_id: string;
+  patient_id?: string;
+  patient_user_id?: string;
+  clinic_id?: string;
+  physiotherapist_id: string;
+  protocol_title: string;
+  current_complaint?: string;
+  general_notes?: string;
+  additional_manual_notes?: string;
+  show_explanations: boolean;
+  status: ProtocolStatus;
+  finalized_at?: string;
+  sent_to_patient_at?: string;
+  created_by: string;
+  updated_by?: string;
+  exercises?: TreatmentProtocolExercise[];
+  affectedAreas?: TreatmentProtocolArea[];
+  recommendations?: TreatmentProtocolRecommendation[];
+}
+
+export interface CreateTreatmentProtocolDto {
+  visit_id: string;
+  protocol_title: string;
+  current_complaint?: string;
+  general_notes?: string;
+  additional_manual_notes?: string;
+  show_explanations?: boolean;
+  exercises?: Omit<TreatmentProtocolExercise, 'id'>[];
+  affected_areas?: Omit<TreatmentProtocolArea, 'id'>[];
+  recommendations?: Omit<TreatmentProtocolRecommendation, 'id'>[];
+}
+
+export interface UpdateTreatmentProtocolDto {
+  protocol_title?: string;
+  current_complaint?: string;
+  general_notes?: string;
+  additional_manual_notes?: string;
+  show_explanations?: boolean;
+  status?: ProtocolStatus;
+  exercises?: Omit<TreatmentProtocolExercise, 'id'>[];
+  affected_areas?: Omit<TreatmentProtocolArea, 'id'>[];
+  recommendations?: Omit<TreatmentProtocolRecommendation, 'id'>[];
+}
+
+export interface GetTreatmentProtocolsQueryDto {
+  visit_id?: string;
+  patient_id?: string;
+  patient_user_id?: string;
+  clinic_id?: string;
+  physiotherapist_id?: string;
+  status?: ProtocolStatus;
+  search?: string;
+  page?: number;
+  limit?: number;
+  sort_by?: string;
+  sort_order?: 'ASC' | 'DESC';
+}
+
 // Error types
 export interface ApiError {
   message: string;

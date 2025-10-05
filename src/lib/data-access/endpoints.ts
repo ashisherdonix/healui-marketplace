@@ -28,6 +28,31 @@ export const ENDPOINTS = {
   CREATE_REVIEW: () => 'patient-users/reviews',
   GET_MY_REVIEWS: () => 'patient-users/reviews',
 
+  // ========== TREATMENT PROTOCOLS ==========
+  GET_TREATMENT_PROTOCOLS: (params?: Record<string, any>) => {
+    let url = 'treatment-protocols';
+    if (params) {
+      const searchParams = new URLSearchParams();
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined && params[key] !== null) {
+          searchParams.append(key, params[key].toString());
+        }
+      });
+      if (searchParams.toString()) {
+        url += '?' + searchParams.toString();
+      }
+    }
+    return url;
+  },
+  GET_TREATMENT_PROTOCOL: (id: string) => `treatment-protocols/${id}`,
+  GET_TREATMENT_PROTOCOL_BY_VISIT: (visitId: string) => `treatment-protocols/visit/${visitId}`,
+  CHECK_TREATMENT_PROTOCOL_EXISTS: (visitId: string) => `treatment-protocols/visit/${visitId}/exists`,
+  CREATE_TREATMENT_PROTOCOL: () => 'treatment-protocols',
+  UPDATE_TREATMENT_PROTOCOL: (id: string) => `treatment-protocols/${id}`,
+  FINALIZE_TREATMENT_PROTOCOL: (id: string) => `treatment-protocols/${id}/finalize`,
+  SEND_TREATMENT_PROTOCOL: (id: string) => `treatment-protocols/${id}/send-to-patient`,
+  GENERATE_TREATMENT_PROTOCOL_PDF: (id: string) => `treatment-protocols/${id}/pdf`,
+
   // ========== MARKETPLACE DISCOVERY ==========
   
   // Home page

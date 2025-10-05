@@ -3,25 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import ApiManager from '@/services/api';
 import Header from '@/components/layout/Header';
-import CleanSearchBar from '@/components/search/CleanSearchBar';
+import SimpleSearchInterface from '@/components/search/SimpleSearchInterface';
 import CleanPhysiotherapistCard from '@/components/shared/CleanPhysiotherapistCard';
 import Card from '@/components/card';
 import Button from '@/components/button';
 import { theme } from '@/utils/theme';
 import { 
   Search, 
-  Users
+  Users,
+  MapPin,
+  RefreshCw
 } from 'lucide-react';
 
-interface SearchParams {
-  query: string;
-  location: string;
-  specialization: string;
-  service_type: 'HOME_VISIT' | 'ONLINE' | '';
-  available_date: string;
-  min_rating: string;
-  max_price: string;
-  gender: 'M' | 'F' | '';
+interface SimpleSearchFilters {
+  query: string; // Combined search for name or pincode
+  specialty: string;
+  serviceType: 'ALL' | 'HOME_VISIT' | 'ONLINE';
 }
 
 interface Physiotherapist {
@@ -46,6 +43,16 @@ interface Physiotherapist {
   gender?: string;
 }
 
+interface LocationData {
+  city?: string;
+  region?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+  ip?: string;
+}
+
 const HomePage: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Physiotherapist[]>([]);
   const [allPhysiotherapists, setAllPhysiotherapists] = useState<Physiotherapist[]>([]);
@@ -54,6 +61,43 @@ const HomePage: React.FC = () => {
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [currentHeadlineIndex, setCurrentHeadlineIndex] = useState(0);
   const [animationPhase, setAnimationPhase] = useState<'part1' | 'part2' | 'part3' | 'complete'>('part1');
+  const [userLocation, setUserLocation] = useState<LocationData | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [currentBgImageIndex, setCurrentBgImageIndex] = useState(0);
+
+  // Background images for hero section - desktop
+  const desktopBackgroundImages = [
+    'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+    'https://plus.unsplash.com/premium_photo-1663012948067-0478e4f9d9c6?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    'https://plus.unsplash.com/premium_photo-1683133816393-b04d94c65872?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    'https://images.unsplash.com/photo-1648638810948-f3bf2cccdde9?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    'https://plus.unsplash.com/premium_photo-1661374820636-35f204935945?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    'https://plus.unsplash.com/premium_photo-1710467003443-4dcf21bf58fe?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDl8fHBoeXNpb3RoZXJhcGlzdHxlbnwwfHwwfHx8MA%3D%3D',
+    'https://images.unsplash.com/photo-1645005512942-a17817fb7c11?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+  ];
+
+  // Background images for hero section - mobile
+  const mobileBackgroundImages = [
+    'https://images.unsplash.com/photo-1648638810948-f3bf2cccdde9?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    'https://plus.unsplash.com/premium_photo-1661767448598-f42428886f1c?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    'https://plus.unsplash.com/premium_photo-1661698465350-dab93e1b2df8?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+  ];
+
+  // Determine which images to use based on viewport
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const backgroundImages = isMobile ? mobileBackgroundImages : desktopBackgroundImages;
 
   // Rotating headlines with professional messaging
   const headlines = [
@@ -88,6 +132,12 @@ const HomePage: React.FC = () => {
     getUserLocation();
     // Load all physiotherapists on page load
     loadAllPhysiotherapists();
+    
+    // Preload background images for smooth transitions
+    backgroundImages.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
   }, []);
 
   // Progressive reveal animation for headlines
@@ -117,17 +167,160 @@ const HomePage: React.FC = () => {
     }
   }, [animationPhase, currentHeadlineIndex, headlines.length]);
 
-  const getUserLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        () => {
-          // In a real app, you'd reverse geocode this to get city name
-          console.log('Location access granted');
-        },
-        () => {
-          console.log('Location access denied');
+  // Rotate background images every 8 seconds
+  useEffect(() => {
+    const bgRotationTimer = setInterval(() => {
+      setCurrentBgImageIndex((prev) => (prev + 1) % backgroundImages.length);
+    }, 8000);
+
+    return () => clearInterval(bgRotationTimer);
+  }, [backgroundImages.length]);
+
+  const getUserLocation = async () => {
+    if (locationLoading) return;
+    
+    setLocationLoading(true);
+    
+    try {
+      // First try to get precise location via browser geolocation
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              timeout: 10000,
+              enableHighAccuracy: false
+            });
+          });
+          
+          const { latitude, longitude } = position.coords;
+          console.log('✅ Got precise location via geolocation:', { latitude, longitude });
+          
+          // Reverse geocode to get city name
+          try {
+            const geocodeResponse = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+            );
+            
+            if (geocodeResponse.ok) {
+              const geocodeData = await geocodeResponse.json();
+              const locationData: LocationData = {
+                city: geocodeData.city || geocodeData.locality || geocodeData.principalSubdivision,
+                region: geocodeData.principalSubdivision,
+                country: geocodeData.countryName,
+                latitude,
+                longitude
+              };
+              
+              setUserLocation(locationData);
+              console.log('✅ Location set via geolocation + reverse geocoding:', locationData);
+              return;
+            }
+          } catch (geocodeError) {
+            console.warn('⚠️ Reverse geocoding failed:', geocodeError);
+            // Still set basic location data
+            setUserLocation({ latitude, longitude });
+          }
+          
+        } catch (geoError) {
+          console.warn('⚠️ Geolocation failed, falling back to IP location:', geoError);
         }
-      );
+      }
+      
+      // Fallback to IP-based location
+      console.log('🔄 Fetching location via IP address...');
+      
+      // Try multiple IP geolocation services for reliability
+      const ipServices = [
+        {
+          name: 'ipapi.co',
+          url: 'https://ipapi.co/json/',
+          parser: (data: any): LocationData => ({
+            city: data.city,
+            region: data.region,
+            country: data.country_name,
+            latitude: parseFloat(data.latitude),
+            longitude: parseFloat(data.longitude),
+            timezone: data.timezone,
+            ip: data.ip
+          })
+        },
+        {
+          name: 'ipinfo.io',
+          url: 'https://ipinfo.io/json',
+          parser: (data: any): LocationData => {
+            const [lat, lon] = (data.loc || '').split(',').map((coord: string) => parseFloat(coord));
+            return {
+              city: data.city,
+              region: data.region,
+              country: data.country,
+              latitude: lat || undefined,
+              longitude: lon || undefined,
+              timezone: data.timezone,
+              ip: data.ip
+            };
+          }
+        },
+        {
+          name: 'ip-api.com',
+          url: 'http://ip-api.com/json/',
+          parser: (data: any): LocationData => ({
+            city: data.city,
+            region: data.regionName,
+            country: data.country,
+            latitude: data.lat,
+            longitude: data.lon,
+            timezone: data.timezone,
+            ip: data.query
+          })
+        }
+      ];
+      
+      for (const service of ipServices) {
+        try {
+          console.log(`🔄 Trying ${service.name}...`);
+          const response = await fetch(service.url, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const locationData = service.parser(data);
+            
+            if (locationData.city && locationData.country) {
+              setUserLocation(locationData);
+              console.log(`✅ Location fetched successfully via ${service.name}:`, locationData);
+              return;
+            }
+          }
+        } catch (serviceError) {
+          console.warn(`⚠️ ${service.name} failed:`, serviceError);
+          continue;
+        }
+      }
+      
+      // If all services fail, try a simple fallback
+      try {
+        console.log('🔄 Trying simple IP lookup...');
+        const response = await fetch('https://api.country.is/');
+        if (response.ok) {
+          const data = await response.json();
+          setUserLocation({
+            country: data.country,
+            ip: data.ip
+          });
+          console.log('✅ Basic location set via fallback service:', data);
+        }
+      } catch (fallbackError) {
+        console.warn('⚠️ All location services failed:', fallbackError);
+      }
+      
+    } catch (error) {
+      console.error('❌ Location fetching failed completely:', error);
+    } finally {
+      setLocationLoading(false);
     }
   };
 
@@ -201,62 +394,16 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleSearch = async (searchParams: SearchParams) => {
-    setLoading(true);
-    setError('');
-    setSearchPerformed(true);
+  const handleSearch = async (searchFilters: SimpleSearchFilters) => {
+    // For homepage, redirect to search page with params
+    const params = new URLSearchParams();
+    
+    if (searchFilters.query) params.set('query', searchFilters.query);
+    if (searchFilters.specialty) params.set('specialty', searchFilters.specialty);
+    if (searchFilters.serviceType && searchFilters.serviceType !== 'ALL') params.set('serviceType', searchFilters.serviceType);
 
-    try {
-      console.log('🔍 Starting search with params:', searchParams);
-      
-      // Convert search params to API params
-      const apiParams: Record<string, string | number> = {};
-      
-      if (searchParams.query) apiParams.query = searchParams.query;
-      if (searchParams.location) apiParams.location = searchParams.location;
-      if (searchParams.specialization) apiParams.specialization = searchParams.specialization;
-      if (searchParams.service_type) apiParams.service_type = searchParams.service_type;
-      if (searchParams.available_date) apiParams.available_date = searchParams.available_date;
-      if (searchParams.min_rating) apiParams.min_rating = parseFloat(searchParams.min_rating);
-      if (searchParams.max_price) apiParams.max_price = parseInt(searchParams.max_price);
-      if (searchParams.gender) apiParams.gender = searchParams.gender;
-
-      console.log('🔄 Calling searchPhysiotherapists with processed params:', apiParams);
-      const response = await ApiManager.searchPhysiotherapists(apiParams);
-      
-      console.log('📊 Search response:', {
-        success: response.success,
-        statusCode: response.statusCode,
-        message: response.message,
-        dataLength: response.data ? (response.data as unknown[]).length : 'null/undefined',
-        fullResponse: response
-      });
-      
-      if (response.success && response.data) {
-        const physiotherapists = response.data as Physiotherapist[];
-        console.log('✅ Search successful, found:', physiotherapists.length, 'physiotherapists');
-        if (physiotherapists.length > 0) {
-          console.log('📋 First search result sample:', physiotherapists[0]);
-        }
-        setSearchResults(physiotherapists);
-        setError('');
-      } else {
-        console.log('❌ Search failed:', response.message);
-        setError(response.message || 'Failed to search physiotherapists');
-        setSearchResults([]);
-      }
-    } catch (error) {
-      console.error('❌ Search error - Full details:', {
-        error,
-        message: (error as Error).message,
-        stack: (error as Error).stack
-      });
-      setError('An error occurred while searching. Please try again.');
-      setSearchResults([]);
-    } finally {
-      console.log('🏁 Search completed');
-      setLoading(false);
-    }
+    const searchURL = params.toString() ? `/search/simple?${params.toString()}` : '/search/simple';
+    window.location.href = searchURL;
   };
 
   const handleClearSearch = () => {
@@ -275,18 +422,43 @@ const HomePage: React.FC = () => {
         {/* Clean Hero Section */}
         <section style={{ 
           backgroundColor: theme.colors.background,
-          padding: 'clamp(2rem, 6vw, 4rem) 0',
+          padding: 'clamp(2rem, 4vw, 3rem) 0',
           position: 'relative',
-          backgroundImage: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.85)), url("https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80")',
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
-          backgroundRepeat: 'no-repeat'
+          backgroundRepeat: 'no-repeat',
+          overflow: 'hidden',
+          minHeight: '400px',
+          maxHeight: '600px',
+          height: 'auto'
         }}>
+          {/* Background Image Layers for Smooth Transition */}
+          {backgroundImages.map((image, index) => (
+            <div
+              key={index}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundImage: `linear-gradient(to bottom, rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.90)), url("${image}")`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center center',
+                backgroundRepeat: 'no-repeat',
+                opacity: currentBgImageIndex === index ? 1 : 0,
+                transition: 'opacity 2s ease-in-out',
+                zIndex: currentBgImageIndex === index ? 1 : 0
+              }}
+            />
+          ))}
           <div style={{ 
-            maxWidth: '700px',
+            maxWidth: '1200px',
             margin: '0 auto',
             padding: '0 clamp(1rem, 4vw, 1.5rem)',
-            textAlign: 'center'
+            textAlign: 'center',
+            position: 'relative',
+            zIndex: 2
           }}>
             {/* Dynamic Headline with Progressive Animation */}
             <h1 style={{
@@ -329,10 +501,10 @@ const HomePage: React.FC = () => {
             <p style={{
               fontSize: 'clamp(0.875rem, 2.5vw, 1.25rem)',
               color: theme.colors.gray[600],
-              marginBottom: 'clamp(2rem, 5vw, 3rem)',
+              marginBottom: 'clamp(1rem, 3vw, 1.5rem)',
               lineHeight: '1.6',
               maxWidth: '600px',
-              margin: '0 auto clamp(2rem, 5vw, 3rem)',
+              margin: '0 auto clamp(1rem, 3vw, 1.5rem)',
               opacity: animationPhase === 'complete' ? 1 : 0,
               transform: animationPhase === 'complete' ? 'translateY(0)' : 'translateY(10px)',
               transition: 'all 0.4s ease-in-out 0.2s',
@@ -345,12 +517,16 @@ const HomePage: React.FC = () => {
             <div style={{ 
               marginBottom: 'clamp(2rem, 4vw, 3rem)',
               width: '100%',
-              maxWidth: '800px',
+              maxWidth: '100%',
               margin: '0 auto clamp(2rem, 4vw, 3rem)'
             }}>
-              <CleanSearchBar 
+              <SimpleSearchInterface 
                 onSearch={handleSearch}
                 loading={loading}
+                placeholder={userLocation?.city 
+                  ? `Search by name, specialty, or condition...`
+                  : "Search by name or pincode..."
+                }
               />
             </div>
 
@@ -377,8 +553,12 @@ const HomePage: React.FC = () => {
                   <button
                     key={index}
                     onClick={() => {
-                      console.log(`Selected condition: ${condition}`);
-                      // You can implement search functionality here
+                      // Quick search for condition
+                      handleSearch({
+                        query: condition,
+                        specialty: '',
+                        serviceType: 'ALL'
+                      });
                     }}
                     style={{
                       padding: 'clamp(0.375rem, 1.5vw, 0.625rem) clamp(0.75rem, 2.5vw, 1.125rem)',
@@ -415,14 +595,27 @@ const HomePage: React.FC = () => {
 
           {/* Mobile Responsive CSS */}
           <style jsx>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            @keyframes fadeIn {
+              0% { opacity: 0; transform: translateY(-10px); }
+              100% { opacity: 1; transform: translateY(0); }
+            }
             @media (max-width: 768px) {
               section {
-                padding: clamp(1.5rem, 5vw, 2.5rem) 0 !important;
-                background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.9)), url("https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80") !important;
+                padding: clamp(1.5rem, 4vw, 2rem) 0 !important;
+                minHeight: 350px !important;
+                maxHeight: 500px !important;
               }
               
               section > div {
                 padding: 0 clamp(1rem, 4vw, 1.25rem) !important;
+              }
+              
+              section > div[style*="backgroundImage"] {
+                backgroundPosition: center center !important;
               }
             }
             
@@ -581,8 +774,8 @@ const HomePage: React.FC = () => {
               {!loading && !error && searchResults.length > 0 && (
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(360px, 100%), 1fr))', 
-                  gap: 'clamp(16px, 4vw, 24px)' 
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', 
+                  gap: 'clamp(20px, 4vw, 28px)' 
                 }}>
                   {searchResults.map((physio, index) => (
                     <CleanPhysiotherapistCard
@@ -643,6 +836,54 @@ const HomePage: React.FC = () => {
           <section style={{ padding: 'clamp(1.5rem, 4vw, 2rem) 0' }} data-physiotherapists-section>
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 clamp(1rem, 4vw, 1rem)' }}>
               
+              {/* Featured Physiotherapists Header */}
+              {!loading && !error && allPhysiotherapists.length > 0 && (
+                <div style={{
+                  textAlign: 'center',
+                  marginBottom: 'clamp(2rem, 5vw, 3rem)',
+                  opacity: 1,
+                  animation: 'fadeIn 0.5s ease-in-out'
+                }}>
+                  <h2 style={{
+                    fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
+                    fontWeight: '600',
+                    color: '#1e5f79',
+                    margin: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.75rem',
+                    flexWrap: 'wrap',
+                    fontFamily: '"IBM Plex Sans", Inter, system-ui, sans-serif'
+                  }}>
+                    <Users style={{ 
+                      width: 'clamp(1.5rem, 4vw, 2rem)', 
+                      height: 'clamp(1.5rem, 4vw, 2rem)',
+                      flexShrink: 0,
+                      color: '#1e5f79'
+                    }} />
+                    <span>
+                      Featured Physiotherapists
+                      {userLocation?.city && (
+                        <span style={{ color: '#1e5f79', fontWeight: '700' }}>
+                          {' '}in {userLocation.city}
+                        </span>
+                      )}
+                    </span>
+                  </h2>
+                  <p style={{
+                    fontSize: 'clamp(0.875rem, 2.5vw, 1.125rem)',
+                    color: '#6B7280',
+                    marginTop: '0.5rem',
+                    fontWeight: '500'
+                  }}>
+                    {userLocation?.city 
+                      ? `Top-rated physiotherapists available in your area`
+                      : 'Discover top-rated physiotherapists near you'
+                    }
+                  </p>
+                </div>
+              )}
 
               {/* Loading State */}
               {loading && (
@@ -683,8 +924,8 @@ const HomePage: React.FC = () => {
               {!loading && !error && allPhysiotherapists.length > 0 && (
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(360px, 100%), 1fr))', 
-                  gap: 'clamp(16px, 4vw, 24px)' 
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', 
+                  gap: 'clamp(20px, 4vw, 28px)' 
                 }}>
                   {allPhysiotherapists.map((physio, index) => (
                     <CleanPhysiotherapistCard
