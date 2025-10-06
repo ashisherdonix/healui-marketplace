@@ -3,6 +3,7 @@ import { ENDPOINTS } from '@/lib/data-access/endpoints';
 import { store } from '@/store/store';
 import therapistSlice from '@/store/slices/therapistSlice';
 import bookingSlice from '@/store/slices/bookingSlice';
+import { BatchAvailabilityQuery, BatchAvailabilityResponse } from '@/lib/types';
 
 // Type definitions (kept for future use)
 // interface MarketplaceAuthDto {
@@ -231,6 +232,86 @@ class ApiManager {
   }) => {
     const url = BASE_URL + ENDPOINTS.GET_PHYSIOTHERAPIST_AVAILABILITY(physioId, params);
     return ApiMethods.get(url);
+  };
+
+  /**
+   * Batch Availability API - Advanced marketplace slot fetching
+   * 
+   * This API provides comprehensive availability data for multiple physiotherapists
+   * across multiple days with advanced filtering and location-based pricing.
+   * 
+   * Features:
+   * - Multi-day availability (up to 7 days)
+   * - Service type filtering (ONLINE, CLINIC, HOME_VISIT)
+   * - Location-based pricing with zone calculations
+   * - Real-time booking conflict detection
+   * - Batch processing for optimal performance
+   * 
+   * Use cases:
+   * - Marketplace search results with availability preview
+   * - Calendar view showing multiple physios
+   * - Location-based pricing comparison
+   * - Bulk availability checking for booking flows
+   * 
+   * @param params - Query parameters for batch availability
+   * @returns Promise<BatchAvailabilityResponse> - Comprehensive availability data
+   */
+  static getBatchAvailability = (params: BatchAvailabilityQuery): Promise<BatchAvailabilityResponse> => {
+    console.log('🔄 ApiManager.getBatchAvailability - Request params:', {
+      physioCount: params.ids.length,
+      date: params.date,
+      days: params.days,
+      serviceTypes: params.service_types,
+      hasLocation: !!(params.patient_pincode || (params.patient_lat && params.patient_lng))
+    });
+
+    // Backend DTO is now fixed! Use real API endpoint
+    const url = BASE_URL + ENDPOINTS.GET_BATCH_AVAILABILITY({
+      ids: params.ids,
+      date: params.date,
+      days: params.days,
+      service_types: params.service_types,
+      patient_pincode: params.patient_pincode,
+      patient_lat: params.patient_lat,
+      patient_lng: params.patient_lng,
+      duration: params.duration
+    });
+
+    console.log('🔍 Final URL being called:', url);
+
+    return ApiMethods.get(url).then((res: BatchAvailabilityResponse) => {
+      console.log('✅ ApiManager.getBatchAvailability - Response received:', {
+        success: res.success,
+        physiosWithAvailability: Object.keys(res.data || {}).length,
+        totalDays: res.meta?.days_included,
+        bookingConflictsChecked: res.meta?.booking_conflicts_checked
+      });
+
+      // Optionally update Redux store with batch availability data
+      // This could be useful for caching and state management
+      if (res.success && res.data) {
+        // Convert batch availability to individual therapist format for Redux compatibility
+        const therapists = Object.values(res.data).map(physio => ({
+          id: physio.physiotherapist_id,
+          name: physio.name,
+          specialization: physio.specialization,
+          rating: physio.rating,
+          total_reviews: physio.total_reviews,
+          years_experience: physio.years_experience,
+          // Add availability and pricing data for components to access
+          batchAvailability: physio.availability,
+          pricing: physio.pricing
+        }));
+
+        // Update therapist store with enriched data
+        store.dispatch(therapistSlice.actions.setTherapists(therapists as unknown as Record<string, unknown>[]));
+      }
+
+      return res;
+    }).catch((error) => {
+      console.error('❌ ApiManager.getBatchAvailability - Error:', error);
+      throw error;
+    });
   };
 
   static getPhysiotherapistReviews = (physioId: string, params?: {

@@ -470,6 +470,121 @@ export interface GetTreatmentProtocolsQueryDto {
   sort_order?: 'ASC' | 'DESC';
 }
 
+// ========== BATCH AVAILABILITY TYPES ==========
+/**
+ * Comprehensive batch availability API for marketplace.
+ * This API allows fetching availability for multiple physiotherapists across multiple days,
+ * with advanced filtering by service types, location-based pricing, and real-time slot conflicts.
+ * 
+ * Features:
+ * - Multi-day availability (up to 7 days)
+ * - Service type filtering (ONLINE, CLINIC, HOME_VISIT)
+ * - Location-based pricing with zone calculations
+ * - Real-time booking conflict detection
+ * - Batch processing for optimal performance
+ */
+
+export interface BatchAvailabilityQuery {
+  ids: string[]; // Physiotherapist IDs
+  date: string; // Start date (YYYY-MM-DD)
+  days?: number; // Number of days (1-7, default: 1)
+  service_types?: AvailabilityServiceType[]; // Filter by service types
+  patient_pincode?: string; // For home visit pricing
+  patient_lat?: number; // Patient latitude for distance calculation
+  patient_lng?: number; // Patient longitude for distance calculation
+  duration?: number; // Session duration (30-180 min, default: 60)
+}
+
+export type AvailabilityServiceType = 'ONLINE' | 'CLINIC' | 'HOME_VISIT';
+
+export interface AvailabilitySlot {
+  availability_id: string;
+  start_time: string; // HH:mm format
+  end_time: string; // HH:mm format
+  duration_minutes: number;
+  is_available: boolean;
+}
+
+export interface OnlineAvailabilitySlot extends AvailabilitySlot {}
+
+export interface ClinicAvailabilitySlot extends AvailabilitySlot {
+  clinic_id?: string;
+  clinic_name?: string;
+  clinic_address?: string;
+}
+
+export interface ZoneInfo {
+  zone: 'green' | 'yellow' | 'red';
+  pincode_match: boolean;
+  distance_km: number;
+  extra_charge: number;
+}
+
+export interface HomeVisitAvailabilitySlot extends AvailabilitySlot {
+  service_location_id?: string;
+  service_location_name?: string;
+  zone_info?: ZoneInfo;
+}
+
+export interface DayAvailability {
+  online?: OnlineAvailabilitySlot[];
+  clinic?: ClinicAvailabilitySlot[];
+  home_visit?: HomeVisitAvailabilitySlot[];
+}
+
+export interface PricingBreakdown {
+  consultation_fee: number;
+  online?: {
+    consultation_fee: number;
+    platform_fee: number;
+    total: number;
+  };
+  clinic?: {
+    consultation_fee: number;
+    total: number;
+  };
+  home_visit?: {
+    consultation_fee: number;
+    travel_fee: number;
+    zone_extra_charge: number;
+    total: number;
+    zone_breakdown: {
+      green: { extra_charge: number; available: boolean };
+      yellow: { extra_charge: number; available: boolean };
+      red: { extra_charge: number; available: boolean };
+    };
+  };
+}
+
+export interface PhysiotherapistBatchAvailability {
+  physiotherapist_id: string;
+  name: string;
+  specialization: string[];
+  rating: number;
+  total_reviews: number;
+  years_experience: number;
+  availability: Record<string, DayAvailability>; // Date string -> availability
+  pricing: PricingBreakdown;
+}
+
+export interface BatchAvailabilityResponse {
+  success: boolean;
+  message: string;
+  data: Record<string, PhysiotherapistBatchAvailability>; // Physio ID -> availability data
+  meta: {
+    requested_date: string;
+    days_included: number;
+    service_types_filter?: AvailabilityServiceType[];
+    patient_location?: {
+      pincode?: string;
+      coordinates?: [number, number];
+    };
+    booking_conflicts_checked: boolean;
+    physiotherapist_count: number;
+    generated_at: string;
+  };
+}
+
 // Error types
 export interface ApiError {
   message: string;

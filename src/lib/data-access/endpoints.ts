@@ -123,6 +123,41 @@ export const ENDPOINTS = {
     return url + '?' + searchParams.toString();
   },
 
+  // Batch availability endpoint - fetches availability for multiple physiotherapists
+  GET_BATCH_AVAILABILITY: (params: {
+    ids: string[];
+    date: string;
+    days?: number;
+    service_types?: string[];
+    patient_pincode?: string;
+    patient_lat?: number;
+    patient_lng?: number;
+    duration?: number;
+  }) => {
+    const url = 'marketplace/physiotherapists/batch-availability';
+    
+    // Backend transform expects strings that it can split, not arrays
+    // Based on error analysis, backend has wrong decorator order but expects comma-separated strings
+    const searchParams = new URLSearchParams();
+    
+    // Use a different approach - send as JSON-encoded arrays or find the working format
+    // Since backend transform calls .split(), it expects strings
+    searchParams.append('ids', params.ids.join(','));
+    searchParams.append('date', params.date);
+    
+    // Optional parameters
+    if (params.days) searchParams.append('days', params.days.toString());
+    if (params.service_types && params.service_types.length > 0) {
+      searchParams.append('service_types', params.service_types.join(','));
+    }
+    if (params.patient_pincode) searchParams.append('patient_pincode', params.patient_pincode);
+    if (params.patient_lat) searchParams.append('patient_lat', params.patient_lat.toString());
+    if (params.patient_lng) searchParams.append('patient_lng', params.patient_lng.toString());
+    if (params.duration) searchParams.append('duration', params.duration.toString());
+    
+    return url + '?' + searchParams.toString();
+  },
+
   // Helper endpoints
   GET_SPECIALIZATIONS: () => 'marketplace/physiotherapists/meta/specializations',
   SEARCH_LOCATIONS: (params: { query: string; limit?: number }) => {

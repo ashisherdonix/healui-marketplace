@@ -7,6 +7,10 @@ import SimpleSearchInterface from '@/components/search/SimpleSearchInterface';
 import SimpleSearchResults from '@/components/search/SimpleSearchResults';
 import simpleSearchService from '@/services/SimpleSearchService';
 import { theme } from '@/utils/theme';
+import { useAvailabilityBatch } from '@/hooks/useAvailabilityBatch';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '@/store/store';
+import { setBatchAvailability } from '@/store/slices/availabilitySlice';
 
 interface SimpleSearchFilters {
   query: string; // Combined search for name or pincode  
@@ -35,16 +39,76 @@ interface SearchResult {
 const SimpleSearchPage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dispatch = useDispatch();
   
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [userLocation, setUserLocation] = useState<any>(null);
+  const [initialFilters, setInitialFilters] = useState<SimpleSearchFilters>({
+    query: '',
+    specialty: '',
+    serviceType: 'ALL'
+  });
 
-  // Load featured physiotherapists on page load
+  // Get physiotherapist IDs for batch availability
+  const physiotherapistIds = results.map(p => p.id);
+  
+  // Use the batch availability hook
+  const { 
+    availability: batchAvailability, 
+    loading: availabilityLoading, 
+    error: availabilityError 
+  } = useAvailabilityBatch({
+    physiotherapistIds,
+    userLocation: userLocation ? {
+      pincode: userLocation.pincode,
+      lat: userLocation.latitude,
+      lng: userLocation.longitude
+    } : undefined,
+    serviceTypes: ['HOME_VISIT', 'ONLINE'],
+    days: 3,
+    enabled: physiotherapistIds.length > 0
+  });
+
+  // Update Redux store with availability data
+  useEffect(() => {
+    if (batchAvailability && Object.keys(batchAvailability).length > 0) {
+      dispatch(setBatchAvailability({ 
+        data: batchAvailability,
+        timestamp: Date.now()
+      }));
+    }
+  }, [batchAvailability, dispatch]);
+
+  // Load featured physiotherapists and get location on page load
   useEffect(() => {
     loadFeatured();
+    getUserLocation();
   }, []);
+
+  const getUserLocation = async () => {
+    try {
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              timeout: 5000,
+              enableHighAccuracy: false
+            });
+          });
+          
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ latitude, longitude });
+        } catch (geoError) {
+          console.warn('Geolocation failed:', geoError);
+        }
+      }
+    } catch (error) {
+      console.warn('Location detection failed:', error);
+    }
+  };
 
   // Check URL parameters and perform search if present
   useEffect(() => {
@@ -52,11 +116,15 @@ const SimpleSearchPage: React.FC = () => {
     const specialty = searchParams.get('specialty') || '';
     const serviceType = (searchParams.get('serviceType') || 'ALL') as 'ALL' | 'HOME_VISIT' | 'ONLINE';
 
+    // Set initial filters for the search interface
+    const filters = { query, specialty, serviceType };
+    setInitialFilters(filters);
+
     if (query || specialty || serviceType !== 'ALL') {
-      performSearch({ query, specialty, serviceType });
+      performSearch(filters);
       setHasSearched(true);
     }
-  }, []);
+  }, [searchParams]);
 
   const loadFeatured = async () => {
     try {
@@ -144,7 +212,9 @@ const SimpleSearchPage: React.FC = () => {
           <SimpleSearchInterface
             onSearch={handleSearch}
             loading={loading}
+            showFilters={true}
             placeholder="Search physiotherapists by name..."
+            initialFilters={initialFilters}
           />
         </div>
       </div>
@@ -186,6 +256,9 @@ const SimpleSearchPage: React.FC = () => {
           error={error}
           onRetry={handleRetry}
           onResultClick={handleResultClick}
+          batchAvailability={batchAvailability}
+          userLocation={userLocation}
+          availabilityLoading={availabilityLoading}
         />
       </main>
     </div>

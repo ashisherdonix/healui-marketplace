@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Stethoscope, Home, Monitor } from 'lucide-react';
+import { Search, MapPin, Stethoscope, Home, Monitor, ChevronDown, X, Navigation } from 'lucide-react';
 import { theme } from '@/utils/theme';
 
 interface SimpleSearchFilters {
@@ -14,105 +14,58 @@ interface SimpleSearchInterfaceProps {
   onSearch: (filters: SimpleSearchFilters) => void;
   loading?: boolean;
   placeholder?: string;
+  initialFilters?: Partial<SimpleSearchFilters>;
+  showFilters?: boolean; // New prop to control filter visibility
 }
 
-const SPECIALTIES = [
-  'orthopedic',
-  'neurological', 
-  'pediatric',
-  'geriatric',
-  'sports',
-  'cardiac',
-  'pulmonary',
-  'women_health',
-  'pain_management',
-  'rehabilitation'
+const ALL_SPECIALTIES = [
+  { id: '', label: 'All Specialties' },
+  { id: 'orthopedic', label: 'Orthopedic' },
+  { id: 'neurological', label: 'Neurological' },
+  { id: 'pediatric', label: 'Pediatric' },
+  { id: 'geriatric', label: 'Geriatric' },
+  { id: 'sports', label: 'Sports Medicine' },
+  { id: 'cardiac', label: 'Cardiac' },
+  { id: 'pulmonary', label: 'Pulmonary' },
+  { id: 'women_health', label: 'Women\'s Health' },
+  { id: 'pain_management', label: 'Pain Management' },
+  { id: 'rehabilitation', label: 'Rehabilitation' }
+];
+
+const SERVICE_TYPES = [
+  { id: 'ALL', label: 'All Services' },
+  { id: 'HOME_VISIT', label: 'Home Visit' },
+  { id: 'ONLINE', label: 'Online' }
 ];
 
 const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
   onSearch,
   loading = false,
-  placeholder = "Search by name or pincode..."
+  placeholder = "Search by name or pincode...",
+  initialFilters = {},
+  showFilters = true // Default to true for backward compatibility
 }) => {
   const [filters, setFilters] = useState<SimpleSearchFilters>({
-    query: '',
-    specialty: '',
-    serviceType: 'ALL'
+    query: initialFilters.query || '',
+    specialty: initialFilters.specialty || '',
+    serviceType: initialFilters.serviceType || 'ALL'
   });
+  const [inputFocused, setInputFocused] = useState(false);
+  const [showSpecialtyDropdown, setShowSpecialtyDropdown] = useState(false);
+  const [showPincodePrompt, setShowPincodePrompt] = useState(false);
+  const [userLocation, setUserLocation] = useState<string>('');
+  const [pincodePromptDismissed, setPincodePromptDismissed] = useState(false);
 
-  // Animated placeholder state
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [currentText, setCurrentText] = useState('');
-  const [charIndex, setCharIndex] = useState(0);
-  
-  // Animated counter state
-  const [patientCount, setPatientCount] = useState(145000);
-  const targetCount = 150000;
-  
-  const placeholderTexts = [
-    'Search by name...',
-    'Dr. Sharma',
-    'Search by specialty...',
-    'Sports injury',
-    'Search by pincode...',
-    '400001',
-    'Knee pain specialist',
-    'Back pain treatment'
-  ];
-
-  // Typing animation effect
+  // Update filters when initialFilters change
   useEffect(() => {
-    if (filters.query) {
-      // Don't animate if user is typing
-      return;
-    }
+    setFilters({
+      query: initialFilters.query || '',
+      specialty: initialFilters.specialty || '',
+      serviceType: initialFilters.serviceType || 'ALL'
+    });
+  }, [initialFilters.query, initialFilters.specialty, initialFilters.serviceType]);
 
-    const currentPlaceholder = placeholderTexts[placeholderIndex];
-    const typingSpeed = 100;
-    const deletingSpeed = 50;
-    const pauseDuration = 2000;
-
-    if (!isDeleting && charIndex < currentPlaceholder.length) {
-      // Typing
-      const timeout = setTimeout(() => {
-        setCurrentText(currentPlaceholder.substring(0, charIndex + 1));
-        setCharIndex(charIndex + 1);
-      }, typingSpeed);
-      return () => clearTimeout(timeout);
-    } else if (!isDeleting && charIndex === currentPlaceholder.length) {
-      // Pause before deleting
-      const timeout = setTimeout(() => {
-        setIsDeleting(true);
-      }, pauseDuration);
-      return () => clearTimeout(timeout);
-    } else if (isDeleting && charIndex > 0) {
-      // Deleting
-      const timeout = setTimeout(() => {
-        setCurrentText(currentPlaceholder.substring(0, charIndex - 1));
-        setCharIndex(charIndex - 1);
-      }, deletingSpeed);
-      return () => clearTimeout(timeout);
-    } else if (isDeleting && charIndex === 0) {
-      // Move to next placeholder
-      setIsDeleting(false);
-      setPlaceholderIndex((placeholderIndex + 1) % placeholderTexts.length);
-    }
-  }, [charIndex, isDeleting, placeholderIndex, filters.query]);
-
-  // Counter animation effect
-  useEffect(() => {
-    if (patientCount < targetCount) {
-      const increment = Math.ceil((targetCount - patientCount) / 50);
-      const timer = setTimeout(() => {
-        setPatientCount(prev => {
-          const next = prev + increment;
-          return next > targetCount ? targetCount : next;
-        });
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [patientCount, targetCount]);
+  // Removed animated placeholders for cleaner UX
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,6 +74,90 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
 
   const handleInputChange = (field: keyof SimpleSearchFilters, value: string) => {
     setFilters(prev => ({ ...prev, [field]: value }));
+    
+    // Check if pincode prompt needed when switching to home visit (only if filters are shown)
+    if (showFilters && field === 'serviceType' && value === 'HOME_VISIT') {
+      checkPincodeNeeded();
+    }
+  };
+
+  // Smooth pincode detection and handling
+  const checkPincodeNeeded = () => {
+    const hasPincode = /\d{6}/.test(filters.query); // Check for 6-digit pincode
+    const hasLocationKeywords = /\b(near|in|at|around)\b/i.test(filters.query); // Check for location indicators
+    
+    if (!hasPincode && !hasLocationKeywords && !userLocation && !pincodePromptDismissed) {
+      // Delay showing prompt to avoid interrupting user flow
+      setTimeout(() => setShowPincodePrompt(true), 800);
+    }
+  };
+
+  // Detect pincode in search query and auto-close prompt
+  useEffect(() => {
+    const hasPincode = /\d{6}/.test(filters.query);
+    if (hasPincode && showPincodePrompt) {
+      setShowPincodePrompt(false);
+    }
+  }, [filters.query, showPincodePrompt]);
+
+  // Get user's current location
+  const getCurrentLocation = async () => {
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          timeout: 10000,
+          enableHighAccuracy: false
+        });
+      });
+      
+      // Get pincode from coordinates (you'd call a reverse geocoding service)
+      setUserLocation('Current Location');
+      setShowPincodePrompt(false);
+      // You can add reverse geocoding API call here
+      
+    } catch (error) {
+      console.warn('Location access denied');
+    }
+  };
+
+  // Format specialty display name
+  const getSpecialtyDisplayName = (specialtyId: string) => {
+    const specialty = ALL_SPECIALTIES.find(s => s.id === specialtyId);
+    return specialty ? specialty.label : 'All Specialties';
+  };
+
+  // Format service type display name
+  const getServiceTypeDisplayName = (serviceTypeId: string) => {
+    const serviceType = SERVICE_TYPES.find(s => s.id === serviceTypeId);
+    return serviceType ? serviceType.label : 'All Services';
+  };
+
+  // Get active filters for display
+  const getActiveFilters = () => {
+    const active = [];
+    if (filters.specialty) {
+      const specialty = ALL_SPECIALTIES.find(s => s.id === filters.specialty);
+      active.push({ type: 'specialty', label: specialty?.label || filters.specialty, value: filters.specialty });
+    }
+    if (filters.serviceType !== 'ALL') {
+      const service = SERVICE_TYPES.find(s => s.id === filters.serviceType);
+      active.push({ type: 'serviceType', label: service?.label || filters.serviceType, value: filters.serviceType });
+    }
+    return active;
+  };
+
+  // Clear specific filter
+  const clearFilter = (type: string) => {
+    if (type === 'specialty') {
+      setFilters(prev => ({ ...prev, specialty: '' }));
+    } else if (type === 'serviceType') {
+      setFilters(prev => ({ ...prev, serviceType: 'ALL' }));
+    }
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setFilters(prev => ({ ...prev, specialty: '', serviceType: 'ALL' }));
   };
 
   // Detect if the query is a pincode (contains numbers) or name (contains letters)
@@ -138,24 +175,9 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
     return 'unknown';
   };
 
+  // Clear search capabilities placeholder
   const getPlaceholderText = () => {
-    // Show animated placeholder only when input is empty
-    if (!filters.query) {
-      return currentText || placeholder;
-    }
-    
-    // Show context-aware placeholder when user is typing
-    const searchType = detectSearchType(filters.query);
-    switch (searchType) {
-      case 'pincode':
-        return 'Pincode detected...';
-      case 'name':
-        return 'Physiotherapist name...';
-      case 'mixed':
-        return 'Name or location...';
-      default:
-        return placeholder;
-    }
+    return "Search by name, pincode, or condition";
   };
 
   const getSearchIcon = () => {
@@ -209,81 +231,176 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
     boxShadow: `0 0 0 3px ${theme.colors.primary}20`
   };
 
+  // Simple homepage version without filters
+  if (!showFilters) {
+    return (
+      <div style={{
+        background: theme.colors.white,
+        borderRadius: '12px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+        border: `1px solid ${theme.colors.gray[200]}`,
+        padding: 'clamp(1rem, 2vw, 1.5rem)',
+        width: '100%',
+        maxWidth: '600px',
+        margin: '0 auto'
+      }}>
+        
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'center' }}>
+          {/* Single Search Input */}
+          <div style={{ position: 'relative', flex: 1 }}>
+            <div style={{
+              position: 'absolute',
+              left: '1rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              pointerEvents: 'none',
+              zIndex: 10
+            }}>
+              <Search style={{ 
+                width: '1.25rem', 
+                height: '1.25rem', 
+                color: theme.colors.gray[400]
+              }} />
+            </div>
+            <input
+              type="text"
+              value={filters.query}
+              onChange={(e) => handleInputChange('query', e.target.value)}
+              placeholder={getPlaceholderText()}
+              style={{
+                fontSize: '1rem',
+                padding: '0.875rem 1rem 0.875rem 2.75rem',
+                border: `1px solid ${theme.colors.gray[300]}`,
+                borderRadius: '8px',
+                backgroundColor: theme.colors.white,
+                color: theme.colors.text,
+                outline: 'none',
+                transition: 'all 0.2s ease',
+                width: '100%',
+                fontWeight: '400'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = theme.colors.primary;
+                e.target.style.boxShadow = `0 0 0 2px ${theme.colors.primary}20`;
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = theme.colors.gray[300];
+                e.target.style.boxShadow = 'none';
+              }}
+              className="search-input"
+            />
+          </div>
+
+          {/* Minimized Search Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              background: loading ? theme.colors.gray[400] : theme.colors.primary,
+              color: theme.colors.white,
+              fontWeight: '500',
+              fontSize: '0.95rem',
+              padding: '0.875rem 1.5rem',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.backgroundColor = theme.colors.primaryDark;
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) {
+                e.currentTarget.style.backgroundColor = theme.colors.primary;
+              }
+            }}
+          >
+            {loading ? 'Searching...' : 'Search'}
+          </button>
+        </form>
+
+        {/* Search capabilities hint */}
+        <div style={{
+          textAlign: 'center',
+          marginTop: '0.75rem',
+          fontSize: '0.875rem',
+          color: theme.colors.gray[500]
+        }}>
+          Try: "Dr. Sharma", "400001", "back pain"
+        </div>
+
+        {/* Mobile Responsive CSS for simple version */}
+        <style jsx>{`
+          @media (max-width: 768px) {
+            form {
+              flex-direction: column !important;
+              gap: 1rem !important;
+            }
+            
+            button[type="submit"] {
+              width: 100% !important;
+              padding: 1.25rem 1.5rem !important;
+              font-size: 1.1rem !important;
+              min-height: 48px !important;
+              border-radius: 12px !important;
+            }
+            
+            input[type="text"] {
+              font-size: 1rem !important;
+              padding: 1.25rem 1rem 1.25rem 3rem !important;
+              min-height: 48px !important;
+              border-radius: 12px !important;
+            }
+          }
+          
+          @media (max-width: 480px) {
+            input[type="text"] {
+              font-size: 0.9rem !important;
+              padding: 0.875rem 0.875rem 0.875rem 2.75rem !important;
+            }
+            
+            button[type="submit"] {
+              font-size: 0.9rem !important;
+              padding: 0.875rem 1.25rem !important;
+            }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Full search page version with filters
   return (
     <div style={{
       background: theme.colors.white,
       borderRadius: '16px',
-      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
       border: `1px solid ${theme.colors.gray[200]}`,
-      padding: 'clamp(1.5rem, 4vw, 2.5rem)',
+      padding: 'clamp(1.25rem, 2.5vw, 2rem)',
       width: '100%',
-      maxWidth: '1200px',
+      maxWidth: '900px',
       margin: '0 auto'
     }}>
-      {/* Header with patient counter */}
-      <div style={{
-        textAlign: 'center',
-        marginBottom: 'clamp(1.5rem, 3vw, 2rem)',
-        padding: '0 clamp(1rem, 2vw, 2rem)'
-      }}>
-        <h3 style={{
-          fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
-          fontWeight: '600',
-          color: theme.colors.text,
-          margin: 0,
-          fontFamily: '"IBM Plex Sans", Inter, system-ui, sans-serif',
-          lineHeight: '1.5'
-        }}>
-          Best physiotherapists in Delhi
-        </h3>
-        <p style={{
-          fontSize: 'clamp(0.875rem, 2.5vw, 1.125rem)',
-          color: theme.colors.gray[600],
-          marginTop: '0.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem',
-          flexWrap: 'wrap'
-        }}>
-          Experience of treating more than
-          <span style={{
-            color: theme.colors.primary,
-            fontWeight: '700',
-            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-            display: 'inline-flex',
-            alignItems: 'baseline',
-            gap: '0.25rem'
-          }}>
-            {patientCount.toLocaleString()}+
-            {patientCount < targetCount && (
-              <span style={{
-                display: 'inline-block',
-                width: 'clamp(0.5rem, 1.5vw, 0.75rem)',
-                height: 'clamp(0.5rem, 1.5vw, 0.75rem)',
-                borderRadius: '50%',
-                backgroundColor: theme.colors.primary,
-                animation: 'pulse 1s infinite'
-              }} />
-            )}
-          </span>
-          patients!
-        </p>
-      </div>
       
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(1rem, 3vw, 1.5rem)' }}>
-        {/* Combined Search */}
-        <div style={{ position: 'relative' }}>
+      {/* Main Search Bar */}
+      <form onSubmit={handleSubmit}>
+        <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
           <div style={{
             position: 'absolute',
-            left: 'clamp(0.75rem, 2vw, 1rem)',
+            left: '1rem',
             top: '50%',
             transform: 'translateY(-50%)',
             pointerEvents: 'none',
-            zIndex: 10,
-            transition: 'all 0.2s ease'
+            zIndex: 10
           }}>
-            {getSearchIcon()}
+            <Search style={{ 
+              width: '1.25rem', 
+              height: '1.25rem', 
+              color: theme.colors.gray[400]
+            }} />
           </div>
           <input
             type="text"
@@ -291,313 +408,447 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
             onChange={(e) => handleInputChange('query', e.target.value)}
             placeholder={getPlaceholderText()}
             style={{
-              ...inputStyle,
-              paddingRight: filters.query ? 'clamp(4.5rem, 8vw, 5rem)' : 'clamp(0.75rem, 2vw, 1rem)'
+              fontSize: '1rem',
+              padding: '1rem 5rem 1rem 3rem',
+              border: `2px solid ${theme.colors.gray[300]}`,
+              borderRadius: '12px',
+              backgroundColor: theme.colors.white,
+              color: theme.colors.text,
+              outline: 'none',
+              transition: 'all 0.2s ease',
+              width: '100%',
+              fontWeight: '400'
             }}
-            onFocus={(e) => Object.assign(e.target.style, focusStyle)}
+            onFocus={(e) => {
+              e.target.style.borderColor = theme.colors.primary;
+              e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+            }}
             onBlur={(e) => {
               e.target.style.borderColor = theme.colors.gray[300];
               e.target.style.boxShadow = 'none';
             }}
-            className="search-input"
           />
-          {/* Search type indicator */}
-          {filters.query && (
-            <div style={{
+          
+          {/* Search Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
               position: 'absolute',
-              right: 'clamp(0.75rem, 2vw, 1rem)',
+              right: '0.5rem',
               top: '50%',
               transform: 'translateY(-50%)',
-              fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
-              color: theme.colors.gray[500],
-              background: theme.colors.gray[100],
-              padding: '0.25rem 0.5rem',
-              borderRadius: '12px',
-              fontWeight: '500',
-              zIndex: 20
-            }}>
-              {detectSearchType(filters.query) === 'pincode' ? 'PIN' : 
-               detectSearchType(filters.query) === 'name' ? 'NAME' : 'MIXED'}
-            </div>
-          )}
+              background: loading ? theme.colors.gray[400] : theme.colors.primary,
+              color: theme.colors.white,
+              fontWeight: '600',
+              fontSize: '0.95rem',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {loading ? 'Searching...' : 'Search'}
+          </button>
         </div>
 
-        {/* Filters Row - Responsive */}
-        <div className="filters-row" style={{ 
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'clamp(0.75rem, 2vw, 1rem)'
+        {/* Enhanced Filters Row */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr auto',
+          gap: '1.5rem',
+          marginBottom: '1rem',
+          alignItems: 'start'
         }}>
-          {/* Specialty */}
-          <div style={{ position: 'relative', width: '100%' }}>
-            <div style={{
-              position: 'absolute',
-              left: 'clamp(0.75rem, 2vw, 1rem)',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              pointerEvents: 'none',
-              zIndex: 10
-            }}>
-              <Stethoscope style={{ 
-                width: 'clamp(1.125rem, 2.5vw, 1.25rem)', 
-                height: 'clamp(1.125rem, 2.5vw, 1.25rem)', 
-                color: theme.colors.gray[400] 
-              }} />
-            </div>
-            <select
-              value={filters.specialty}
-              onChange={(e) => handleInputChange('specialty', e.target.value)}
-              style={selectStyle}
-              onFocus={(e) => Object.assign(e.target.style, focusStyle)}
-              onBlur={(e) => {
-                e.target.style.borderColor = theme.colors.gray[300];
-                e.target.style.boxShadow = 'none';
+          
+          {/* Specialty Filter */}
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setShowSpecialtyDropdown(!showSpecialtyDropdown)}
+              style={{
+                width: '100%',
+                padding: '0.875rem 1rem',
+                border: `2px solid ${filters.specialty ? theme.colors.primary : theme.colors.gray[300]}`,
+                borderRadius: '8px',
+                backgroundColor: theme.colors.white,
+                color: filters.specialty ? theme.colors.primary : theme.colors.gray[600],
+                fontSize: '0.95rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
               }}
             >
-              <option value="">All Specialties</option>
-              {SPECIALTIES.map(specialty => (
-                <option key={specialty} value={specialty}>
-                  {specialty.charAt(0).toUpperCase() + specialty.slice(1).replace('_', ' ')}
-                </option>
-              ))}
-            </select>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Stethoscope style={{ width: '1rem', height: '1rem' }} />
+                <span>{getSpecialtyDisplayName(filters.specialty)}</span>
+              </div>
+              <ChevronDown style={{ 
+                width: '1rem', 
+                height: '1rem',
+                transform: showSpecialtyDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease'
+              }} />
+            </button>
+            
+            {/* Specialty Dropdown */}
+            {showSpecialtyDropdown && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                zIndex: 1000,
+                backgroundColor: theme.colors.white,
+                border: `1px solid ${theme.colors.gray[300]}`,
+                borderRadius: '8px',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                marginTop: '0.25rem',
+                maxHeight: '300px',
+                overflowY: 'auto'
+              }}>
+                {ALL_SPECIALTIES.map((specialty) => (
+                  <div
+                    key={specialty.id}
+                    onClick={() => {
+                      handleInputChange('specialty', specialty.id);
+                      setShowSpecialtyDropdown(false);
+                    }}
+                    style={{
+                      padding: '0.75rem 1rem',
+                      cursor: 'pointer',
+                      borderBottom: `1px solid ${theme.colors.gray[100]}`,
+                      backgroundColor: filters.specialty === specialty.id ? theme.colors.primaryLight + '20' : 'transparent',
+                      color: filters.specialty === specialty.id ? theme.colors.primary : theme.colors.text,
+                      fontSize: '0.9rem',
+                      fontWeight: filters.specialty === specialty.id ? '600' : '400',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (filters.specialty !== specialty.id) {
+                        e.currentTarget.style.backgroundColor = theme.colors.gray[50];
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (filters.specialty !== specialty.id) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
+                  >
+                    <span>{specialty.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Service Type Toggle */}
-          <div style={{ position: 'relative', width: '100%' }}>
-            <div className="service-type-toggle" style={{
-              display: 'flex',
-              background: theme.colors.gray[100],
-              borderRadius: '12px',
-              padding: '4px',
-              width: '100%',
-              height: 'clamp(3rem, 7vw, 3.5rem)',
-              maxWidth: '100%'
-            }}>
-              {['ALL', 'HOME_VISIT', 'ONLINE'].map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => handleInputChange('serviceType', type as 'ALL' | 'HOME_VISIT' | 'ONLINE')}
-                  className={`service-button ${filters.serviceType === type ? 'active' : ''}`}
-                  style={{
-                    flex: 1,
-                    padding: '0 clamp(0.75rem, 2vw, 1.25rem)',
-                    background: filters.serviceType === type ? theme.colors.white : 'transparent',
-                    color: filters.serviceType === type ? theme.colors.primary : theme.colors.gray[600],
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-                    fontWeight: filters.serviceType === type ? '600' : '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 'clamp(0.375rem, 1vw, 0.5rem)',
-                    boxShadow: filters.serviceType === type ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
-                    textAlign: 'center',
-                    minWidth: 0,
-                    whiteSpace: 'nowrap',
-                    height: '100%'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (filters.serviceType !== type) {
-                      e.currentTarget.style.background = `${theme.colors.gray[200]}`;
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (filters.serviceType !== type) {
-                      e.currentTarget.style.background = 'transparent';
-                    }
-                  }}
-                >
-                  <div className="service-button-content" style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    gap: 'clamp(0.375rem, 1.5vw, 0.625rem)',
-                    flexDirection: 'row',
-                    width: '100%'
-                  }}>
-                    {type === 'HOME_VISIT' && (
-                      <Home style={{ 
-                        width: 'clamp(1.125rem, 2.5vw, 1.25rem)', 
-                        height: 'clamp(1.125rem, 2.5vw, 1.25rem)',
-                        flexShrink: 0
-                      }} />
-                    )}
-                    {type === 'ONLINE' && (
-                      <Monitor style={{ 
-                        width: 'clamp(1.125rem, 2.5vw, 1.25rem)', 
-                        height: 'clamp(1.125rem, 2.5vw, 1.25rem)',
-                        flexShrink: 0
-                      }} />
-                    )}
-                    <span className="service-button-text" style={{ 
-                      fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-                      fontWeight: 'inherit',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}>
-                      {type === 'ALL' ? 'Any' : type === 'HOME_VISIT' ? 'Home' : 'Online'}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
+          {/* Service Type Tabs */}
+          <div style={{
+            display: 'flex',
+            backgroundColor: theme.colors.gray[100],
+            borderRadius: '8px',
+            padding: '0.25rem',
+            gap: '0.25rem'
+          }}>
+            {SERVICE_TYPES.map((service) => (
+              <button
+                key={service.id}
+                type="button"
+                onClick={() => handleInputChange('serviceType', service.id as 'ALL' | 'HOME_VISIT' | 'ONLINE')}
+                style={{
+                  padding: '0.625rem 1rem',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: filters.serviceType === service.id ? theme.colors.white : 'transparent',
+                  color: filters.serviceType === service.id ? theme.colors.primary : theme.colors.gray[600],
+                  fontSize: '0.875rem',
+                  fontWeight: filters.serviceType === service.id ? '600' : '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap',
+                  boxShadow: filters.serviceType === service.id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.375rem'
+                }}
+                onMouseEnter={(e) => {
+                  if (filters.serviceType !== service.id) {
+                    e.currentTarget.style.backgroundColor = theme.colors.white + '60';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (filters.serviceType !== service.id) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                {service.id === 'HOME_VISIT' && <Home style={{ width: '0.875rem', height: '0.875rem' }} />}
+                {service.id === 'ONLINE' && <Monitor style={{ width: '0.875rem', height: '0.875rem' }} />}
+                {service.id === 'ALL' && <Search style={{ width: '0.875rem', height: '0.875rem' }} />}
+                <span>{service.label}</span>
+              </button>
+            ))}
           </div>
         </div>
-
-        {/* Search Button */}
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: '100%',
-            background: loading ? theme.colors.gray[400] : theme.gradients.primary,
-            color: theme.colors.white,
-            fontWeight: '600',
-            fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-            padding: 'clamp(0.875rem, 2.5vw, 1rem)',
-            borderRadius: '12px',
-            border: 'none',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            transition: 'all 0.2s ease',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem'
-          }}
-          onMouseEnter={(e) => {
-            if (!loading) {
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = `0 8px 25px ${theme.colors.primary}40`;
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!loading) {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }
-          }}
-        >
-          {loading ? (
-            <>
-              <div style={{
-                width: 'clamp(1rem, 2.5vw, 1.25rem)',
-                height: 'clamp(1rem, 2.5vw, 1.25rem)',
-                border: '2px solid transparent',
-                borderTop: `2px solid ${theme.colors.white}`,
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite'
-              }}></div>
-              Searching...
-            </>
-          ) : (
-            <>
-              <Search style={{ 
-                width: 'clamp(1rem, 2.5vw, 1.25rem)', 
-                height: 'clamp(1rem, 2.5vw, 1.25rem)' 
-              }} />
-              Search Physiotherapists
-            </>
-          )}
-        </button>
       </form>
 
-      {/* Combined CSS for responsive layout and animations */}
+      {/* Subtle Pincode Prompt for Home Visits */}
+      {showPincodePrompt && filters.serviceType === 'HOME_VISIT' && (
+        <div style={{
+          backgroundColor: theme.colors.primary + '08',
+          border: `1px solid ${theme.colors.primary}20`,
+          borderRadius: '8px',
+          padding: '0.875rem 1rem',
+          marginBottom: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.875rem'
+        }}>
+          <MapPin style={{ width: '1rem', height: '1rem', color: theme.colors.primary }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '0.875rem', fontWeight: '500', color: theme.colors.text }}>
+              Add your location for accurate home visit results
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <button
+              onClick={getCurrentLocation}
+              style={{
+                padding: '0.375rem 0.75rem',
+                backgroundColor: 'transparent',
+                color: theme.colors.primary,
+                border: `1px solid ${theme.colors.primary}40`,
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.375rem',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = theme.colors.primary + '10';
+                e.currentTarget.style.borderColor = theme.colors.primary + '60';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.borderColor = theme.colors.primary + '40';
+              }}
+            >
+              <Navigation style={{ width: '0.75rem', height: '0.75rem' }} />
+              Use Location
+            </button>
+            <button
+              onClick={() => {
+                setShowPincodePrompt(false);
+                setPincodePromptDismissed(true);
+              }}
+              style={{
+                padding: '0.25rem',
+                backgroundColor: 'transparent',
+                color: theme.colors.gray[400],
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = theme.colors.gray[600];
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = theme.colors.gray[400];
+              }}
+            >
+              <X style={{ width: '0.875rem', height: '0.875rem' }} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Active Filters */}
+      {getActiveFilters().length > 0 && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          marginBottom: '1rem',
+          flexWrap: 'wrap'
+        }}>
+          <span style={{ fontSize: '0.875rem', color: theme.colors.gray[600], fontWeight: '500' }}>
+            Active filters:
+          </span>
+          {getActiveFilters().map((filter, index) => (
+            <div
+              key={index}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                backgroundColor: theme.colors.primary + '15',
+                color: theme.colors.primary,
+                padding: '0.375rem 0.75rem',
+                borderRadius: '20px',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                border: `1px solid ${theme.colors.primary}30`
+              }}
+            >
+              <span>{filter.label}</span>
+              <button
+                onClick={() => clearFilter(filter.type)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: theme.colors.primary,
+                  cursor: 'pointer',
+                  padding: '0',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <X style={{ width: '0.875rem', height: '0.875rem' }} />
+              </button>
+            </div>
+          ))}
+          {getActiveFilters().length > 1 && (
+            <button
+              onClick={clearAllFilters}
+              style={{
+                background: 'none',
+                border: `1px solid ${theme.colors.gray[400]}`,
+                color: theme.colors.gray[600],
+                cursor: 'pointer',
+                padding: '0.375rem 0.75rem',
+                borderRadius: '20px',
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}
+            >
+              Clear all
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Search capabilities hint */}
+      <div style={{
+        textAlign: 'center',
+        fontSize: '0.875rem',
+        color: theme.colors.gray[500]
+      }}>
+        Try: "Dr. Sharma", "400001", "back pain", "sports injury"
+      </div>
+
+      {/* Mobile Responsive CSS */}
       <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
-        }
-        
-        @keyframes pulse {
-          0% {
-            transform: scale(1);
-            opacity: 1;
-          }
-          50% {
-            transform: scale(1.2);
-            opacity: 0.8;
-          }
-          100% {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
-        
-        /* Animated placeholder styling */
-        :global(.search-input::placeholder) {
-          color: #6B7280;
-          transition: opacity 0.3s ease;
-        }
-        
-        /* Desktop layout - filters in one row */
-        @media (min-width: 769px) {
-          :global(.filters-row) {
-            flex-direction: row !important;
-            gap: clamp(1rem, 2vw, 1.5rem) !important;
-          }
-          
-          :global(.filters-row > div) {
-            flex: 1 !important;
-          }
-          
-          :global(.service-type-toggle) {
-            min-width: 335px !important;
-          }
-        }
-        
-        /* Tablet and mobile - filters stacked */
+        /* Mobile-first responsive design */
         @media (max-width: 768px) {
-          :global(.service-button-content) {
-            flex-direction: row !important;
-            gap: 0.375rem !important;
+          div[style*="grid-template-columns: 1fr auto"] {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
           }
-          :global(.service-button-text) {
-            font-size: 0.875rem !important;
-            line-height: 1.2 !important;
+          
+          input[type="text"] {
+            padding: 1rem 4rem 1rem 3rem !important;
+            font-size: 0.95rem !important;
           }
-          :global(.service-button) {
-            padding: 0 0.75rem !important;
+          
+          button[type="submit"] {
+            padding: 0.75rem 1.25rem !important;
+            font-size: 0.9rem !important;
           }
-        }
-        
-        @media (max-width: 600px) {
-          :global(.service-button-content) {
+          
+          /* Service type tabs on mobile */
+          div[style*="display: flex"][style*="backgroundColor"] {
+            width: 100% !important;
+            justify-content: space-between !important;
+          }
+          
+          div[style*="display: flex"][style*="backgroundColor"] button {
+            flex: 1 !important;
+            padding: 0.75rem 0.5rem !important;
+            font-size: 0.8rem !important;
+          }
+          
+          /* Specialty filter button */
+          button[type="button"][style*="Stethoscope"] {
+            padding: 0.875rem !important;
+            font-size: 0.9rem !important;
+          }
+          
+          /* Dropdown positioning */
+          div[style*="position: absolute"][style*="top: 100%"] {
+            position: fixed !important;
+            left: 1rem !important;
+            right: 1rem !important;
+            top: auto !important;
+            bottom: 1rem !important;
+            z-index: 9999 !important;
+          }
+          
+          /* Active filters on mobile */
+          div[style*="Active filters"] {
             flex-direction: column !important;
-            gap: 0.125rem !important;
+            align-items: flex-start !important;
+            gap: 0.5rem !important;
           }
-          :global(.service-button-text) {
-            font-size: 0.75rem !important;
-            line-height: 1 !important;
+          
+          /* Pincode prompt on mobile */
+          div[style*="Add your location"] {
+            flex-direction: column !important;
+            gap: 0.75rem !important;
+            text-align: center !important;
           }
-          :global(.service-button) {
-            padding: 0 0.5rem !important;
-          }
-          :global(.service-button svg) {
-            width: 1rem !important;
-            height: 1rem !important;
+          
+          div[style*="Add your location"] > div:last-child {
+            justify-content: center !important;
+            width: 100% !important;
           }
         }
         
-        @media (max-width: 400px) {
-          :global(.service-button-text) {
-            font-size: 0.7rem !important;
+        @media (max-width: 480px) {
+          div[style*="maxWidth: 900px"] {
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 1rem !important;
+            border-radius: 12px !important;
           }
-          :global(.service-button) {
-            padding: 0 0.375rem !important;
+          
+          input[type="text"] {
+            padding: 1rem 3.5rem 1rem 2.75rem !important;
+            font-size: 0.9rem !important;
           }
-          :global(.service-button svg) {
+          
+          button[type="submit"] {
+            padding: 0.625rem 1rem !important;
+            font-size: 0.875rem !important;
+            right: 0.375rem !important;
+          }
+          
+          /* Smaller filter icons on mobile */
+          svg {
             width: 0.875rem !important;
             height: 0.875rem !important;
+          }
+        }
+        
+        /* Click outside to close dropdowns */
+        @media (hover: none) {
+          div[style*="position: absolute"][style*="zIndex: 1000"] {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 90vw !important;
+            max-width: 400px !important;
+            max-height: 60vh !important;
+            border-radius: 12px !important;
           }
         }
       `}</style>
