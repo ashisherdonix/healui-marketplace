@@ -52,8 +52,22 @@ const SimpleSearchPage: React.FC = () => {
     serviceType: 'ALL'
   });
 
-  // Get physiotherapist IDs for batch availability
-  const physiotherapistIds = results.map(p => p.id);
+  // Get physiotherapist IDs from Redux store (homepage featured doctors) and current search results
+  const homepagePhysiotherapists = useSelector((state: RootState) => state.therapist.therapists);
+  const homepagePhysioIds = homepagePhysiotherapists.map((p: any) => p.id);
+  const searchResultIds = results.map(p => p.id);
+  
+  // Combine IDs from homepage featured doctors and current search results (prioritize search results)
+  const physiotherapistIds = searchResultIds.length > 0 
+    ? [...new Set([...searchResultIds, ...homepagePhysioIds])] // Remove duplicates, prioritize search results
+    : homepagePhysioIds; // Use homepage IDs if no search results
+  
+  console.log('🔍 Batch availability IDs:', {
+    searchResultIds: searchResultIds.length,
+    homepageIds: homepagePhysioIds.length,
+    totalIds: physiotherapistIds.length,
+    finalIds: physiotherapistIds
+  });
   
   // Use the batch availability hook
   const { 
@@ -84,9 +98,34 @@ const SimpleSearchPage: React.FC = () => {
 
   // Load featured physiotherapists and get location on page load
   useEffect(() => {
-    loadFeatured();
+    // Check if we already have physiotherapists from homepage in Redux store
+    if (homepagePhysiotherapists.length > 0 && results.length === 0) {
+      console.log('🔄 Using physiotherapists from homepage Redux store:', homepagePhysiotherapists.length);
+      // Convert the Redux therapists to the expected format for results
+      const convertedResults = homepagePhysiotherapists.map((therapist: any) => ({
+        id: therapist.id,
+        full_name: therapist.name || therapist.full_name,
+        specializations: therapist.specialization || therapist.specializations,
+        years_of_experience: therapist.years_experience || therapist.years_of_experience,
+        average_rating: therapist.rating || therapist.average_rating,
+        total_reviews: therapist.total_reviews,
+        practice_address: therapist.practice_address,
+        consultation_fee: therapist.consultation_fee,
+        home_visit_fee: therapist.home_visit_fee,
+        profile_photo_url: therapist.profile_photo_url,
+        bio: therapist.bio,
+        is_verified: therapist.is_verified,
+        home_visit_available: therapist.home_visit_available,
+        online_consultation_available: therapist.online_consultation_available,
+        gender: therapist.gender
+      }));
+      setResults(convertedResults);
+    } else {
+      // Load featured if not available in Redux store
+      loadFeatured();
+    }
     getUserLocation();
-  }, []);
+  }, [homepagePhysiotherapists.length]); // Re-run when homepage physiotherapists are loaded
 
   const getUserLocation = async () => {
     try {
@@ -192,22 +231,24 @@ const SimpleSearchPage: React.FC = () => {
   return (
     <div style={{ 
       minHeight: '100vh', 
-      background: theme.colors.background 
+      background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)'
     }}>
       <Header />
       
       {/* Search Interface */}
       <div style={{
-        background: theme.colors.white,
-        borderBottom: `1px solid ${theme.colors.gray[200]}`,
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(20px)',
+        borderBottom: 'none',
         position: 'sticky',
         top: 0,
-        zIndex: 50
+        zIndex: 50,
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
       }}>
         <div style={{
           maxWidth: '1000px',
           margin: '0 auto',
-          padding: 'clamp(1rem, 2.5vw, 1.5rem) clamp(1rem, 2.5vw, 1.5rem)'
+          padding: 'clamp(1.5rem, 3vw, 2rem) clamp(1rem, 2.5vw, 1.5rem)'
         }}>
           <SimpleSearchInterface
             onSearch={handleSearch}
@@ -223,26 +264,31 @@ const SimpleSearchPage: React.FC = () => {
       <main style={{
         maxWidth: '1000px',
         margin: '0 auto',
-        padding: 'clamp(1.5rem, 4vw, 2rem) clamp(1rem, 2.5vw, 1.5rem)'
+        padding: 'clamp(2rem, 4vw, 2.5rem) clamp(1rem, 2.5vw, 1.5rem)'
       }}>
         {/* Page Title */}
         {!hasSearched && !loading && (
           <div style={{
             textAlign: 'center',
-            marginBottom: 'clamp(2rem, 5vw, 3rem)'
+            marginBottom: 'clamp(2.5rem, 5vw, 3.5rem)'
           }}>
             <h1 style={{
-              fontSize: 'clamp(1.5rem, 4vw, 2rem)',
-              fontWeight: '700',
+              fontSize: 'clamp(1.75rem, 4vw, 2.25rem)',
+              fontWeight: '800',
               color: theme.colors.text,
-              marginBottom: 'clamp(0.5rem, 1.5vw, 0.75rem)'
+              marginBottom: 'clamp(0.75rem, 1.5vw, 1rem)',
+              background: 'linear-gradient(135deg, #1e5f79 0%, #0f4c75 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              letterSpacing: '-0.02em'
             }}>
               Find Expert Physiotherapists
             </h1>
             <p style={{
               color: theme.colors.gray[600],
-              fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-              lineHeight: '1.5'
+              fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
+              lineHeight: '1.6',
+              fontWeight: '500'
             }}>
               Search by name, pincode, specialty, or service type
             </p>
@@ -250,16 +296,20 @@ const SimpleSearchPage: React.FC = () => {
         )}
 
         {/* Search Results */}
-        <SimpleSearchResults
-          results={results}
-          loading={loading}
-          error={error}
-          onRetry={handleRetry}
-          onResultClick={handleResultClick}
-          batchAvailability={batchAvailability}
-          userLocation={userLocation}
-          availabilityLoading={availabilityLoading}
-        />
+        <div style={{
+          background: 'transparent'
+        }}>
+          <SimpleSearchResults
+            results={results}
+            loading={loading}
+            error={error}
+            onRetry={handleRetry}
+            onResultClick={handleResultClick}
+            batchAvailability={batchAvailability}
+            userLocation={userLocation}
+            availabilityLoading={availabilityLoading}
+          />
+        </div>
       </main>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import ApiManager from '@/services/api';
 import Header from '@/components/layout/Header';
 import SimpleSearchInterface from '@/components/search/SimpleSearchInterface';
@@ -12,7 +12,10 @@ import {
   Search, 
   Users,
   MapPin,
-  RefreshCw
+  RefreshCw,
+  Award,
+  CheckCircle2,
+  TrendingUp
 } from 'lucide-react';
 import { useAvailabilityBatch } from '@/hooks/useAvailabilityBatch';
 import { useSelector, useDispatch } from 'react-redux';
@@ -56,6 +59,246 @@ interface LocationData {
   timezone?: string;
   ip?: string;
 }
+
+// Animated Counter Component
+const AnimatedCounter: React.FC<{ target: number; duration: number }> = ({ target, duration }) => {
+  const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const counterRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (counterRef.current) {
+      observer.observe(counterRef.current);
+    }
+
+    return () => {
+      if (counterRef.current) {
+        observer.unobserve(counterRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const startTime = Date.now();
+    const endTime = startTime + duration;
+
+    const updateCount = () => {
+      const now = Date.now();
+      const progress = Math.min((now - startTime) / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const currentCount = Math.floor(target * easeOutQuart);
+      
+      setCount(currentCount);
+
+      if (progress < 1) {
+        requestAnimationFrame(updateCount);
+      }
+    };
+
+    requestAnimationFrame(updateCount);
+  }, [isVisible, target, duration]);
+
+  return (
+    <span ref={counterRef}>
+      {count.toLocaleString()}
+    </span>
+  );
+};
+
+// Memoized Available Today Section to prevent re-renders
+const AvailableTodaySection = memo(({ 
+  allPhysiotherapists, 
+  batchAvailability, 
+  userLocation, 
+  availabilityLoading,
+  loading,
+  error,
+  theme
+}: any) => {
+  return (
+    <div style={{ marginTop: 'clamp(2.5rem, 4vw, 3.5rem)' }}>
+      <h3 style={{
+        textAlign: 'center',
+        fontSize: 'clamp(1.25rem, 3vw, 1.5rem)',
+        fontWeight: '600',
+        color: theme.colors.text,
+        marginBottom: 'clamp(1rem, 2vw, 1.5rem)',
+        margin: '0 0 clamp(1rem, 2vw, 1.5rem) 0'
+      }}>
+        Available Today{userLocation?.city ? ` in ${userLocation.city}` : ''}
+      </h3>
+      
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: 'clamp(1rem, 2vw, 1.5rem)',
+        maxWidth: '900px',
+        margin: '0 auto'
+      }}>
+        {!loading && !error && allPhysiotherapists.length > 0 ? (
+          allPhysiotherapists.slice(0, 3).map((physio: any, index: number) => {
+            const availability = batchAvailability[physio.id];
+            return (
+              <CleanPhysiotherapistCard
+                key={physio.id || index}
+                physiotherapist={physio}
+                availability={availability}
+                userLocation={userLocation}
+                availabilityLoading={availabilityLoading}
+              />
+            );
+          })
+        ) : loading ? (
+          // Loading skeleton cards
+          [1, 2, 3].map((i) => (
+            <div key={i} style={{
+              background: theme.colors.white,
+              borderRadius: '12px',
+              padding: '1.5rem',
+              border: `1px solid ${theme.colors.gray[200]}`,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              minHeight: '320px'
+            }}>
+              {/* Loading skeleton content... */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '1rem',
+                marginBottom: '1rem'
+              }}>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  backgroundColor: theme.colors.gray[300],
+                  animation: 'pulse 1.5s ease-in-out infinite'
+                }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    height: '1.1rem',
+                    backgroundColor: theme.colors.gray[300],
+                    borderRadius: '4px',
+                    marginBottom: '0.5rem',
+                    animation: 'pulse 1.5s ease-in-out infinite'
+                  }} />
+                  <div style={{
+                    height: '0.875rem',
+                    backgroundColor: theme.colors.gray[200],
+                    borderRadius: '4px',
+                    width: '70%',
+                    animation: 'pulse 1.5s ease-in-out infinite'
+                  }} />
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          // Fallback
+          <div style={{
+            gridColumn: '1 / -1',
+            textAlign: 'center',
+            padding: '2rem',
+            color: theme.colors.gray[600]
+          }}>
+            Loading available physiotherapists...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
+
+AvailableTodaySection.displayName = 'AvailableTodaySection';
+
+// Memoized Trust Signals to prevent re-renders
+const TrustSignals = memo(({ theme }: any) => {
+  return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: '0.75rem',
+      marginTop: '1.5rem',
+      flexWrap: 'wrap'
+    }}>
+      {/* 35+ Years Excellence */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.25rem',
+        fontSize: '0.8125rem',
+        color: theme.colors.gray[700],
+        fontWeight: '600',
+        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
+      }}>
+        <Award style={{ 
+          width: '14px', 
+          height: '14px', 
+          color: theme.colors.primary
+        }} />
+        <span>35+ Years Excellence</span>
+      </div>
+
+      {/* Separator */}
+      <span style={{ color: theme.colors.gray[300] }}>•</span>
+
+      {/* Verified Doctors */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.25rem',
+        fontSize: '0.8125rem',
+        color: theme.colors.gray[700],
+        fontWeight: '600',
+        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
+      }}>
+        <CheckCircle2 style={{ 
+          width: '14px', 
+          height: '14px', 
+          color: theme.colors.success
+        }} />
+        <span>Verified Doctors</span>
+      </div>
+
+      {/* Separator */}
+      <span style={{ color: theme.colors.gray[300] }}>•</span>
+
+      {/* Available Today */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.25rem',
+        fontSize: '0.8125rem',
+        color: theme.colors.gray[700],
+        fontWeight: '600',
+        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
+      }}>
+        <div style={{
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          backgroundColor: theme.colors.success
+        }} />
+        <span>Available Today</span>
+      </div>
+    </div>
+  );
+});
+
+TrustSignals.displayName = 'TrustSignals';
 
 const HomePage: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Physiotherapist[]>([]);
@@ -556,162 +799,89 @@ const HomePage: React.FC = () => {
               />
             </div>
 
-            {/* Clean Trust Signals */}
+            {/* Ultra-Compact Trust Signals - Static */}
             <div style={{
               display: 'flex',
-              gap: 'clamp(1rem, 4vw, 3rem)',
               justifyContent: 'center',
               alignItems: 'center',
-              marginTop: 'clamp(2rem, 3vw, 3rem)',
+              gap: '0.75rem',
+              marginTop: '1.5rem',
               flexWrap: 'wrap',
-              opacity: animationPhase === 'complete' ? 1 : 0,
-              transform: animationPhase === 'complete' ? 'translateY(0)' : 'translateY(10px)',
-              transition: 'all 0.4s ease-in-out 0.4s'
+              opacity: 1,
+              transition: 'none'
             }}>
+              {/* 35+ Years Excellence */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                color: theme.colors.gray[600],
-                fontWeight: '500'
+                gap: '0.25rem',
+                fontSize: '0.8125rem',
+                color: theme.colors.gray[700],
+                fontWeight: '600',
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
               }}>
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  backgroundColor: theme.colors.success,
-                  marginRight: '0.25rem'
+                <Award style={{ 
+                  width: '14px', 
+                  height: '14px', 
+                  color: theme.colors.primary
                 }} />
-                <span>150,000+ patients treated</span>
+                <span>35+ Years Excellence</span>
               </div>
+
+              {/* Separator */}
+              <span style={{ color: theme.colors.gray[300] }}>•</span>
+
+              {/* Verified Doctors */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                color: theme.colors.gray[600],
-                fontWeight: '500'
+                gap: '0.25rem',
+                fontSize: '0.8125rem',
+                color: theme.colors.gray[700],
+                fontWeight: '600',
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
               }}>
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  backgroundColor: theme.colors.success,
-                  marginRight: '0.25rem'
+                <CheckCircle2 style={{ 
+                  width: '14px', 
+                  height: '14px', 
+                  color: theme.colors.success
                 }} />
-                <span>Verified professionals</span>
+                <span>Verified Doctors</span>
               </div>
+
+              {/* Separator */}
+              <span style={{ color: theme.colors.gray[300] }}>•</span>
+
+              {/* Available Today */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                color: theme.colors.gray[600],
-                fontWeight: '500'
+                gap: '0.25rem',
+                fontSize: '0.8125rem',
+                color: theme.colors.gray[700],
+                fontWeight: '600',
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
               }}>
                 <div style={{
-                  width: '8px',
-                  height: '8px',
+                  width: '6px',
+                  height: '6px',
                   borderRadius: '50%',
-                  backgroundColor: theme.colors.success,
-                  marginRight: '0.25rem'
+                  backgroundColor: theme.colors.success
                 }} />
-                <span>Available today</span>
+                <span>Available Today</span>
               </div>
             </div>
 
-            {/* Available Today Section */}
-            <div style={{
-              marginTop: 'clamp(2.5rem, 4vw, 3.5rem)'
-            }}>
-              <h3 style={{
-                textAlign: 'center',
-                fontSize: 'clamp(1.25rem, 3vw, 1.5rem)',
-                fontWeight: '600',
-                color: theme.colors.text,
-                marginBottom: 'clamp(1rem, 2vw, 1.5rem)',
-                margin: '0 0 clamp(1rem, 2vw, 1.5rem) 0'
-              }}>
-                Available Today{userLocation?.city ? ` in ${userLocation.city}` : ''}
-              </h3>
-              
-              {/* Available Today Physiotherapists Grid */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: 'clamp(1rem, 2vw, 1.5rem)',
-                maxWidth: '900px',
-                margin: '0 auto'
-              }}>
-                {!loading && !error && allPhysiotherapists.length > 0 ? (
-                  allPhysiotherapists.slice(0, 3).map((physio, index) => {
-                    const availability = batchAvailability[physio.id];
-                    return (
-                      <CleanPhysiotherapistCard
-                        key={physio.id || index}
-                        physiotherapist={physio}
-                        availability={availability}
-                        userLocation={userLocation}
-                        availabilityLoading={availabilityLoading}
-                      />
-                    );
-                  })
-                ) : loading ? (
-                  // Loading skeleton cards
-                  [1, 2, 3].map((i) => (
-                    <div key={i} style={{
-                      background: theme.colors.white,
-                      borderRadius: '12px',
-                      padding: '1.5rem',
-                      border: `1px solid ${theme.colors.gray[200]}`,
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '1rem',
-                        marginBottom: '1rem'
-                      }}>
-                        <div style={{
-                          width: '60px',
-                          height: '60px',
-                          borderRadius: '50%',
-                          backgroundColor: theme.colors.gray[300],
-                          animation: 'pulse 1.5s ease-in-out infinite'
-                        }} />
-                        <div style={{ flex: 1 }}>
-                          <div style={{
-                            height: '1.1rem',
-                            backgroundColor: theme.colors.gray[300],
-                            borderRadius: '4px',
-                            marginBottom: '0.5rem',
-                            animation: 'pulse 1.5s ease-in-out infinite'
-                          }} />
-                          <div style={{
-                            height: '0.875rem',
-                            backgroundColor: theme.colors.gray[200],
-                            borderRadius: '4px',
-                            width: '70%',
-                            animation: 'pulse 1.5s ease-in-out infinite'
-                          }} />
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  // Fallback static cards when no data
-                  <div style={{
-                    gridColumn: '1 / -1',
-                    textAlign: 'center',
-                    padding: '2rem',
-                    color: theme.colors.gray[600]
-                  }}>
-                    Loading available physiotherapists...
-                  </div>
-                )}
-              </div>
-            </div>
+            {/* Memoized Available Today Section - No re-renders on hero text change */}
+            <AvailableTodaySection
+              allPhysiotherapists={allPhysiotherapists}
+              batchAvailability={batchAvailability}
+              userLocation={userLocation}
+              availabilityLoading={availabilityLoading}
+              loading={loading}
+              error={error}
+              theme={theme}
+            />
 
             {/* Real Social Proof */}
             <div style={{
@@ -770,24 +940,39 @@ const HomePage: React.FC = () => {
                 line-height: 1.5 !important;
               }
               
-              /* Trust signals stack on mobile */
-              div[style*="gap: clamp(1rem, 4vw, 3rem)"] {
-                flex-direction: column !important;
-                gap: 1rem !important;
-                align-items: center !important;
-                max-width: 300px !important;
-                margin: clamp(2rem, 3vw, 3rem) auto 0 !important;
+              /* Ultra-compact trust signals on mobile */
+              div[style*="gap: 0.75rem"][style*="marginTop: 1.5rem"] {
+                gap: 0.5rem !important;
+                margin-top: 1rem !important;
+                justify-content: center !important;
               }
               
-              /* Trust signal items larger on mobile */
-              div[style*="gap: clamp(1rem, 4vw, 3rem)"] > div {
-                font-size: 1rem !important;
-                padding: 0.75rem 1rem !important;
-                background: rgba(255,255,255,0.9) !important;
-                border-radius: 8px !important;
-                width: 100% !important;
-                justify-content: center !important;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+              /* Trust signal items on mobile */
+              div[style*="fontSize: 0.8125rem"] {
+                font-size: 0.75rem !important;
+              }
+              
+              /* Even smaller icons on mobile */
+              svg[style*="width: 14px"] {
+                width: 12px !important;
+                height: 12px !important;
+              }
+              
+              /* Tiny dot indicator */
+              div[style*="width: 6px"] {
+                width: 5px !important;
+                height: 5px !important;
+              }
+              
+              /* Hide separators on very small screens */
+              @media (max-width: 360px) {
+                span[style*="color: theme.colors.gray[300]"] {
+                  display: none !important;
+                }
+                
+                div[style*="gap: 0.75rem"] {
+                  gap: 0.75rem !important;
+                }
               }
             }
             

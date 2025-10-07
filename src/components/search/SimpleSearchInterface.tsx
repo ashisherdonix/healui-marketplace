@@ -177,7 +177,7 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
 
   // Clear search capabilities placeholder
   const getPlaceholderText = () => {
-    return "Search by name, pincode, or condition";
+    return "Search by name or pincode";
   };
 
   const getSearchIcon = () => {
@@ -236,16 +236,16 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
     return (
       <div style={{
         background: theme.colors.white,
-        borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+        borderRadius: '16px',
+        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
         border: `1px solid ${theme.colors.gray[200]}`,
-        padding: 'clamp(1rem, 2vw, 1.5rem)',
+        padding: '1.5rem',
         width: '100%',
         maxWidth: '600px',
         margin: '0 auto'
       }}>
         
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'center' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'stretch' }}>
           {/* Single Search Input */}
           <div style={{ position: 'relative', flex: 1 }}>
             <div style={{
@@ -269,23 +269,28 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
               placeholder={getPlaceholderText()}
               style={{
                 fontSize: '1rem',
-                padding: '0.875rem 1rem 0.875rem 2.75rem',
-                border: `1px solid ${theme.colors.gray[300]}`,
-                borderRadius: '8px',
+                padding: '1rem 1.5rem 1rem 3.5rem',
+                border: `2px solid ${theme.colors.gray[300]}`,
+                borderRadius: '12px',
                 backgroundColor: theme.colors.white,
                 color: theme.colors.text,
                 outline: 'none',
-                transition: 'all 0.2s ease',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 width: '100%',
-                fontWeight: '400'
+                fontWeight: '400',
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+                minHeight: '52px',
+                textOverflow: 'ellipsis'
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = theme.colors.primary;
-                e.target.style.boxShadow = `0 0 0 2px ${theme.colors.primary}20`;
+                e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                e.target.style.transform = 'scale(1.01)';
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = theme.colors.gray[300];
                 e.target.style.boxShadow = 'none';
+                e.target.style.transform = 'scale(1)';
               }}
               className="search-input"
             />
@@ -298,23 +303,30 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
             style={{
               background: loading ? theme.colors.gray[400] : theme.colors.primary,
               color: theme.colors.white,
-              fontWeight: '500',
-              fontSize: '0.95rem',
-              padding: '0.875rem 1.5rem',
-              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '1rem',
+              padding: '1rem 2rem',
+              borderRadius: '12px',
               border: 'none',
               cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              whiteSpace: 'nowrap',
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+              minHeight: '52px',
+              boxShadow: '0 2px 8px rgba(30, 95, 121, 0.2)'
             }}
             onMouseEnter={(e) => {
               if (!loading) {
                 e.currentTarget.style.backgroundColor = theme.colors.primaryDark;
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(30, 95, 121, 0.3)';
               }
             }}
             onMouseLeave={(e) => {
               if (!loading) {
                 e.currentTarget.style.backgroundColor = theme.colors.primary;
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(30, 95, 121, 0.2)';
               }
             }}
           >
@@ -334,7 +346,16 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
 
         {/* Mobile Responsive CSS for simple version */}
         <style jsx>{`
+          /* Container adjustments for mobile */
           @media (max-width: 768px) {
+            div[style*="maxWidth: 600px"] {
+              max-width: 100% !important;
+              margin: 0 !important;
+              padding: 1rem !important;
+              border-radius: 12px !important;
+              box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04) !important;
+            }
+            
             form {
               flex-direction: column !important;
               gap: 1rem !important;
@@ -342,29 +363,67 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
             
             button[type="submit"] {
               width: 100% !important;
-              padding: 1.25rem 1.5rem !important;
-              font-size: 1.1rem !important;
-              min-height: 48px !important;
+              padding: 1rem 1.5rem !important;
+              font-size: 1rem !important;
+              min-height: 52px !important;
               border-radius: 12px !important;
+              margin: 0 !important;
             }
             
             input[type="text"] {
               font-size: 1rem !important;
-              padding: 1.25rem 1rem 1.25rem 3rem !important;
-              min-height: 48px !important;
+              padding: 1rem 1.5rem 1rem 3.5rem !important;
+              min-height: 52px !important;
               border-radius: 12px !important;
+              width: 100% !important;
+              box-sizing: border-box !important;
+            }
+            
+            /* Search icon positioning */
+            div[style*="position: absolute"] {
+              left: 1.25rem !important;
+            }
+            
+            /* Hint text */
+            div[style*="Try:"] {
+              font-size: 0.875rem !important;
+              margin-top: 1rem !important;
             }
           }
           
           @media (max-width: 480px) {
+            div[style*="maxWidth: 600px"] {
+              padding: 1rem !important;
+              margin: 0 0.5rem !important;
+            }
+            
             input[type="text"] {
-              font-size: 0.9rem !important;
-              padding: 0.875rem 0.875rem 0.875rem 2.75rem !important;
+              font-size: 1rem !important;
+              padding: 1rem 1.25rem 1rem 3.25rem !important;
+            }
+            
+            /* Search icon positioning for small mobile */
+            div[style*="position: absolute"] {
+              left: 1.125rem !important;
             }
             
             button[type="submit"] {
-              font-size: 0.9rem !important;
-              padding: 0.875rem 1.25rem !important;
+              font-size: 1rem !important;
+              padding: 1rem 1.5rem !important;
+            }
+            
+            /* Search icon smaller */
+            svg {
+              width: 1.125rem !important;
+              height: 1.125rem !important;
+            }
+          }
+          
+          /* Ensure full width on very small screens */
+          @media (max-width: 320px) {
+            div[style*="maxWidth: 600px"] {
+              margin: 0 !important;
+              border-radius: 8px !important;
             }
           }
         `}</style>
@@ -375,11 +434,7 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
   // Full search page version with filters
   return (
     <div style={{
-      background: theme.colors.white,
-      borderRadius: '16px',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-      border: `1px solid ${theme.colors.gray[200]}`,
-      padding: 'clamp(1.25rem, 2.5vw, 2rem)',
+      background: 'transparent',
       width: '100%',
       maxWidth: '900px',
       margin: '0 auto'
@@ -390,7 +445,7 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
         <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
           <div style={{
             position: 'absolute',
-            left: '1rem',
+            left: '1.25rem',
             top: '50%',
             transform: 'translateY(-50%)',
             pointerEvents: 'none',
@@ -410,22 +465,24 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
             style={{
               fontSize: '1rem',
               padding: '1rem 5rem 1rem 3rem',
-              border: `2px solid ${theme.colors.gray[300]}`,
-              borderRadius: '12px',
+              border: 'none',
+              borderRadius: '16px',
               backgroundColor: theme.colors.white,
               color: theme.colors.text,
               outline: 'none',
-              transition: 'all 0.2s ease',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               width: '100%',
-              fontWeight: '400'
+              fontWeight: '500',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+              minHeight: '56px'
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = theme.colors.primary;
-              e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+              e.target.style.boxShadow = `0 8px 32px rgba(30, 95, 121, 0.15)`;
+              e.target.style.transform = 'translateY(-2px)';
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = theme.colors.gray[300];
-              e.target.style.boxShadow = 'none';
+              e.target.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+              e.target.style.transform = 'translateY(0)';
             }}
           />
           
@@ -438,16 +495,32 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
               right: '0.5rem',
               top: '50%',
               transform: 'translateY(-50%)',
-              background: loading ? theme.colors.gray[400] : theme.colors.primary,
+              background: loading ? theme.colors.gray[400] : 'linear-gradient(135deg, #1e5f79 0%, #0f4c75 100%)',
               color: theme.colors.white,
               fontWeight: '600',
               fontSize: '0.95rem',
               padding: '0.75rem 1.5rem',
-              borderRadius: '8px',
+              borderRadius: '12px',
               border: 'none',
               cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 4px 16px rgba(30, 95, 121, 0.25)',
+              minHeight: '44px'
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #0f4c75 0%, #1e5f79 100%)';
+                e.currentTarget.style.transform = 'translateY(-50%) scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(30, 95, 121, 0.35)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #1e5f79 0%, #0f4c75 100%)';
+                e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(30, 95, 121, 0.25)';
+              }
             }}
           >
             {loading ? 'Searching...' : 'Search'}
@@ -456,62 +529,79 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
 
         {/* Enhanced Filters Row */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr auto',
-          gap: '1.5rem',
-          marginBottom: '1rem',
-          alignItems: 'start'
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+          marginBottom: '1rem'
         }}>
           
-          {/* Specialty Filter */}
-          <div style={{ position: 'relative' }}>
-            <button
-              type="button"
-              onClick={() => setShowSpecialtyDropdown(!showSpecialtyDropdown)}
-              style={{
-                width: '100%',
-                padding: '0.875rem 1rem',
-                border: `2px solid ${filters.specialty ? theme.colors.primary : theme.colors.gray[300]}`,
-                borderRadius: '8px',
-                backgroundColor: theme.colors.white,
-                color: filters.specialty ? theme.colors.primary : theme.colors.gray[600],
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Stethoscope style={{ width: '1rem', height: '1rem' }} />
-                <span>{getSpecialtyDisplayName(filters.specialty)}</span>
-              </div>
-              <ChevronDown style={{ 
-                width: '1rem', 
-                height: '1rem',
-                transform: showSpecialtyDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s ease'
-              }} />
+          {/* Filters Container */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '0.75rem',
+            alignItems: 'stretch'
+          }}>
+            {/* Specialty Filter */}
+            <div style={{ position: 'relative', flex: 1 }}>
+              <button
+                type="button"
+                onClick={() => setShowSpecialtyDropdown(!showSpecialtyDropdown)}
+                style={{
+                  width: '100%',
+                  padding: '0.875rem 1rem',
+                  border: 'none',
+                  borderRadius: '12px',
+                  backgroundColor: filters.specialty ? theme.colors.primary + '15' : theme.colors.gray[50],
+                  color: filters.specialty ? theme.colors.primary : theme.colors.gray[700],
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!filters.specialty) {
+                    e.currentTarget.style.backgroundColor = theme.colors.gray[100];
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!filters.specialty) {
+                    e.currentTarget.style.backgroundColor = theme.colors.gray[50];
+                  }
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Stethoscope style={{ width: '1rem', height: '1rem' }} />
+                  <span>{getSpecialtyDisplayName(filters.specialty)}</span>
+                </div>
+                <ChevronDown style={{ 
+                  width: '1rem', 
+                  height: '1rem',
+                  transform: showSpecialtyDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s ease'
+                }} />
             </button>
             
-            {/* Specialty Dropdown */}
-            {showSpecialtyDropdown && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-                backgroundColor: theme.colors.white,
-                border: `1px solid ${theme.colors.gray[300]}`,
-                borderRadius: '8px',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                marginTop: '0.25rem',
-                maxHeight: '300px',
-                overflowY: 'auto'
-              }}>
+              {/* Specialty Dropdown */}
+              {showSpecialtyDropdown && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  zIndex: 1000,
+                  backgroundColor: theme.colors.white,
+                  border: 'none',
+                  borderRadius: '12px',
+                  boxShadow: '0 12px 32px rgba(0,0,0,0.12)',
+                  marginTop: '0.5rem',
+                  maxHeight: '280px',
+                  overflowY: 'auto'
+                }}>
                 {ALL_SPECIALTIES.map((specialty) => (
                   <div
                     key={specialty.id}
@@ -543,56 +633,60 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
                     <span>{specialty.label}</span>
                   </div>
                 ))}
-              </div>
-            )}
-          </div>
+                </div>
+              )}
+            </div>
 
-          {/* Service Type Tabs */}
-          <div style={{
-            display: 'flex',
-            backgroundColor: theme.colors.gray[100],
-            borderRadius: '8px',
-            padding: '0.25rem',
-            gap: '0.25rem'
-          }}>
-            {SERVICE_TYPES.map((service) => (
-              <button
-                key={service.id}
-                type="button"
-                onClick={() => handleInputChange('serviceType', service.id as 'ALL' | 'HOME_VISIT' | 'ONLINE')}
-                style={{
-                  padding: '0.625rem 1rem',
-                  border: 'none',
-                  borderRadius: '6px',
-                  backgroundColor: filters.serviceType === service.id ? theme.colors.white : 'transparent',
-                  color: filters.serviceType === service.id ? theme.colors.primary : theme.colors.gray[600],
-                  fontSize: '0.875rem',
-                  fontWeight: filters.serviceType === service.id ? '600' : '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  whiteSpace: 'nowrap',
-                  boxShadow: filters.serviceType === service.id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.375rem'
-                }}
-                onMouseEnter={(e) => {
-                  if (filters.serviceType !== service.id) {
-                    e.currentTarget.style.backgroundColor = theme.colors.white + '60';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (filters.serviceType !== service.id) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }
-                }}
-              >
-                {service.id === 'HOME_VISIT' && <Home style={{ width: '0.875rem', height: '0.875rem' }} />}
-                {service.id === 'ONLINE' && <Monitor style={{ width: '0.875rem', height: '0.875rem' }} />}
-                {service.id === 'ALL' && <Search style={{ width: '0.875rem', height: '0.875rem' }} />}
-                <span>{service.label}</span>
-              </button>
-            ))}
+            {/* Service Type Tabs */}
+            <div style={{
+              display: 'flex',
+              backgroundColor: theme.colors.gray[50],
+              borderRadius: '12px',
+              padding: '0.25rem',
+              gap: '0.25rem',
+              minWidth: 'fit-content',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+            }}>
+              {SERVICE_TYPES.map((service) => (
+                <button
+                  key={service.id}
+                  type="button"
+                  onClick={() => handleInputChange('serviceType', service.id as 'ALL' | 'HOME_VISIT' | 'ONLINE')}
+                  style={{
+                    padding: '0.625rem 0.875rem',
+                    border: 'none',
+                    borderRadius: '8px',
+                    backgroundColor: filters.serviceType === service.id ? theme.colors.white : 'transparent',
+                    color: filters.serviceType === service.id ? theme.colors.primary : theme.colors.gray[600],
+                    fontSize: '0.8rem',
+                    fontWeight: filters.serviceType === service.id ? '600' : '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    whiteSpace: 'nowrap',
+                    boxShadow: filters.serviceType === service.id ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.375rem',
+                    minWidth: 'fit-content'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (filters.serviceType !== service.id) {
+                      e.currentTarget.style.backgroundColor = theme.colors.white + '60';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (filters.serviceType !== service.id) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }
+                  }}
+                >
+                  {service.id === 'HOME_VISIT' && <Home style={{ width: '0.875rem', height: '0.875rem' }} />}
+                  {service.id === 'ONLINE' && <Monitor style={{ width: '0.875rem', height: '0.875rem' }} />}
+                  {service.id === 'ALL' && <Search style={{ width: '0.875rem', height: '0.875rem' }} />}
+                  <span>{service.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </form>
@@ -749,97 +843,114 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
       <style jsx>{`
         /* Mobile-first responsive design */
         @media (max-width: 768px) {
-          div[style*="grid-template-columns: 1fr auto"] {
-            grid-template-columns: 1fr !important;
-            gap: 1rem !important;
+          /* Stack filters vertically on mobile */
+          div[style*="flex-direction: row"] {
+            flex-direction: column !important;
+            gap: 0.75rem !important;
           }
           
+          /* Full width for search input on mobile */
           input[type="text"] {
             padding: 1rem 4rem 1rem 3rem !important;
-            font-size: 0.95rem !important;
+            font-size: 1rem !important;
+            border-radius: 16px !important;
           }
           
           button[type="submit"] {
-            padding: 0.75rem 1.25rem !important;
+            padding: 0.875rem 1.5rem !important;
             font-size: 0.9rem !important;
+            border-radius: 12px !important;
           }
           
-          /* Service type tabs on mobile */
-          div[style*="display: flex"][style*="backgroundColor"] {
+          /* Service type tabs responsive */
+          div[style*="minWidth: fit-content"] {
             width: 100% !important;
             justify-content: space-between !important;
           }
           
-          div[style*="display: flex"][style*="backgroundColor"] button {
+          div[style*="minWidth: fit-content"] button {
             flex: 1 !important;
+            min-width: auto !important;
             padding: 0.75rem 0.5rem !important;
-            font-size: 0.8rem !important;
+            font-size: 0.75rem !important;
+            gap: 0.25rem !important;
           }
           
-          /* Specialty filter button */
-          button[type="button"][style*="Stethoscope"] {
-            padding: 0.875rem !important;
+          /* Specialty filter responsive */
+          div[style*="flex: 1"] button {
+            padding: 1rem !important;
             font-size: 0.9rem !important;
+            border-radius: 16px !important;
           }
           
-          /* Dropdown positioning */
-          div[style*="position: absolute"][style*="top: 100%"] {
+          /* Dropdown positioning for mobile */
+          div[style*="position: absolute"][style*="zIndex: 1000"] {
             position: fixed !important;
             left: 1rem !important;
             right: 1rem !important;
             top: auto !important;
-            bottom: 1rem !important;
+            bottom: 2rem !important;
             z-index: 9999 !important;
+            border-radius: 16px !important;
+            max-height: 50vh !important;
           }
           
-          /* Active filters on mobile */
+          /* Active filters responsive */
           div[style*="Active filters"] {
             flex-direction: column !important;
             align-items: flex-start !important;
-            gap: 0.5rem !important;
+            gap: 0.75rem !important;
           }
           
-          /* Pincode prompt on mobile */
+          /* Pincode prompt responsive */
           div[style*="Add your location"] {
             flex-direction: column !important;
-            gap: 0.75rem !important;
+            gap: 1rem !important;
             text-align: center !important;
-          }
-          
-          div[style*="Add your location"] > div:last-child {
-            justify-content: center !important;
-            width: 100% !important;
+            padding: 1rem !important;
+            border-radius: 16px !important;
           }
         }
         
         @media (max-width: 480px) {
-          div[style*="maxWidth: 900px"] {
-            max-width: 100% !important;
-            margin: 0 !important;
-            padding: 1rem !important;
-            border-radius: 12px !important;
-          }
-          
+          /* Extra small screens */
           input[type="text"] {
             padding: 1rem 3.5rem 1rem 2.75rem !important;
-            font-size: 0.9rem !important;
+            font-size: 1rem !important;
           }
           
           button[type="submit"] {
-            padding: 0.625rem 1rem !important;
+            padding: 0.75rem 1.25rem !important;
             font-size: 0.875rem !important;
-            right: 0.375rem !important;
+            right: 0.5rem !important;
           }
           
-          /* Smaller filter icons on mobile */
+          /* Compact service tabs */
+          div[style*="minWidth: fit-content"] button {
+            padding: 0.625rem 0.375rem !important;
+            font-size: 0.7rem !important;
+          }
+          
+          /* Compact specialty filter */
+          div[style*="flex: 1"] button {
+            padding: 0.875rem !important;
+          }
+          
+          /* Smaller icons */
           svg {
             width: 0.875rem !important;
             height: 0.875rem !important;
           }
         }
         
-        /* Click outside to close dropdowns */
-        @media (hover: none) {
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+          /* Larger touch targets */
+          button {
+            min-height: 44px !important;
+          }
+          
+          /* Full screen dropdown on touch devices */
           div[style*="position: absolute"][style*="zIndex: 1000"] {
             position: fixed !important;
             top: 50% !important;
@@ -847,8 +958,8 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
             transform: translate(-50%, -50%) !important;
             width: 90vw !important;
             max-width: 400px !important;
-            max-height: 60vh !important;
-            border-radius: 12px !important;
+            max-height: 70vh !important;
+            border-radius: 20px !important;
           }
         }
       `}</style>

@@ -380,33 +380,31 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
   return (
     <div style={{
       backgroundColor: theme.colors.white,
-      borderRadius: '12px',
-      border: `1px solid ${theme.colors.gray[200]}`,
+      borderRadius: '20px',
+      border: 'none',
       overflow: 'hidden',
-      transition: 'all 0.2s ease',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       cursor: 'pointer',
       height: 'auto',
       display: 'flex',
       flexDirection: 'column',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
       position: 'relative'
     }}
     onClick={handleBookAppointment}
     onMouseEnter={(e) => {
-      e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.12)';
-      e.currentTarget.style.transform = 'translateY(-2px)';
-      e.currentTarget.style.borderColor = theme.colors.primary;
+      e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.15)';
+      e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
     }}
     onMouseLeave={(e) => {
-      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)';
-      e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.borderColor = theme.colors.gray[200];
+      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+      e.currentTarget.style.transform = 'translateY(0) scale(1)';
     }}>
 
       {/* Doctor Profile Header */}
       <div style={{ 
-        padding: '20px 20px 16px 20px',
-        background: theme.colors.white
+        padding: '24px 24px 20px 24px',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)'
       }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
           {/* Profile Image */}
@@ -415,10 +413,12 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
             height: '72px',
             borderRadius: '50%',
             overflow: 'hidden',
-            backgroundColor: theme.colors.gray[100],
+            backgroundColor: theme.colors.gray[50],
             flexShrink: 0,
-            border: `3px solid ${theme.colors.white}`,
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+            border: `4px solid ${theme.colors.white}`,
+            boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
             position: 'relative'
           }}>
             {physiotherapist.profile_photo_url ? (
@@ -436,7 +436,7 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: theme.colors.gray[200]
+                backgroundColor: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)'
               }}>
                 <User style={{ width: '32px', height: '32px', color: theme.colors.gray[500] }} />
               </div>
@@ -452,7 +452,8 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
                 height: '22px',
                 borderRadius: '50%',
                 backgroundColor: theme.colors.success,
-                border: `3px solid ${theme.colors.white}`,
+                border: `4px solid ${theme.colors.white}`,
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -531,7 +532,7 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
       {/* Specializations Section */}
       {physiotherapist.specializations && physiotherapist.specializations.length > 0 && (
         <div style={{ 
-          padding: '0 20px 18px 20px'
+          padding: '0 24px 20px 24px'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -543,13 +544,14 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
               <span 
                 key={index}
                 style={{
-                  backgroundColor: theme.colors.gray[100],
+                  backgroundColor: theme.colors.gray[50],
                   color: theme.colors.gray[700],
-                  padding: '6px 12px',
-                  borderRadius: '20px',
+                  padding: '8px 14px',
+                  borderRadius: '24px',
                   fontSize: '12px',
-                  fontWeight: '500',
-                  border: `1px solid ${theme.colors.gray[200]}`,
+                  fontWeight: '600',
+                  border: 'none',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
                   lineHeight: '1.2'
                 }}
               >
@@ -575,9 +577,10 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
 
       {/* Availability Section */}
       <div style={{ 
-        padding: '16px 20px',
-        borderTop: `1px solid ${theme.colors.gray[200]}`,
-        backgroundColor: theme.colors.gray[25] || '#fafafa'
+        padding: '20px 24px',
+        borderTop: 'none',
+        backgroundColor: 'rgba(248, 250, 252, 0.8)',
+        backdropFilter: 'blur(10px)'
       }}>
         {/* Availability Status */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -630,7 +633,7 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
       </div>
 
       {/* Pricing Cards Section */}
-      <div style={{ padding: '0 20px 16px 20px' }}>
+      <div style={{ padding: '0 24px 20px 24px' }}>
         <div style={{ 
           display: 'grid', 
           gridTemplateColumns: (availability?.pricing?.home_visit && availability?.pricing?.online) 
@@ -642,11 +645,17 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
           {availability?.pricing?.home_visit && (
             <div style={{
               backgroundColor: theme.colors.white,
-              border: `2px solid ${isInGreenZone && discount ? theme.colors.success : theme.colors.gray[200]}`,
-              borderRadius: '12px',
-              padding: '16px',
+              border: 'none',
+              borderRadius: '16px',
+              padding: '20px',
               position: 'relative',
-              textAlign: 'center'
+              textAlign: 'center',
+              boxShadow: isInGreenZone && discount 
+                ? '0 4px 20px rgba(16, 185, 129, 0.15)' 
+                : '0 4px 16px rgba(0, 0, 0, 0.08)',
+              background: isInGreenZone && discount 
+                ? 'linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%)'
+                : theme.colors.white
             }}>
               {/* Discount Badge */}
               {isInGreenZone && discount && (
@@ -728,11 +737,12 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
           {availability?.pricing?.online && (
             <div style={{
               backgroundColor: theme.colors.white,
-              border: `2px solid ${theme.colors.gray[200]}`,
-              borderRadius: '12px',
-              padding: '16px',
+              border: 'none',
+              borderRadius: '16px',
+              padding: '20px',
               textAlign: 'center',
-              position: 'relative'
+              position: 'relative',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)'
             }}>
               <div style={{ marginBottom: '8px' }}>
                 <Video style={{ 
@@ -775,7 +785,7 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
       </div>
 
       {/* Enhanced CTA Button */}
-      <div style={{ padding: '0 20px 20px 20px' }}>
+      <div style={{ padding: '0 24px 24px 24px' }}>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -783,32 +793,33 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
           }}
           style={{
             width: '100%',
-            padding: '14px 20px',
-            minHeight: '52px',
+            padding: '16px 24px',
+            minHeight: '56px',
             backgroundColor: theme.colors.primary,
             color: theme.colors.white,
             border: 'none',
-            borderRadius: '10px',
+            borderRadius: '16px',
             fontSize: '16px',
             fontWeight: '600',
             cursor: 'pointer',
-            transition: 'all 0.2s ease',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px',
-            boxShadow: '0 4px 12px rgba(30, 95, 121, 0.25)',
-            letterSpacing: '0.01em'
+            gap: '10px',
+            boxShadow: '0 8px 24px rgba(30, 95, 121, 0.25)',
+            letterSpacing: '0.01em',
+            background: 'linear-gradient(135deg, #1e5f79 0%, #0f4c75 100%)'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = theme.colors.primaryDark;
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            e.currentTarget.style.boxShadow = '0 6px 16px rgba(30, 95, 121, 0.35)';
+            e.currentTarget.style.background = 'linear-gradient(135deg, #0f4c75 0%, #1e5f79 100%)';
+            e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+            e.currentTarget.style.boxShadow = '0 12px 32px rgba(30, 95, 121, 0.4)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = theme.colors.primary;
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(30, 95, 121, 0.25)';
+            e.currentTarget.style.background = 'linear-gradient(135deg, #1e5f79 0%, #0f4c75 100%)';
+            e.currentTarget.style.transform = 'translateY(0) scale(1)';
+            e.currentTarget.style.boxShadow = '0 8px 24px rgba(30, 95, 121, 0.25)';
           }}
         >
           {todayAvailability ? (
@@ -823,6 +834,82 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
           )}
         </button>
       </div>
+      
+      {/* Mobile Responsive Styles */}
+      <style jsx>{`
+        @media (max-width: 768px) {
+          /* Mobile card optimizations */
+          div[style*="padding: 24px 24px 20px 24px"] {
+            padding: 20px 16px 16px 16px !important;
+          }
+          
+          div[style*="padding: 0 24px 20px 24px"] {
+            padding: 0 16px 16px 16px !important;
+          }
+          
+          div[style*="padding: 20px 24px"] {
+            padding: 16px !important;
+          }
+          
+          div[style*="padding: 0 24px 24px 24px"] {
+            padding: 0 16px 20px 16px !important;
+          }
+          
+          /* Smaller profile image on mobile */
+          div[style*="width: 72px"][style*="height: 72px"] {
+            width: 64px !important;
+            height: 64px !important;
+          }
+          
+          /* Compact text on mobile */
+          h3[style*="fontSize: 19px"] {
+            font-size: 17px !important;
+            line-height: 1.2 !important;
+          }
+          
+          /* Smaller badges */
+          div[style*="fontSize: 12px"][style*="fontWeight: 600"] {
+            font-size: 11px !important;
+            padding: 3px 8px !important;
+          }
+          
+          /* Compact pricing cards */
+          div[style*="padding: 20px"][style*="textAlign: center"] {
+            padding: 16px !important;
+          }
+          
+          /* Responsive button */
+          button[style*="minHeight: 56px"] {
+            min-height: 48px !important;
+            padding: 14px 20px !important;
+            font-size: 15px !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          /* Extra compact for very small screens */
+          div[style*="gap: 16px"] {
+            gap: 12px !important;
+          }
+          
+          /* Even smaller profile image */
+          div[style*="width: 72px"][style*="height: 72px"] {
+            width: 56px !important;
+            height: 56px !important;
+          }
+          
+          /* More compact text */
+          h3[style*="fontSize: 19px"] {
+            font-size: 16px !important;
+          }
+          
+          /* Smaller specialization badges */
+          span[style*="padding: 8px 14px"] {
+            padding: 6px 10px !important;
+            font-size: 11px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

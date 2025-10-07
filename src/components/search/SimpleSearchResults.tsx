@@ -58,9 +58,10 @@ const SimpleSearchResults: React.FC<SimpleSearchResultsProps> = ({
             key={index} 
             style={{
               background: theme.colors.white,
-              borderRadius: '16px',
-              border: `1px solid ${theme.colors.gray[200]}`,
-              padding: 'clamp(1.25rem, 3vw, 1.5rem)'
+              borderRadius: '20px',
+              border: 'none',
+              padding: 'clamp(1.5rem, 3.5vw, 2rem)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'start', gap: 'clamp(1rem, 2.5vw, 1.25rem)' }}>
@@ -224,8 +225,9 @@ const SimpleSearchResults: React.FC<SimpleSearchResultsProps> = ({
       {/* Results List */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', 
-        gap: 'clamp(20px, 4vw, 28px)' 
+        gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', 
+        gap: 'clamp(16px, 3.5vw, 24px)',
+        padding: '0'
       }}>
         {results.map((result) => (
           <CleanPhysiotherapistCard

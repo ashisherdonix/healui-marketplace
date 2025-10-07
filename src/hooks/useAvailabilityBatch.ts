@@ -67,6 +67,12 @@ export const useAvailabilityBatch = ({
       const today = istDate.toISOString().split('T')[0];
       
       console.log('🔄 Fetching batch availability for', physiotherapistIds.length, 'physiotherapists');
+      console.log('📋 Physiotherapist IDs being sent:', physiotherapistIds);
+      console.log('🌍 Location data:', { 
+        pincode: userLocation?.pincode, 
+        lat: userLocation?.lat, 
+        lng: userLocation?.lng 
+      });
       
       const response = await ApiManager.getBatchAvailability({
         ids: physiotherapistIds,
