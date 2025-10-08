@@ -127,7 +127,15 @@ const AvailableTodaySection = memo(({
   loading,
   error,
   theme
-}: any) => {
+}: {
+  allPhysiotherapists: unknown[];
+  batchAvailability: unknown;
+  userLocation: unknown;
+  availabilityLoading: boolean;
+  loading: boolean;
+  error: string | null;
+  theme: unknown;
+}) => {
   return (
     <div style={{ marginTop: 'clamp(2.5rem, 4vw, 3.5rem)' }}>
       <h3 style={{
@@ -149,7 +157,7 @@ const AvailableTodaySection = memo(({
         margin: '0 auto'
       }}>
         {!loading && !error && allPhysiotherapists.length > 0 ? (
-          allPhysiotherapists.slice(0, 3).map((physio: any, index: number) => {
+          allPhysiotherapists.slice(0, 3).map((physio: unknown, index: number) => {
             const availability = batchAvailability[physio.id];
             return (
               <CleanPhysiotherapistCard
@@ -224,7 +232,7 @@ const AvailableTodaySection = memo(({
 AvailableTodaySection.displayName = 'AvailableTodaySection';
 
 // Memoized Trust Signals to prevent re-renders
-const TrustSignals = memo(({ theme }: any) => {
+const TrustSignals = memo(({ theme }: { theme: unknown }) => {
   return (
     <div style={{
       display: 'flex',
@@ -504,7 +512,7 @@ const HomePage: React.FC = () => {
         {
           name: 'ipapi.co',
           url: 'https://ipapi.co/json/',
-          parser: (data: any): LocationData => ({
+          parser: (data: Record<string, unknown>): LocationData => ({
             city: data.city,
             region: data.region,
             country: data.country_name,
@@ -517,7 +525,7 @@ const HomePage: React.FC = () => {
         {
           name: 'ipinfo.io',
           url: 'https://ipinfo.io/json',
-          parser: (data: any): LocationData => {
+          parser: (data: Record<string, unknown>): LocationData => {
             const [lat, lon] = (data.loc || '').split(',').map((coord: string) => parseFloat(coord));
             return {
               city: data.city,
@@ -533,7 +541,7 @@ const HomePage: React.FC = () => {
         {
           name: 'ip-api.com',
           url: 'http://ip-api.com/json/',
-          parser: (data: any): LocationData => ({
+          parser: (data: Record<string, unknown>): LocationData => ({
             city: data.city,
             region: data.regionName,
             country: data.country,
@@ -901,7 +909,7 @@ const HomePage: React.FC = () => {
                 marginTop: '0.5rem',
                 fontStyle: 'italic'
               }}>
-                "Dr. Sharma helped me walk pain-free in just 3 sessions" - Priya M.
+                &ldquo;Dr. Sharma helped me walk pain-free in just 3 sessions&rdquo; - Priya M.
               </div>
             </div>
 

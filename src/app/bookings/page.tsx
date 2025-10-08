@@ -67,7 +67,7 @@ interface AffectedArea {
   structure_name: string;
   structure_type: string;
   structure_category: string;
-  additional_metadata?: any;
+  additional_metadata?: Record<string, unknown>;
 }
 
 interface Recommendations {
@@ -99,7 +99,7 @@ interface TreatmentProtocol {
   status: string;
   finalized_at?: string | null;
   sent_to_patient_at?: string | null;
-  pdf_metadata?: any;
+  pdf_metadata?: Record<string, unknown>;
   created_by: string;
   updated_by: string;
   created_at: string;

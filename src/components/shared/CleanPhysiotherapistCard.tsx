@@ -8,6 +8,7 @@ import { theme } from '@/utils/theme';
 import { PhysiotherapistBatchAvailability } from '@/lib/types';
 import AvailabilityBadge from '@/components/availability/AvailabilityBadge';
 import PricingDisplay from '@/components/availability/PricingDisplay';
+import { getSmartAvailabilitySummary } from '@/utils/availabilityUtils';
 
 interface PhysiotherapistCardProps {
   physiotherapist: {
@@ -52,30 +53,39 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
     router.push(`/physiotherapist/${physiotherapist.id}`);
   };
 
+  const availabilitySummary = getSmartAvailabilitySummary(availability?.availability);
+  
   const getAvailabilityColor = () => {
-    switch (physiotherapist.availability_status) {
-      case 'AVAILABLE':
-        return theme.colors.success;
-      case 'BUSY':
-        return theme.colors.warning;
-      case 'OFFLINE':
-        return theme.colors.gray[500];
-      default:
-        return theme.colors.success;
-    }
+    if (availabilityLoading) return theme.colors.gray[400];
+    if (!availabilitySummary.hasAvailability) return theme.colors.gray[500];
+    
+    // Check if available today
+    const hasToday = availabilitySummary.lines.some(line => line.includes('today'));
+    return hasToday ? theme.colors.success : theme.colors.warning;
   };
 
   const getAvailabilityText = () => {
-    switch (physiotherapist.availability_status) {
-      case 'AVAILABLE':
-        return 'Available today';
-      case 'BUSY':
-        return 'Next available tomorrow';
-      case 'OFFLINE':
-        return 'Currently offline';
-      default:
-        return 'Check availability';
+    if (availabilityLoading) return 'Checking availability...';
+    if (!availabilitySummary.hasAvailability) return 'All slots booked';
+    
+    // Return the first availability line, or a shorter version for compact display
+    const firstLine = availabilitySummary.lines[0];
+    if (firstLine) {
+      // Shorten for card display - just show the key info
+      if (firstLine.includes('today')) {
+        const timeMatch = firstLine.match(/from (\d+:\d+ [AP]M) - (\d+:\d+ [AP]M)/);
+        if (timeMatch) {
+          const serviceType = firstLine.includes('Online') ? 'Online' : 'Home visit';
+          return `${serviceType} available today ${timeMatch[1]}-${timeMatch[2]}`;
+        }
+        return firstLine;
+      } else {
+        // For future dates, show when next available
+        return firstLine.replace('available ', '');
+      }
     }
+    
+    return 'Check availability';
   };
 
   const formatSpecialization = (spec: string) => {
@@ -249,6 +259,30 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
 
         {/* Pricing and Actions */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-end', minWidth: '200px' }}>
+          {/* Availability Status */}
+          <div style={{
+            backgroundColor: getAvailabilityColor(),
+            color: '#ffffff',
+            padding: '6px 12px',
+            borderRadius: '16px',
+            fontSize: '12px',
+            fontWeight: '600',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            maxWidth: '180px',
+            overflow: 'hidden'
+          }}>
+            <Clock style={{ width: '12px', height: '12px', flexShrink: 0 }} />
+            <span style={{ 
+              overflow: 'hidden', 
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}>
+              {getAvailabilityText()}
+            </span>
+          </div>
+          
           {/* Pricing */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-end' }}>
             {(physiotherapist.home_visit_available !== false && physiotherapist.home_visit_fee) && (
@@ -331,94 +365,46 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
     );
   }
 
-  const getTodayAvailability = () => {
-    if (!availability?.availability) return null;
-    
-    const today = new Date().toISOString().split('T')[0];
-    const todaySlots = availability.availability[today];
-    
-    // Check home visit slots for today
-    if (todaySlots?.home_visit?.length > 0) {
-      const availableSlots = todaySlots.home_visit.filter(slot => slot.is_available);
-      if (availableSlots.length > 0) {
-        const formatTime = (time: string) => {
-          const [hours, minutes] = time.split(':');
-          const hour = parseInt(hours);
-          const period = hour >= 12 ? 'PM' : 'AM';
-          const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-          return `${displayHour}:${minutes} ${period}`;
-        };
-        
-        const firstSlot = availableSlots[0];
-        const lastSlot = availableSlots[availableSlots.length - 1];
-        
-        return {
-          startTime: formatTime(firstSlot.start_time),
-          endTime: formatTime(lastSlot.end_time),
-          count: availableSlots.length
-        };
-      }
-    }
-    return null;
-  };
-
-  const calculateDiscount = () => {
-    if (!availability?.pricing?.home_visit?.zone_breakdown) return null;
-    
-    const breakdown = availability.pricing.home_visit.zone_breakdown;
-    const yellowCharge = breakdown.yellow?.extra_charge || 0;
-    const redCharge = breakdown.red?.extra_charge || 0;
-    const maxSaving = Math.max(yellowCharge, redCharge);
-    
-    return maxSaving > 0 ? maxSaving : null;
-  };
-
-  const todayAvailability = getTodayAvailability();
-  const discount = calculateDiscount();
-  const isInGreenZone = availability?.pricing?.home_visit?.zone_extra_charge === 0;
 
   return (
     <div style={{
       backgroundColor: theme.colors.white,
-      borderRadius: '20px',
+      borderRadius: '16px',
       border: 'none',
       overflow: 'hidden',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      transition: 'all 0.2s ease',
       cursor: 'pointer',
       height: 'auto',
       display: 'flex',
       flexDirection: 'column',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+      boxShadow: '0 2px 16px rgba(0, 0, 0, 0.06)',
       position: 'relative'
     }}
     onClick={handleBookAppointment}
     onMouseEnter={(e) => {
-      e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.15)';
-      e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
+      e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.12)';
+      e.currentTarget.style.transform = 'translateY(-2px)';
     }}
     onMouseLeave={(e) => {
-      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
-      e.currentTarget.style.transform = 'translateY(0) scale(1)';
+      e.currentTarget.style.boxShadow = '0 2px 16px rgba(0, 0, 0, 0.06)';
+      e.currentTarget.style.transform = 'translateY(0)';
     }}>
 
       {/* Doctor Profile Header */}
       <div style={{ 
-        padding: '24px 24px 20px 24px',
-        background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)'
+        padding: '20px',
+        background: theme.colors.white
       }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
           {/* Profile Image */}
           <div style={{
-            width: '72px',
-            height: '72px',
+            width: '64px',
+            height: '64px',
             borderRadius: '50%',
             overflow: 'hidden',
             backgroundColor: theme.colors.gray[50],
             flexShrink: 0,
-            border: `4px solid ${theme.colors.white}`,
-            boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
-            transform: 'translateZ(0)',
-            backfaceVisibility: 'hidden',
+            border: `2px solid ${theme.colors.gray[100]}`,
             position: 'relative'
           }}>
             {physiotherapist.profile_photo_url ? (
@@ -436,7 +422,7 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)'
+                backgroundColor: theme.colors.gray[50]
               }}>
                 <User style={{ width: '32px', height: '32px', color: theme.colors.gray[500] }} />
               </div>
@@ -446,346 +432,213 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
             {physiotherapist.is_verified && (
               <div style={{
                 position: 'absolute',
-                bottom: '-3px',
-                right: '-3px',
-                width: '22px',
-                height: '22px',
+                bottom: '-2px',
+                right: '-2px',
+                width: '18px',
+                height: '18px',
                 borderRadius: '50%',
-                backgroundColor: theme.colors.success,
-                border: `4px solid ${theme.colors.white}`,
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                backgroundColor: '#2563eb',
+                border: `2px solid ${theme.colors.white}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <CheckCircle2 style={{ width: '12px', height: '12px', color: '#ffffff' }} />
+                <CheckCircle2 style={{ width: '10px', height: '10px', color: '#ffffff' }} />
               </div>
             )}
           </div>
 
           {/* Name and Info */}
           <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
               <div style={{ flex: 1, paddingRight: '8px' }}>
                 <h3 style={{
-                  fontSize: '19px',
-                  fontWeight: '700',
+                  fontSize: '16px',
+                  fontWeight: '600',
                   color: theme.colors.text,
                   margin: 0,
-                  marginBottom: '6px',
+                  marginBottom: '2px',
                   lineHeight: '1.3',
-                  fontFamily: '"IBM Plex Sans", Inter, system-ui, sans-serif'
+                  fontFamily: 'Inter, system-ui, sans-serif'
                 }}>
                   Dr. {physiotherapist.full_name}
                 </h3>
                 
-                {/* Experience Badge */}
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  backgroundColor: theme.colors.primary,
-                  color: theme.colors.white,
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: '600'
-                }}>
-                  <Award style={{ width: '12px', height: '12px' }} />
-                  {physiotherapist.years_of_experience || 5} years experience
-                </div>
+                {/* Experience Only */}
+                {physiotherapist.years_of_experience && (
+                  <div style={{ marginTop: '2px' }}>
+                    <span style={{
+                      fontSize: '12px',
+                      color: theme.colors.gray[600],
+                      fontWeight: '500'
+                    }}>
+                      {physiotherapist.years_of_experience} years experience
+                    </span>
+                  </div>
+                )}
               </div>
               
-              {/* Rating - Right aligned */}
+              {/* Rating */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                backgroundColor: theme.colors.gray[50],
-                padding: '6px 10px',
-                borderRadius: '8px',
-                border: `1px solid ${theme.colors.gray[200]}`,
+                backgroundColor: 'transparent',
                 flexShrink: 0
               }}>
                 <Star style={{ width: '14px', height: '14px', color: '#FFC107', fill: '#FFC107' }} />
                 <span style={{
                   fontSize: '14px',
-                  fontWeight: '700',
+                  fontWeight: '600',
                   color: theme.colors.text
                 }}>
                   {physiotherapist.average_rating && physiotherapist.average_rating > 0 
                     ? Number(physiotherapist.average_rating).toFixed(1) 
                     : '4.5'}
                 </span>
-                <span style={{
-                  fontSize: '12px',
-                  color: theme.colors.gray[600]
-                }}>
-                  ({physiotherapist.total_reviews || 'New'})
-                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Specializations Section */}
+      {/* Specializations */}
       {physiotherapist.specializations && physiotherapist.specializations.length > 0 && (
         <div style={{ 
-          padding: '0 24px 20px 24px'
+          padding: '0 20px 16px 20px'
         }}>
           <div style={{ 
             display: 'flex', 
             flexWrap: 'wrap', 
-            gap: '8px',
+            gap: '6px',
             alignItems: 'center'
           }}>
-            {physiotherapist.specializations.slice(0, 3).map((spec, index) => (
+            {physiotherapist.specializations.slice(0, 2).map((spec, index) => (
               <span 
                 key={index}
                 style={{
                   backgroundColor: theme.colors.gray[50],
                   color: theme.colors.gray[700],
-                  padding: '8px 14px',
-                  borderRadius: '24px',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  border: 'none',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-                  lineHeight: '1.2'
+                  padding: '4px 10px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  fontWeight: '500',
+                  border: 'none'
                 }}
               >
                 {formatSpecialization(spec)}
               </span>
             ))}
-            {physiotherapist.specializations.length > 3 && (
+            {physiotherapist.specializations.length > 2 && (
               <span style={{
                 color: theme.colors.gray[500],
-                fontSize: '12px',
-                fontWeight: '500',
-                padding: '6px 8px',
-                display: 'flex',
-                alignItems: 'center',
-                lineHeight: '1.2'
+                fontSize: '11px',
+                fontWeight: '500'
               }}>
-                +{physiotherapist.specializations.length - 3} more
+                +{physiotherapist.specializations.length - 2} more
               </span>
             )}
           </div>
         </div>
       )}
 
-      {/* Availability Section */}
+      {/* Availability */}
       <div style={{ 
-        padding: '20px 24px',
-        borderTop: 'none',
-        backgroundColor: 'rgba(248, 250, 252, 0.8)',
-        backdropFilter: 'blur(10px)'
+        padding: '16px 20px',
+        borderTop: `1px solid ${theme.colors.gray[100]}`,
+        textAlign: 'center'
       }}>
-        {/* Availability Status */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          {todayAvailability ? (
-            <>
-              <div style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: theme.colors.success
-              }} />
-              <span style={{ 
-                fontSize: '13px', 
-                color: theme.colors.success, 
-                fontWeight: '700'
-              }}>
-                Available Today
-              </span>
-              <span style={{ 
-                fontSize: '12px', 
-                color: theme.colors.gray[600]
-              }}>
-                • {todayAvailability.startTime} - {todayAvailability.endTime}
-              </span>
-            </>
-          ) : (
-            <>
-              <div style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: theme.colors.warning
-              }} />
-              <span style={{ 
-                fontSize: '13px', 
-                color: theme.colors.warning, 
-                fontWeight: '700'
-              }}>
-                High Demand
-              </span>
-              <span style={{ 
-                fontSize: '12px', 
-                color: theme.colors.gray[600]
-              }}>
-                • Book for tomorrow
-              </span>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Pricing Cards Section */}
-      <div style={{ padding: '0 24px 20px 24px' }}>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: (availability?.pricing?.home_visit && availability?.pricing?.online) 
-            ? '1fr 1fr' 
-            : '1fr',
-          gap: '12px'
+        <div style={{
+          backgroundColor: '#f8fafc',
+          color: theme.colors.gray[700],
+          padding: '8px 12px',
+          borderRadius: '8px',
+          fontSize: '12px',
+          fontWeight: '500',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          maxWidth: '100%',
+          border: `1px solid ${theme.colors.gray[200]}`
         }}>
-          {/* Home Visit Pricing Card */}
-          {availability?.pricing?.home_visit && (
+          <Clock style={{ width: '12px', height: '12px', flexShrink: 0 }} />
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {availabilityLoading ? 'Checking...' : getAvailabilityText()}
+          </span>
+        </div>
+      </div>
+
+      {/* Pricing */}
+      <div style={{ padding: '0 20px 16px 20px' }}>
+        <div style={{ 
+          display: 'flex', 
+          gap: '12px',
+          justifyContent: 'space-between'
+        }}>
+          {/* Home Visit */}
+          {physiotherapist.home_visit_available && physiotherapist.home_visit_fee && (
             <div style={{
-              backgroundColor: theme.colors.white,
-              border: 'none',
-              borderRadius: '16px',
-              padding: '20px',
-              position: 'relative',
-              textAlign: 'center',
-              boxShadow: isInGreenZone && discount 
-                ? '0 4px 20px rgba(16, 185, 129, 0.15)' 
-                : '0 4px 16px rgba(0, 0, 0, 0.08)',
-              background: isInGreenZone && discount 
-                ? 'linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%)'
-                : theme.colors.white
+              flex: 1,
+              textAlign: 'center'
             }}>
-              {/* Discount Badge */}
-              {isInGreenZone && discount && (
-                <div style={{
-                  position: 'absolute',
-                  top: '-8px',
-                  right: '8px',
-                  backgroundColor: theme.colors.success,
-                  color: theme.colors.white,
-                  padding: '4px 8px',
-                  borderRadius: '12px',
-                  fontSize: '10px',
-                  fontWeight: '700',
-                  boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
-                }}>
-                  {Math.round((discount / (parseFloat(availability.pricing.home_visit.total) + discount)) * 100)}% OFF
-                </div>
-              )}
-              
-              <div style={{ marginBottom: '8px' }}>
+              <div style={{ marginBottom: '4px' }}>
                 <Home style={{ 
-                  width: '20px', 
-                  height: '20px', 
-                  color: theme.colors.primary,
-                  margin: '0 auto'
+                  width: '16px', 
+                  height: '16px', 
+                  color: theme.colors.gray[600]
                 }} />
               </div>
-              
-              <div style={{ marginBottom: '4px' }}>
-                <span style={{ 
-                  fontSize: '12px', 
-                  color: theme.colors.gray[600],
-                  fontWeight: '500'
-                }}>
-                  Home Visit
-                </span>
-              </div>
-              
-              {isInGreenZone && discount ? (
-                <div style={{ marginBottom: '4px' }}>
-                  <div style={{ 
-                    fontSize: '14px', 
-                    color: theme.colors.gray[500], 
-                    textDecoration: 'line-through',
-                    fontWeight: '500'
-                  }}>
-                    ₹{(parseFloat(availability.pricing.home_visit.total) + discount).toLocaleString()}
-                  </div>
-                  <div style={{ 
-                    fontSize: '20px', 
-                    fontWeight: '700', 
-                    color: theme.colors.success
-                  }}>
-                    ₹{parseFloat(availability.pricing.home_visit.total).toLocaleString()}
-                  </div>
-                </div>
-              ) : (
-                <div style={{ 
-                  fontSize: '20px', 
-                  fontWeight: '700', 
-                  color: theme.colors.text,
-                  marginBottom: '4px'
-                }}>
-                  ₹{parseFloat(availability.pricing.home_visit.total).toLocaleString()}
-                </div>
-              )}
-              
               <div style={{ 
                 fontSize: '11px', 
                 color: theme.colors.gray[500],
-                fontWeight: '500'
+                marginBottom: '2px'
               }}>
-                per session
+                Home Visit
+              </div>
+              <div style={{ 
+                fontSize: '16px', 
+                fontWeight: '600', 
+                color: theme.colors.text
+              }}>
+                ₹{parseInt(physiotherapist.home_visit_fee).toLocaleString()}
               </div>
             </div>
           )}
 
-          {/* Online Pricing Card */}
-          {availability?.pricing?.online && (
+          {/* Online */}
+          {physiotherapist.online_consultation_available && physiotherapist.consultation_fee && (
             <div style={{
-              backgroundColor: theme.colors.white,
-              border: 'none',
-              borderRadius: '16px',
-              padding: '20px',
-              textAlign: 'center',
-              position: 'relative',
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)'
+              flex: 1,
+              textAlign: 'center'
             }}>
-              <div style={{ marginBottom: '8px' }}>
+              <div style={{ marginBottom: '4px' }}>
                 <Video style={{ 
-                  width: '20px', 
-                  height: '20px', 
-                  color: theme.colors.primary,
-                  margin: '0 auto'
+                  width: '16px', 
+                  height: '16px', 
+                  color: theme.colors.gray[600]
                 }} />
               </div>
-              
-              <div style={{ marginBottom: '4px' }}>
-                <span style={{ 
-                  fontSize: '12px', 
-                  color: theme.colors.gray[600],
-                  fontWeight: '500'
-                }}>
-                  Online
-                </span>
-              </div>
-              
-              <div style={{ 
-                fontSize: '20px', 
-                fontWeight: '700', 
-                color: theme.colors.text,
-                marginBottom: '4px'
-              }}>
-                ₹{parseFloat(availability.pricing.online.total).toLocaleString()}
-              </div>
-              
               <div style={{ 
                 fontSize: '11px', 
                 color: theme.colors.gray[500],
-                fontWeight: '500'
+                marginBottom: '2px'
               }}>
-                per session
+                Online
+              </div>
+              <div style={{ 
+                fontSize: '16px', 
+                fontWeight: '600', 
+                color: theme.colors.text
+              }}>
+                ₹{parseInt(physiotherapist.consultation_fee).toLocaleString()}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Enhanced CTA Button */}
-      <div style={{ padding: '0 24px 24px 24px' }}>
+      {/* CTA Button */}
+      <div style={{ padding: '0 20px 20px 20px' }}>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -793,123 +646,27 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
           }}
           style={{
             width: '100%',
-            padding: '16px 24px',
-            minHeight: '56px',
-            backgroundColor: theme.colors.primary,
-            color: theme.colors.white,
+            padding: '12px 20px',
+            backgroundColor: '#2563eb',
+            color: '#ffffff',
             border: 'none',
-            borderRadius: '16px',
-            fontSize: '16px',
+            borderRadius: '8px',
+            fontSize: '14px',
             fontWeight: '600',
             cursor: 'pointer',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '10px',
-            boxShadow: '0 8px 24px rgba(30, 95, 121, 0.25)',
-            letterSpacing: '0.01em',
-            background: 'linear-gradient(135deg, #1e5f79 0%, #0f4c75 100%)'
+            transition: 'all 0.2s ease'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, #0f4c75 0%, #1e5f79 100%)';
-            e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-            e.currentTarget.style.boxShadow = '0 12px 32px rgba(30, 95, 121, 0.4)';
+            e.currentTarget.style.backgroundColor = '#1d4ed8';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, #1e5f79 0%, #0f4c75 100%)';
-            e.currentTarget.style.transform = 'translateY(0) scale(1)';
-            e.currentTarget.style.boxShadow = '0 8px 24px rgba(30, 95, 121, 0.25)';
+            e.currentTarget.style.backgroundColor = '#2563eb';
           }}
         >
-          {todayAvailability ? (
-            <>
-              <Calendar style={{ width: '18px', height: '18px' }} />
-              Book Today's Slot
-            </>
-          ) : (
-            <>
-              View Profile & Book
-            </>
-          )}
+          Book Appointment
         </button>
       </div>
       
-      {/* Mobile Responsive Styles */}
-      <style jsx>{`
-        @media (max-width: 768px) {
-          /* Mobile card optimizations */
-          div[style*="padding: 24px 24px 20px 24px"] {
-            padding: 20px 16px 16px 16px !important;
-          }
-          
-          div[style*="padding: 0 24px 20px 24px"] {
-            padding: 0 16px 16px 16px !important;
-          }
-          
-          div[style*="padding: 20px 24px"] {
-            padding: 16px !important;
-          }
-          
-          div[style*="padding: 0 24px 24px 24px"] {
-            padding: 0 16px 20px 16px !important;
-          }
-          
-          /* Smaller profile image on mobile */
-          div[style*="width: 72px"][style*="height: 72px"] {
-            width: 64px !important;
-            height: 64px !important;
-          }
-          
-          /* Compact text on mobile */
-          h3[style*="fontSize: 19px"] {
-            font-size: 17px !important;
-            line-height: 1.2 !important;
-          }
-          
-          /* Smaller badges */
-          div[style*="fontSize: 12px"][style*="fontWeight: 600"] {
-            font-size: 11px !important;
-            padding: 3px 8px !important;
-          }
-          
-          /* Compact pricing cards */
-          div[style*="padding: 20px"][style*="textAlign: center"] {
-            padding: 16px !important;
-          }
-          
-          /* Responsive button */
-          button[style*="minHeight: 56px"] {
-            min-height: 48px !important;
-            padding: 14px 20px !important;
-            font-size: 15px !important;
-          }
-        }
-        
-        @media (max-width: 480px) {
-          /* Extra compact for very small screens */
-          div[style*="gap: 16px"] {
-            gap: 12px !important;
-          }
-          
-          /* Even smaller profile image */
-          div[style*="width: 72px"][style*="height: 72px"] {
-            width: 56px !important;
-            height: 56px !important;
-          }
-          
-          /* More compact text */
-          h3[style*="fontSize: 19px"] {
-            font-size: 16px !important;
-          }
-          
-          /* Smaller specialization badges */
-          span[style*="padding: 8px 14px"] {
-            padding: 6px 10px !important;
-            font-size: 11px !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

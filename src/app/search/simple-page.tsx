@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import SimpleSearchInterface from '@/components/search/SimpleSearchInterface';
@@ -36,7 +36,7 @@ interface SearchResult {
   gender?: string;
 }
 
-const SimpleSearchPage: React.FC = () => {
+const SimpleSearchContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
@@ -184,6 +184,20 @@ const SimpleSearchPage: React.FC = () => {
       setError(null);
       setHasSearched(true);
       
+      // Extract pincode from search query if present
+      const { extractPincode } = await import('@/utils/pincodeUtils');
+      const extractedPincode = extractPincode(filters.query);
+      
+      if (extractedPincode && !userLocation?.pincode) {
+        console.log('📍 Setting user location from search pincode:', extractedPincode);
+        setUserLocation(prev => ({
+          ...prev,
+          pincode: extractedPincode,
+          latitude: prev?.latitude,
+          longitude: prev?.longitude
+        }));
+      }
+      
       const searchResults = await simpleSearchService.search(filters);
       setResults(searchResults);
       
@@ -312,6 +326,21 @@ const SimpleSearchPage: React.FC = () => {
         </div>
       </main>
     </div>
+  );
+};
+
+const SimpleSearchPage: React.FC = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading search...</p>
+        </div>
+      </div>
+    }>
+      <SimpleSearchContent />
+    </Suspense>
   );
 };
 

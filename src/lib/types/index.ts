@@ -493,6 +493,10 @@ export interface BatchAvailabilityQuery {
   patient_lat?: number; // Patient latitude for distance calculation
   patient_lng?: number; // Patient longitude for distance calculation
   duration?: number; // Session duration (30-180 min, default: 60)
+  // New sorting and filtering parameters
+  sort_by?: 'zone' | 'price' | 'rating' | 'distance' | 'experience'; // Sort results by preference
+  preferred_zones?: ('green' | 'yellow' | 'red')[]; // Preferred zones for home visits
+  max_zone_charge?: number; // Maximum acceptable zone extra charge
 }
 
 export type AvailabilityServiceType = 'ONLINE' | 'CLINIC' | 'HOME_VISIT';
@@ -565,6 +569,18 @@ export interface PhysiotherapistBatchAvailability {
   years_experience: number;
   availability: Record<string, DayAvailability>; // Date string -> availability
   pricing: PricingBreakdown;
+  // New enhanced fields
+  distance_info?: {
+    min_distance_km: number;
+    primary_zone: 'green' | 'yellow' | 'red' | null;
+    service_locations: {
+      location_id: string;
+      location_name: string;
+      distance_km: number;
+      zone: 'green' | 'yellow' | 'red';
+    }[];
+  };
+  value_score?: number; // Calculated value score for smart recommendations
 }
 
 export interface BatchAvailabilityResponse {

@@ -1,4 +1,5 @@
 import ApiManager from './api';
+import { parseLocationQuery } from '@/utils/pincodeUtils';
 
 interface SimpleSearchFilters {
   query: string; // Combined search for name or pincode
@@ -67,21 +68,37 @@ class SimpleSearchService {
     };
 
     if (filters.query.trim()) {
-      // Detect if query is likely a pincode (numbers only) or name/location
-      const hasNumbers = /\d/.test(filters.query);
-      const hasLetters = /[a-zA-Z]/.test(filters.query);
+      const query = filters.query.trim();
       
-      if (hasNumbers && !hasLetters) {
-        // Pure numbers - treat as pincode/location
-        params.location = filters.query.trim();
+      // Use utility function to parse location query
+      const { pincode, remainingQuery } = parseLocationQuery(query);
+      
+      // Detect query type
+      const hasNumbers = /\d/.test(query);
+      const hasLetters = /[a-zA-Z]/.test(query);
+      
+      if (pincode) {
+        // Found a valid 6-digit pincode - use it for location
+        console.log('🔍 Extracted pincode from search:', pincode);
+        params.location = pincode;
+        
+        // If query has more than just pincode, also search by remaining text
+        if (remainingQuery) {
+          params.query = remainingQuery;
+          console.log('🔍 Also searching for:', remainingQuery);
+        }
+      } else if (hasNumbers && !hasLetters) {
+        // Pure numbers but not valid pincode - still treat as location
+        params.location = query;
       } else if (hasLetters && !hasNumbers) {
         // Pure letters - treat as name
-        params.query = filters.query.trim();
+        params.query = query;
       } else {
-        // Mixed - search both name and location
-        params.query = filters.query.trim();
-        params.location = filters.query.trim();
+        // Mixed content without valid pincode - search as name
+        params.query = query;
       }
+      
+      console.log('🔎 Search params:', params);
     }
 
     if (filters.specialty) {
