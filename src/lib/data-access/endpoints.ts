@@ -167,10 +167,40 @@ export const ENDPOINTS = {
     return `marketplace/physiotherapists/meta/locations?${searchParams.toString()}`;
   },
 
-  // NOT IMPLEMENTED YET
-  // CREATE_PAYMENT_INTENT: ...
-  // CONFIRM_PAYMENT: ...
-  // GET_PAYMENT_STATUS: ...
-  // GET_CONDITIONS: ...
-  // SEARCH_CONDITIONS: ...
+  // ========== PAYMENT ENDPOINTS ==========
+  CREATE_PAYMENT_INTENT: () => 'marketplace/payments/create',
+  CONFIRM_PAYMENT: (transactionId: string) => `marketplace/payments/${transactionId}/confirm`,
+  GET_PAYMENT_STATUS: (transactionId: string) => `marketplace/payments/${transactionId}/status`,
+  PROCESS_PAYMENT_WEBHOOK: () => 'marketplace/payments/webhook',
+
+  // ========== COUPON ENDPOINTS ==========
+  GET_AVAILABLE_COUPONS: (params?: { physiotherapist_id?: string; total_amount?: number }) => {
+    let url = 'marketplace/coupons/available';
+    if (params) {
+      const searchParams = new URLSearchParams();
+      if (params.physiotherapist_id) searchParams.append('physio_id', params.physiotherapist_id);
+      if (params.total_amount) searchParams.append('total_amount', params.total_amount.toString());
+      if (searchParams.toString()) {
+        url += '?' + searchParams.toString();
+      }
+    }
+    return url;
+  },
+  VALIDATE_COUPON: () => 'marketplace/coupons/validate',
+  GET_COUPON_DETAILS: (couponCode: string) => `marketplace/coupons/${couponCode}`,
+
+  // ========== CONDITIONS ==========
+  GET_CONDITIONS: (params?: { search?: string; limit?: number }) => {
+    let url = 'conditions';
+    if (params) {
+      const searchParams = new URLSearchParams();
+      if (params.search) searchParams.append('search', params.search);
+      if (params.limit) searchParams.append('limit', params.limit.toString());
+      if (searchParams.toString()) {
+        url += '?' + searchParams.toString();
+      }
+    }
+    return url;
+  },
+  SEARCH_CONDITIONS: (query: string) => `conditions/search?q=${encodeURIComponent(query)}`,
 };

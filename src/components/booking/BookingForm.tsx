@@ -13,6 +13,9 @@ import {
   Video
 } from 'lucide-react';
 import type { User as UserType } from '@/lib/types';
+import CouponInput from '@/components/payment/CouponInput';
+import PaymentSummary from '@/components/payment/PaymentSummary';
+import RazorpayCheckout from '@/components/payment/RazorpayCheckout';
 
 interface AvailabilitySlot {
   slot_id: string;
@@ -91,6 +94,14 @@ const BookingForm: React.FC<BookingFormProps> = ({
     selected_family_member: ''
   });
 
+  // Payment state
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [finalAmount, setFinalAmount] = useState(formData.total_amount);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [createdBooking, setCreatedBooking] = useState<any>(null);
+
   useEffect(() => {
     // Update patient_user_id when user changes
     if (userId) {
@@ -112,7 +123,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
     const travelFee = Number(formData.travel_fee) || 0;
     const total = consultationFee + travelFee;
     setFormData(prev => ({ ...prev, total_amount: total }));
-  }, [formData.consultation_fee, formData.travel_fee]);
+    
+    // Update final amount after discount
+    const finalAmt = total - discountAmount;
+    setFinalAmount(finalAmt);
+  }, [formData.consultation_fee, formData.travel_fee, discountAmount]);
 
   const loadFamilyMembers = async () => {
     try {
@@ -153,7 +168,140 @@ const BookingForm: React.FC<BookingFormProps> = ({
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async () => {
+  const handleCouponApplied = (couponData: any) => {
+    setAppliedCoupon(couponData);
+    if (couponData) {
+      setDiscountAmount(couponData.discount_amount);
+    } else {
+      setDiscountAmount(0);
+    }
+  };
+
+  const handleCreateBookingAndPayment = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // First, create the booking
+      const patientUserId = formData.selected_family_member || formData.patient_user_id;
+      
+      const bookingData = {
+        patient_user_id: patientUserId,
+        physiotherapist_id: formData.physiotherapist_id,
+        visit_mode: formData.visit_mode,
+        scheduled_date: formData.scheduled_date,
+        scheduled_time: formData.scheduled_time,
+        end_time: formData.end_time,
+        duration_minutes: Number(formData.duration_minutes),
+        chief_complaint: formData.chief_complaint,
+        patient_address: formData.patient_address,
+        consultation_fee: Number(formData.consultation_fee),
+        travel_fee: Number(formData.travel_fee),
+        total_amount: Number(finalAmount),
+        conditions: formData.conditions
+      };
+
+      console.log('Creating booking with data:', bookingData);
+      const bookingResponse = await ApiManager.createBooking(bookingData);
+      
+      if (!bookingResponse.success) {
+        throw new Error(bookingResponse.message || 'Failed to create booking');
+      }
+
+      // Store the booking for later use
+      const bookingId = bookingResponse.data.id;
+      setCreatedBooking(bookingResponse.data);
+      
+      // Now create the payment intent with the actual booking ID
+      await createPaymentIntent(bookingId);
+      
+      // Move to payment step
+      setStep('payment');
+    } catch (error: unknown) {
+      console.error('Booking/payment creation failed:', error);
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createPaymentIntent = async (visitId: string) => {
+    setPaymentLoading(true);
+    setError(null);
+
+    try {
+      const patientUserId = formData.selected_family_member || formData.patient_user_id;
+      
+      const paymentIntentData = {
+        visit_id: visitId,
+        coupon_code: appliedCoupon?.coupon_code
+      };
+
+      const response = await ApiManager.createPaymentIntent(paymentIntentData);
+      
+      if (response.success && response.data) {
+        setPaymentData(response.data);
+        return response.data;
+      } else {
+        throw new Error(response.message || 'Failed to create payment intent');
+      }
+    } catch (error) {
+      console.error('Failed to create payment intent:', error);
+      setError(error instanceof Error ? error.message : 'Failed to setup payment');
+      throw error;
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const handlePaymentSuccess = async (paymentResponse: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }) => {
+    setLoading(true);
+    try {
+      // First confirm the payment
+      const confirmResponse = await ApiManager.confirmPayment(paymentData.transaction_id, paymentResponse);
+      
+      if (!confirmResponse.success) {
+        throw new Error('Payment confirmation failed');
+      }
+
+      // Booking was already created, just call success with the stored booking data
+      if (createdBooking) {
+        onSuccess(createdBooking);
+      } else {
+        throw new Error('No booking found - this should not happen');
+      }
+    } catch (error) {
+      console.error('Booking creation failed:', error);
+      setError(error instanceof Error ? error.message : 'Booking creation failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePaymentError = async (error: any) => {
+    console.error('Payment failed:', error);
+    
+    // If we have a created booking that wasn't paid for, cancel it
+    if (createdBooking?.id) {
+      try {
+        console.log('🔄 Cancelling unpaid booking:', createdBooking.id);
+        await ApiManager.cancelBooking(createdBooking.id, { reason: 'Payment cancelled by user' });
+        console.log('✅ Unpaid booking cancelled');
+      } catch (cancelError) {
+        console.error('❌ Failed to cancel unpaid booking:', cancelError);
+        // Continue with error handling even if cancel fails
+      }
+    }
+    
+    setError(error.message || 'Payment failed. Please try again.');
+  };
+
+  // Removed handleSubmit - now using handleCreateBookingAndPayment flow
+  const handleSubmit_REMOVED = async () => {
     // Validate user is authenticated
     if (!isAuthenticated || !userId) {
       setError('Please login to continue with booking');
@@ -282,7 +430,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
           {/* Back Button */}
           {step !== 'patient' && (
             <button
-              onClick={() => setStep(step === 'details' ? 'patient' : 'patient')}
+              onClick={() => setStep(step === 'payment' ? 'details' : step === 'details' ? 'patient' : 'patient')}
               style={{
                 position: 'absolute',
                 top: '12px',
@@ -696,45 +844,13 @@ const BookingForm: React.FC<BookingFormProps> = ({
               )}
 
               {/* Fee Breakdown */}
-              <div style={{
-                background: '#eff8ff',
-                border: '1px solid #c8eaeb',
-                borderRadius: '8px',
-                padding: '16px',
-                marginBottom: '20px'
-              }}>
-                <h4 style={{
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  color: '#1e5f79',
-                  margin: '0 0 12px 0'
-                }}>
-                  Fee Breakdown
-                </h4>
-                
-                <div style={{ display: 'grid', gap: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '14px', color: '#000000' }}>Consultation Fee</span>
-                    <span style={{ fontSize: '14px', color: '#000000', fontWeight: '500' }}>₹{formData.consultation_fee}</span>
-                  </div>
-                  
-                  {formData.visit_mode === 'HOME_VISIT' && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '14px', color: '#000000' }}>Travel Fee</span>
-                      <span style={{ fontSize: '14px', color: '#000000', fontWeight: '500' }}>₹{formData.travel_fee}</span>
-                    </div>
-                  )}
-                  
-                  <hr style={{ border: 'none', borderTop: '1px solid #c8eaeb', margin: '8px 0' }} />
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '16px', fontWeight: '600', color: '#000000' }}>Total Amount</span>
-                    <span style={{ fontSize: '16px', fontWeight: '700', color: '#1e5f79' }}>
-                      ₹{formData.total_amount}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <PaymentSummary
+                consultationFee={formData.consultation_fee}
+                travelFee={formData.travel_fee}
+                discountAmount={0}
+                appliedCoupon={null}
+                finalAmount={formData.total_amount}
+              />
 
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button
@@ -763,7 +879,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                   Back
                 </button>
                 <button
-                  onClick={handleSubmit}
+                  onClick={handleCreateBookingAndPayment}
                   disabled={!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading}
                   style={{
                     flex: 2,
@@ -777,11 +893,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                     fontSize: '15px',
                     fontWeight: '600',
                     cursor: (!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading) ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px'
+                    transition: 'all 0.2s ease'
                   }}
                   onMouseEnter={(e) => {
                     if (!(!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading)) {
@@ -794,23 +906,125 @@ const BookingForm: React.FC<BookingFormProps> = ({
                     }
                   }}
                 >
-                  {loading ? (
-                    <>
-                      <div style={{
-                        width: '16px',
-                        height: '16px',
-                        border: '2px solid white',
-                        borderTopColor: 'transparent',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }} />
-                      Booking...
-                    </>
-                  ) : (
-                    'Confirm Booking'
-                  )}
+                  {loading ? 'Creating Booking...' : 'Continue to Payment'}
                 </button>
               </div>
+            </div>
+          )}
+
+          {step === 'payment' && (
+            <div>
+              <h3 style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#000000',
+                margin: '0 0 16px 0'
+              }}>
+                Payment & Confirmation
+              </h3>
+
+              {/* Payment Summary */}
+              <PaymentSummary
+                consultationFee={formData.consultation_fee}
+                travelFee={formData.travel_fee}
+                discountAmount={discountAmount}
+                appliedCoupon={appliedCoupon}
+                finalAmount={finalAmount}
+              />
+
+              {/* Coupon Input */}
+              <CouponInput
+                physiotherapistId={physiotherapist.id}
+                totalAmount={formData.total_amount}
+                onCouponApplied={handleCouponApplied}
+              />
+
+              {/* Payment Gateway */}
+              {paymentData ? (
+                <RazorpayCheckout
+                  paymentData={paymentData}
+                  patientName={actualUser?.full_name || 'Patient'}
+                  patientPhone={actualUser?.phone}
+                  patientEmail={actualUser?.email}
+                  onSuccess={handlePaymentSuccess}
+                  onError={handlePaymentError}
+                  loading={loading}
+                />
+              ) : (
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    onClick={() => setStep('details')}
+                    style={{
+                      flex: 1,
+                      padding: '14px',
+                      background: 'none',
+                      color: '#1e5f79',
+                      border: '1px solid #c8eaeb',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#eff8ff';
+                      e.currentTarget.style.borderColor = '#1e5f79';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.borderColor = '#c8eaeb';
+                    }}
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={createPaymentIntent}
+                    disabled={paymentLoading}
+                    style={{
+                      flex: 2,
+                      padding: '14px',
+                      background: paymentLoading ? '#9ca3af' : '#1e5f79',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      cursor: paymentLoading ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!paymentLoading) {
+                        e.currentTarget.style.backgroundColor = '#000000';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!paymentLoading) {
+                        e.currentTarget.style.backgroundColor = '#1e5f79';
+                      }
+                    }}
+                  >
+                    {paymentLoading ? (
+                      <>
+                        <div style={{
+                          width: '16px',
+                          height: '16px',
+                          border: '2px solid white',
+                          borderTopColor: 'transparent',
+                          borderRadius: '50%',
+                          animation: 'spin 1s linear infinite'
+                        }} />
+                        Setting up...
+                      </>
+                    ) : (
+                      `Proceed to Pay ₹${finalAmount}`
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

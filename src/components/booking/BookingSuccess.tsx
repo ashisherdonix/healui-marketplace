@@ -261,14 +261,15 @@ const BookingSuccess: React.FC<BookingSuccessProps> = ({
               
               <div style={{
                 fontSize: '12px',
-                color: '#6b7280',
+                color: '#10b981',
                 textAlign: 'center',
                 marginTop: '8px',
                 padding: '8px',
-                backgroundColor: 'rgba(200, 234, 235, 0.3)',
-                borderRadius: '6px'
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderRadius: '6px',
+                fontWeight: '600'
               }}>
-                💳 Payment will be collected at the time of service
+                ✅ Payment Successful
               </div>
             </div>
           </div>

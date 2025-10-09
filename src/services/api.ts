@@ -61,6 +61,25 @@ interface AddFamilyMemberDto {
   pincode?: string;
 }
 
+interface CreatePaymentIntentDto {
+  visit_id: string;
+  total_amount: number;
+  coupon_code?: string;
+  payment_method?: string;
+}
+
+interface ConfirmPaymentDto {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+interface ValidateCouponDto {
+  coupon_code: string;
+  physiotherapist_id: string;
+  total_amount: number;
+}
+
 // API Manager class for marketplace - following EMR pattern exactly
 class ApiManager {
   // ========== FIREBASE AUTHENTICATION (Following EMR Pattern) ==========
@@ -380,8 +399,48 @@ class ApiManager {
     return ApiMethods.get(url);
   };
 
-  // ========== NOT IMPLEMENTED YET ==========
-  // TODO: Payment APIs, Conditions APIs, etc.
+  // ========== PAYMENT APIS ==========
+  static createPaymentIntent = (data: CreatePaymentIntentDto) => {
+    const url = BASE_URL + ENDPOINTS.CREATE_PAYMENT_INTENT();
+    return ApiMethods.post(url, data);
+  };
+
+  static confirmPayment = (transactionId: string, data: ConfirmPaymentDto) => {
+    const url = BASE_URL + ENDPOINTS.CONFIRM_PAYMENT(transactionId);
+    return ApiMethods.post(url, data);
+  };
+
+  static getPaymentStatus = (transactionId: string) => {
+    const url = BASE_URL + ENDPOINTS.GET_PAYMENT_STATUS(transactionId);
+    return ApiMethods.get(url);
+  };
+
+  // ========== COUPON APIS ==========
+  static getAvailableCoupons = (params?: { physiotherapist_id?: string; total_amount?: number }) => {
+    const url = BASE_URL + ENDPOINTS.GET_AVAILABLE_COUPONS(params);
+    return ApiMethods.get(url);
+  };
+
+  static validateCoupon = (data: ValidateCouponDto) => {
+    const url = BASE_URL + ENDPOINTS.VALIDATE_COUPON();
+    return ApiMethods.post(url, data);
+  };
+
+  static getCouponDetails = (couponCode: string) => {
+    const url = BASE_URL + ENDPOINTS.GET_COUPON_DETAILS(couponCode);
+    return ApiMethods.get(url);
+  };
+
+  // ========== CONDITIONS ==========
+  static getConditions = (params?: { search?: string; limit?: number }) => {
+    const url = BASE_URL + ENDPOINTS.GET_CONDITIONS(params);
+    return ApiMethods.get(url);
+  };
+
+  static searchConditions = (query: string) => {
+    const url = BASE_URL + ENDPOINTS.SEARCH_CONDITIONS(query);
+    return ApiMethods.get(url);
+  };
 
   // ========== LOGOUT ==========
   static logout = () => {
