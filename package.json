@@ -11,10 +11,13 @@
   },
   "dependencies": {
     "@csstools/normalize.css": "^12.1.1",
+    "@heroicons/react": "^2.2.0",
     "@material/material-color-utilities": "^0.3.0",
     "@reduxjs/toolkit": "^2.9.0",
+    "@types/leaflet": "^1.9.12",
     "cookies-next": "^6.1.0",
     "firebase": "^12.3.0",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.544.0",
     "next": "15.5.3",
     "react": "19.1.0",

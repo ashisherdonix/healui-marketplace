@@ -5,6 +5,7 @@ import bookingSlice from './slices/bookingSlice';
 import therapistSlice from './slices/therapistSlice';
 import searchSlice from './slices/searchSlice';
 import availabilitySlice from './slices/availabilitySlice';
+import addressSlice from './slices/addressSlice';
 
 // Configure Redux store following clinic-web pattern
 export const store = configureStore({
@@ -15,6 +16,7 @@ export const store = configureStore({
     therapist: therapistSlice.reducer,
     search: searchSlice.reducer,
     availability: availabilitySlice.reducer,
+    address: addressSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

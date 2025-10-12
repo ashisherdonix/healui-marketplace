@@ -7,10 +7,11 @@ import Header from '@/components/layout/Header';
 import PersonalInfoSection from '@/components/profile/PersonalInfoSection';
 import FamilyMembersSection from '@/components/profile/FamilyMembersSection';
 import ReviewsSection from '@/components/profile/ReviewsSection';
+import AddressSection from '@/components/profile/AddressSection';
 import Card from '@/components/card';
 import { User } from '@/lib/types';
 
-type TabType = 'profile' | 'members' | 'ratings';
+type TabType = 'profile' | 'addresses' | 'members' | 'ratings';
 
 const ProfilePage: React.FC = () => {
   const { user, isAuthenticated, initializing } = useAppSelector((state) => state.auth);
@@ -23,7 +24,7 @@ const ProfilePage: React.FC = () => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab');
-      if (tabParam && ['profile', 'members', 'ratings'].includes(tabParam)) {
+      if (tabParam && ['profile', 'addresses', 'members', 'ratings'].includes(tabParam)) {
         setActiveTab(tabParam as TabType);
       }
     }
@@ -59,6 +60,7 @@ const ProfilePage: React.FC = () => {
 
   const tabs = [
     { id: 'profile' as TabType, label: 'Profile' },
+    { id: 'addresses' as TabType, label: 'Addresses' },
     { id: 'members' as TabType, label: 'Members' },
     { id: 'ratings' as TabType, label: 'Ratings' }
   ];
@@ -191,6 +193,7 @@ const ProfilePage: React.FC = () => {
                     onUpdate={(updatedUser) => setProfileData(updatedUser)}
                   />
                 )}
+                {activeTab === 'addresses' && <AddressSection />}
                 {activeTab === 'members' && <FamilyMembersSection />}
                 {activeTab === 'ratings' && <ReviewsSection />}
               </>

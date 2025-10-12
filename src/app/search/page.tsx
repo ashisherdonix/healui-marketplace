@@ -19,6 +19,12 @@ interface SearchFilters {
   minRating: number;
   maxPrice?: number;
   sortBy: 'RELEVANCE' | 'RATING' | 'PRICE' | 'DISTANCE';
+  // New location-based parameters
+  lat?: number;
+  lng?: number;
+  radius?: number;
+  pincode?: string;
+  useCurrentLocation?: boolean;
 }
 
 interface SearchResponse {
@@ -167,7 +173,12 @@ const SearchContent: React.FC = () => {
     serviceType: 'ALL',
     availability: 'ALL',
     minRating: 0,
-    sortBy: 'RELEVANCE'
+    sortBy: 'RELEVANCE',
+    lat: undefined,
+    lng: undefined,
+    radius: 15,
+    pincode: '',
+    useCurrentLocation: false
   });
 
   // Load initial filters from URL on mount
@@ -181,7 +192,13 @@ const SearchContent: React.FC = () => {
       specificDate: searchParams.get('specificDate') || undefined,
       minRating: parseFloat(searchParams.get('minRating') || '0'),
       maxPrice: searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined,
-      sortBy: (searchParams.get('sortBy') as 'RELEVANCE' | 'RATING' | 'PRICE' | 'DISTANCE') || 'RELEVANCE'
+      sortBy: (searchParams.get('sortBy') as 'RELEVANCE' | 'RATING' | 'PRICE' | 'DISTANCE') || 'RELEVANCE',
+      // Location-based parameters from URL
+      lat: searchParams.get('lat') ? parseFloat(searchParams.get('lat')!) : undefined,
+      lng: searchParams.get('lng') ? parseFloat(searchParams.get('lng')!) : undefined,
+      radius: searchParams.get('radius') ? parseInt(searchParams.get('radius')!) : 15,
+      pincode: searchParams.get('pincode') || '',
+      useCurrentLocation: searchParams.get('useCurrentLocation') === 'true'
     };
 
     setInitialFilters(urlFilters);
@@ -205,7 +222,10 @@ const SearchContent: React.FC = () => {
       filters.availability !== 'ALL' ||
       filters.minRating > 0 ||
       filters.maxPrice ||
-      filters.sortBy !== 'RELEVANCE'
+      filters.sortBy !== 'RELEVANCE' ||
+      filters.lat ||
+      filters.lng ||
+      filters.pincode
     );
   }, []);
 

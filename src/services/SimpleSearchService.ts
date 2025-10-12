@@ -78,9 +78,9 @@ class SimpleSearchService {
       const hasLetters = /[a-zA-Z]/.test(query);
       
       if (pincode) {
-        // Found a valid 6-digit pincode - use it for location
+        // Found a valid 6-digit pincode - use pincode parameter
         console.log('🔍 Extracted pincode from search:', pincode);
-        params.location = pincode;
+        params.pincode = pincode;
         
         // If query has more than just pincode, also search by remaining text
         if (remainingQuery) {
@@ -88,8 +88,13 @@ class SimpleSearchService {
           console.log('🔍 Also searching for:', remainingQuery);
         }
       } else if (hasNumbers && !hasLetters) {
-        // Pure numbers but not valid pincode - still treat as location
-        params.location = query;
+        // Pure numbers but not valid pincode - check if it's close to 6 digits
+        if (query.length === 5 || query.length === 6) {
+          // Might be a pincode, use pincode param
+          params.pincode = query;
+        } else {
+          params.location = query;
+        }
       } else if (hasLetters && !hasNumbers) {
         // Pure letters - treat as name
         params.query = query;

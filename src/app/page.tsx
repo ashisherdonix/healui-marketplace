@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import ApiManager from '@/services/api';
 import Header from '@/components/layout/Header';
+import AddressBanner from '@/components/navigation/AddressBanner';
 import SimpleSearchInterface from '@/components/search/SimpleSearchInterface';
 import CleanPhysiotherapistCard from '@/components/shared/CleanPhysiotherapistCard';
 import Card from '@/components/card';
@@ -695,6 +696,7 @@ const HomePage: React.FC = () => {
   return (
     <>
       <Header />
+      <AddressBanner />
       <div style={{ minHeight: '100vh', backgroundColor: theme.colors.background }}>
         
         {/* Hero Section with Rotating Background */}

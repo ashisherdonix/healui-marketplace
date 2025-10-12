@@ -4,6 +4,7 @@ import { store } from '@/store/store';
 import therapistSlice from '@/store/slices/therapistSlice';
 import bookingSlice from '@/store/slices/bookingSlice';
 import { BatchAvailabilityQuery, BatchAvailabilityResponse } from '@/lib/types';
+import { CreateAddressDto, UpdateAddressDto, AddressApiResponse, AddressListApiResponse } from '@/lib/types/address';
 
 // Type definitions (kept for future use)
 // interface MarketplaceAuthDto {
@@ -224,6 +225,10 @@ class ApiManager {
     limit?: number;
     sort_by?: string;
     sort_order?: string;
+    lat?: number;
+    lng?: number;
+    radius?: number;
+    pincode?: string;
   }) => {
     const url = BASE_URL + ENDPOINTS.SEARCH_PHYSIOTHERAPISTS(params);
     return ApiMethods.get(url).then((res) => {
@@ -440,6 +445,37 @@ class ApiManager {
   static searchConditions = (query: string) => {
     const url = BASE_URL + ENDPOINTS.SEARCH_CONDITIONS(query);
     return ApiMethods.get(url);
+  };
+
+  // ========== ADDRESSES ==========
+  static getAddresses = (): Promise<AddressListApiResponse> => {
+    const url = BASE_URL + ENDPOINTS.GET_ADDRESSES();
+    return ApiMethods.get(url);
+  };
+
+  static createAddress = (data: CreateAddressDto): Promise<AddressApiResponse> => {
+    const url = BASE_URL + ENDPOINTS.CREATE_ADDRESS();
+    return ApiMethods.post(url, data);
+  };
+
+  static getAddress = (addressId: string): Promise<AddressApiResponse> => {
+    const url = BASE_URL + ENDPOINTS.GET_ADDRESS(addressId);
+    return ApiMethods.get(url);
+  };
+
+  static updateAddress = (addressId: string, data: UpdateAddressDto): Promise<AddressApiResponse> => {
+    const url = BASE_URL + ENDPOINTS.UPDATE_ADDRESS(addressId);
+    return ApiMethods.patch(url, data);
+  };
+
+  static deleteAddress = (addressId: string): Promise<{ success: boolean; message: string }> => {
+    const url = BASE_URL + ENDPOINTS.DELETE_ADDRESS(addressId);
+    return ApiMethods.delete(url);
+  };
+
+  static setPrimaryAddress = (addressId: string): Promise<AddressApiResponse> => {
+    const url = BASE_URL + ENDPOINTS.SET_PRIMARY_ADDRESS(addressId);
+    return ApiMethods.patch(url, {});
   };
 
   // ========== LOGOUT ==========

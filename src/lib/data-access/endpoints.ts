@@ -203,4 +203,12 @@ export const ENDPOINTS = {
     return url;
   },
   SEARCH_CONDITIONS: (query: string) => `conditions/search?q=${encodeURIComponent(query)}`,
+
+  // ========== ADDRESSES ==========
+  GET_ADDRESSES: () => 'addresses',
+  CREATE_ADDRESS: () => 'addresses',
+  GET_ADDRESS: (addressId: string) => `addresses/${addressId}`,
+  UPDATE_ADDRESS: (addressId: string) => `addresses/${addressId}`,
+  DELETE_ADDRESS: (addressId: string) => `addresses/${addressId}`,
+  SET_PRIMARY_ADDRESS: (addressId: string) => `addresses/${addressId}/set-primary`,
 };

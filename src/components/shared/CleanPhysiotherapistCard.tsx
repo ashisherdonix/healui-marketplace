@@ -222,7 +222,7 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
           {/* Specializations */}
           {physiotherapist.specializations && physiotherapist.specializations.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {physiotherapist.specializations.slice(0, 4).map((spec, index) => (
+              {(Array.isArray(physiotherapist.specializations) ? physiotherapist.specializations : []).slice(0, 4).map((spec, index) => (
                 <span 
                   key={index} 
                   style={{
@@ -513,7 +513,7 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
             gap: '6px',
             alignItems: 'center'
           }}>
-            {physiotherapist.specializations.slice(0, 2).map((spec, index) => (
+            {(Array.isArray(physiotherapist.specializations) ? physiotherapist.specializations : []).slice(0, 2).map((spec, index) => (
               <span 
                 key={index}
                 style={{
@@ -529,13 +529,13 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
                 {formatSpecialization(spec)}
               </span>
             ))}
-            {physiotherapist.specializations.length > 2 && (
+            {Array.isArray(physiotherapist.specializations) && physiotherapist.specializations.length > 2 && (
               <span style={{
                 color: theme.colors.gray[500],
                 fontSize: '11px',
                 fontWeight: '500'
               }}>
-                +{physiotherapist.specializations.length - 2} more
+                +{Array.isArray(physiotherapist.specializations) ? physiotherapist.specializations.length - 2 : 0} more
               </span>
             )}
           </div>

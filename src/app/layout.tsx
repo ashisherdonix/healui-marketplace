@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ReduxProvider from "@/providers/redux-provider";
 import Footer from "@/components/layout/Footer";
+import SmartFloatingSupport from "@/components/support/SmartFloatingSupport";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -168,6 +169,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
+            <SmartFloatingSupport />
           </div>
         </ReduxProvider>
       </body>

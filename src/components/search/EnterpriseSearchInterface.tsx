@@ -10,8 +10,11 @@ import {
   TrendingUp,
   Clock,
   ChevronDown,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Navigation,
+  Target
 } from 'lucide-react';
+import useGeolocation from '@/hooks/useGeolocation';
 
 // Types
 interface SearchFilters {
@@ -24,6 +27,12 @@ interface SearchFilters {
   minRating: number;
   maxPrice?: number;
   sortBy: 'RELEVANCE' | 'RATING' | 'PRICE' | 'DISTANCE';
+  // New location-based parameters
+  lat?: number;
+  lng?: number;
+  radius?: number;
+  pincode?: string;
+  useCurrentLocation?: boolean;
 }
 
 interface SearchSuggestion {
@@ -106,6 +115,12 @@ const EnterpriseSearchInterface: React.FC<EnterpriseSearchProps> = ({
     availability: 'ALL',
     minRating: 0,
     sortBy: 'RELEVANCE',
+    // Location-based parameters
+    lat: undefined,
+    lng: undefined,
+    radius: 15, // Default 15km radius
+    pincode: '',
+    useCurrentLocation: false,
     ...initialFilters
   });
 
@@ -121,6 +136,7 @@ const EnterpriseSearchInterface: React.FC<EnterpriseSearchProps> = ({
   // Custom hooks
   const debouncedQuery = useDebounce(filters.query, 300);
   const { trackSearch } = useSearchAnalytics();
+  const geolocation = useGeolocation();
 
   // Load recent searches from localStorage
   useEffect(() => {
@@ -135,6 +151,61 @@ const EnterpriseSearchInterface: React.FC<EnterpriseSearchProps> = ({
       }
     }
   }, []);
+
+  // Location handling functions
+  const parseLocationInput = useCallback((locationText: string) => {
+    // Check if input is a 6-digit pincode
+    const pincodeMatch = locationText.match(/\b\d{6}\b/);
+    if (pincodeMatch) {
+      return {
+        pincode: pincodeMatch[0],
+        location: locationText,
+        isSpecificPincode: true
+      };
+    }
+    
+    return {
+      pincode: '',
+      location: locationText,
+      isSpecificPincode: false
+    };
+  }, []);
+
+  const handleLocationChange = useCallback((value: string) => {
+    const locationData = parseLocationInput(value);
+    setFilters(prev => ({
+      ...prev,
+      location: locationData.location,
+      pincode: locationData.pincode,
+      // Clear coordinates when manually entering location
+      lat: locationData.isSpecificPincode ? prev.lat : undefined,
+      lng: locationData.isSpecificPincode ? prev.lng : undefined,
+      useCurrentLocation: false
+    }));
+  }, [parseLocationInput]);
+
+  const handleUseCurrentLocation = useCallback(() => {
+    if (!geolocation.isSupported) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+
+    geolocation.getCurrentPosition();
+  }, [geolocation]);
+
+  // Update filters when geolocation changes
+  useEffect(() => {
+    if (geolocation.latitude && geolocation.longitude && !geolocation.loading) {
+      setFilters(prev => ({
+        ...prev,
+        lat: geolocation.latitude!,
+        lng: geolocation.longitude!,
+        location: `${geolocation.latitude!.toFixed(4)}, ${geolocation.longitude!.toFixed(4)}`,
+        pincode: '', // Clear pincode when using coordinates
+        useCurrentLocation: true
+      }));
+    }
+  }, [geolocation.latitude, geolocation.longitude, geolocation.loading]);
 
   // Handle search execution
   const executeSearch = useCallback(() => {
@@ -176,6 +247,9 @@ const EnterpriseSearchInterface: React.FC<EnterpriseSearchProps> = ({
            filters.specialization || 
            filters.serviceType !== 'ALL' || 
            filters.availability !== 'ALL' ||
+           filters.lat || 
+           filters.lng || 
+           filters.pincode ||
            filters.minRating > 0 ||
            filters.maxPrice ||
            filters.sortBy !== 'RELEVANCE';
@@ -312,7 +386,20 @@ const EnterpriseSearchInterface: React.FC<EnterpriseSearchProps> = ({
               ref={searchInputRef}
               type="text"
               value={filters.query}
-              onChange={(e) => updateFilter('query', e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                updateFilter('query', value);
+                
+                // Auto-detect pincode in main search
+                const pincodeMatch = value.match(/\b\d{6}\b/);
+                if (pincodeMatch && !filters.location) {
+                  // If user types a pincode in main search, auto-populate pincode field
+                  setFilters(prev => ({ ...prev, pincode: pincodeMatch[0] }));
+                } else if (!value.match(/\d{6}/) && filters.pincode) {
+                  // Clear pincode if query no longer contains 6 digits
+                  setFilters(prev => ({ ...prev, pincode: '' }));
+                }
+              }}
               onFocus={() => {
                 setIsFocused(true);
                 setShowSuggestions(true);
@@ -407,16 +494,79 @@ const EnterpriseSearchInterface: React.FC<EnterpriseSearchProps> = ({
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Location
+                  {filters.useCurrentLocation && (
+                    <span className="ml-2 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                      Using current location
+                    </span>
+                  )}
                 </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={filters.location}
-                    onChange={(e) => updateFilter('location', e.target.value)}
-                    placeholder="City or pincode"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+                <div className="space-y-3">
+                  {/* Location Input */}
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={filters.location}
+                      onChange={(e) => handleLocationChange(e.target.value)}
+                      placeholder="City or pincode"
+                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    {/* Clear location button */}
+                    {filters.location && (
+                      <button
+                        onClick={() => {
+                          setFilters(prev => ({ ...prev, location: '', pincode: '', lat: undefined, lng: undefined, useCurrentLocation: false }));
+                          geolocation.clearLocation();
+                        }}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Location Actions */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleUseCurrentLocation}
+                      disabled={geolocation.loading}
+                      className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 disabled:opacity-50"
+                    >
+                      {geolocation.loading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Navigation className="w-4 h-4" />
+                      )}
+                      {geolocation.loading ? 'Getting location...' : 'Use current location'}
+                    </button>
+                    
+                    {/* Radius selector for coordinate-based search */}
+                    {(filters.lat && filters.lng) && (
+                      <div className="flex items-center gap-2">
+                        <Target className="w-4 h-4 text-gray-400" />
+                        <select
+                          value={filters.radius}
+                          onChange={(e) => setFilters(prev => ({ ...prev, radius: parseInt(e.target.value) }))}
+                          className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                        >
+                          <option value={5}>5 km</option>
+                          <option value={10}>10 km</option>
+                          <option value={15}>15 km</option>
+                          <option value={25}>25 km</option>
+                          <option value={50}>50 km</option>
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Location status/error */}
+                  {geolocation.error && (
+                    <p className="text-sm text-red-600">{geolocation.error}</p>
+                  )}
+                  
+                  {filters.pincode && (
+                    <p className="text-sm text-green-600">Pincode detected: {filters.pincode}</p>
+                  )}
                 </div>
               </div>
 

@@ -13,6 +13,12 @@ interface SearchFilters {
   sortBy: 'RELEVANCE' | 'RATING' | 'PRICE' | 'DISTANCE';
   page?: number;
   limit?: number;
+  // New location-based parameters
+  lat?: number;
+  lng?: number;
+  radius?: number;
+  pincode?: string;
+  useCurrentLocation?: boolean;
 }
 
 interface SearchResult {
@@ -174,16 +180,39 @@ class EnterpriseSearchService {
    * Convert our filter format to API parameters
    */
   private convertFiltersToApiParams(filters: SearchFilters): Record<string, any> {
+    // Debug location parameters
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      console.log('🔧 EnterpriseSearchService - Converting Filters:', {
+        inputFilters: filters,
+        hasLocation: !!filters.location,
+        hasPincode: !!filters.pincode,
+        hasCoordinates: !!(filters.lat && filters.lng),
+      });
+    }
     const params: Record<string, any> = {
       page: filters.page || 1,
       limit: filters.limit || 12
     };
 
+    // Handle query parameter - check if it's a pincode
     if (filters.query) {
-      params.query = filters.query;
+      const pincodeMatch = filters.query.match(/\b\d{6}\b/);
+      if (pincodeMatch && !filters.pincode && !filters.location) {
+        // If query is just a pincode, use it as pincode parameter instead
+        params.pincode = pincodeMatch[0];
+        // Also keep the query in case backend wants to search by name too
+        const queryWithoutPincode = filters.query.replace(/\b\d{6}\b/, '').trim();
+        if (queryWithoutPincode) {
+          params.query = queryWithoutPincode;
+        }
+      } else {
+        // Regular text query
+        params.query = filters.query;
+      }
     }
 
-    if (filters.location) {
+    // Only send location if no pincode or coordinates are specified (to avoid conflicts)
+    if (filters.location && !filters.pincode && !(filters.lat && filters.lng)) {
       params.location = filters.location;
     }
 
@@ -209,6 +238,22 @@ class EnterpriseSearchService {
       params.max_price = filters.maxPrice;
     }
 
+    // Handle location-based parameters (priority: coordinates > pincode > location text)
+    if (filters.lat && filters.lng) {
+      // Coordinate-based search takes highest priority
+      params.lat = filters.lat;
+      params.lng = filters.lng;
+      
+      // Include radius for coordinate-based search
+      if (filters.radius) {
+        params.radius = filters.radius;
+      }
+    } else if (filters.pincode) {
+      // Pincode search takes second priority
+      params.pincode = filters.pincode;
+    }
+    // Note: Generic location text is handled above with the location field
+
     // Handle sorting
     switch (filters.sortBy) {
       case 'RATING':
@@ -226,6 +271,13 @@ class EnterpriseSearchService {
       default:
         // RELEVANCE - let API handle default sorting
         break;
+    }
+
+    // Debug final params
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      console.log('🚀 Final API Parameters:', params);
+      console.log('🌐 Request URL Preview:', 
+        `/marketplace/physiotherapists/search?${new URLSearchParams(params).toString()}`);
     }
 
     return params;

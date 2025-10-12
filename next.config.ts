@@ -18,6 +18,22 @@ const nextConfig: NextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  // Transpile packages for proper SSR handling
+  transpilePackages: ['leaflet'],
+  
+  webpack: (config, { isServer }) => {
+    // Handle Leaflet on client side only
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    
+    return config;
+  },
 };
 
 export default nextConfig;
