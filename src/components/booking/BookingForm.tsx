@@ -77,7 +77,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [step, setStep] = useState<'patient' | 'details' | 'payment'>('patient');
+  // Removed multi-step navigation - now single step
+  // const [step, setStep] = useState<'patient' | 'details' | 'payment'>('patient');
   
   const [formData, setFormData] = useState({
     patient_user_id: userId || '',
@@ -224,8 +225,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       // Now create the payment intent with the actual booking ID
       await createPaymentIntent(bookingId);
       
-      // Move to payment step
-      setStep('payment');
+      // Payment step is now integrated - no need to change step
     } catch (error: unknown) {
       console.error('Booking/payment creation failed:', error);
       setError(error instanceof Error ? error.message : 'An unexpected error occurred');
@@ -234,7 +234,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
   };
 
-  const createPaymentIntent = async (visitId: string) => {
+  const createPaymentIntent = async (visitId?: string) => {
+    // If no visitId provided, use the created booking ID
+    const bookingId = visitId || createdBooking?.id;
     setPaymentLoading(true);
     setError(null);
 
@@ -242,7 +244,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       const patientUserId = formData.selected_family_member || formData.patient_user_id;
       
       const paymentIntentData = {
-        visit_id: visitId,
+        visit_id: bookingId,
         coupon_code: appliedCoupon?.coupon_code
       };
 
@@ -443,45 +445,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
             }} />
           </button>
 
-          {/* Back Button */}
-          {step !== 'patient' && (
-            <button
-              onClick={() => setStep(step === 'payment' ? 'details' : step === 'details' ? 'patient' : 'patient')}
-              style={{
-                position: 'absolute',
-                top: '12px',
-                left: '12px',
-                background: 'rgba(0, 0, 0, 0.15)',
-                border: 'none',
-                borderRadius: '6px',
-                width: '28px',
-                height: '28px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                zIndex: 10
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.25)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.15)';
-              }}
-            >
-              <svg 
-                width="16" 
-                height="16" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="#000000" 
-                strokeWidth="2"
-              >
-                <path d="m15 18-6-6 6-6"/>
-              </svg>
-            </button>
-          )}
 
           <div style={{ textAlign: 'center' }}>
             <h2 style={{
@@ -500,8 +463,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
               fontWeight: '500',
               opacity: 0.8
             }}>
-              {step === 'patient' ? 'Select patient for appointment' : 
-               step === 'details' ? 'Appointment details' : 'Payment & confirmation'}
+              Complete your booking in one step
             </p>
           </div>
         </div>
@@ -588,9 +550,10 @@ const BookingForm: React.FC<BookingFormProps> = ({
             </div>
           )}
 
-          {/* Form Steps */}
-          {step === 'patient' && (
-            <div>
+          {/* Single Step Form */}
+          <div>
+            {/* Patient Selection Section */}
+            <div style={{ marginBottom: '24px' }}>
               <h3 style={{
                 fontSize: '16px',
                 fontWeight: '600',
@@ -600,7 +563,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
                 Select Patient
               </h3>
 
-              
               {/* Loading state for family members */}
               {loading && (
                 <div style={{
@@ -736,46 +698,19 @@ const BookingForm: React.FC<BookingFormProps> = ({
                   </div>
                 </div>
               )}
-
-              <button
-                onClick={() => setStep('details')}
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  background: '#1e5f79',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  marginTop: '16px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#000000';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#1e5f79';
-                }}
-              >
-                Continue
-              </button>
             </div>
-          )}
 
-          {step === 'details' && (
-            <div>
+            {/* Chief Complaint Section */}
+            <div style={{ marginBottom: '24px' }}>
               <h3 style={{
                 fontSize: '16px',
                 fontWeight: '600',
                 color: '#000000',
                 margin: '0 0 16px 0'
               }}>
-                Complete Booking Details
+                Appointment Details
               </h3>
-
-              {/* Chief Complaint */}
+              
               <div style={{ marginBottom: '16px' }}>
                 <label style={{
                   display: 'block',
@@ -918,85 +853,17 @@ const BookingForm: React.FC<BookingFormProps> = ({
                   </div>
                 </div>
               )}
-
-              {/* Fee Breakdown */}
-              <PaymentSummary
-                consultationFee={formData.consultation_fee}
-                travelFee={formData.travel_fee}
-                discountAmount={0}
-                appliedCoupon={null}
-                finalAmount={formData.total_amount}
-              />
-
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button
-                  onClick={() => setStep('patient')}
-                  style={{
-                    flex: 1,
-                    padding: '14px',
-                    background: 'none',
-                    color: '#1e5f79',
-                    border: '1px solid #c8eaeb',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#eff8ff';
-                    e.currentTarget.style.borderColor = '#1e5f79';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.borderColor = '#c8eaeb';
-                  }}
-                >
-                  Back
-                </button>
-                <button
-                  onClick={handleCreateBookingAndPayment}
-                  disabled={!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading}
-                  style={{
-                    flex: 2,
-                    padding: '14px',
-                    background: (!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading) 
-                      ? '#9ca3af' 
-                      : '#1e5f79',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '15px',
-                    fontWeight: '600',
-                    cursor: (!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading) ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!(!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading)) {
-                      e.currentTarget.style.backgroundColor = '#000000';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!(!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading)) {
-                      e.currentTarget.style.backgroundColor = '#1e5f79';
-                    }
-                  }}
-                >
-                  {loading ? 'Creating Booking...' : 'Continue to Payment'}
-                </button>
-              </div>
             </div>
-          )}
 
-          {step === 'payment' && (
-            <div>
+            {/* Payment Section */}
+            <div style={{ marginBottom: '24px' }}>
               <h3 style={{
                 fontSize: '16px',
                 fontWeight: '600',
                 color: '#000000',
                 margin: '0 0 16px 0'
               }}>
-                Payment & Confirmation
+                Payment Details
               </h3>
 
               {/* Payment Summary */}
@@ -1014,95 +881,70 @@ const BookingForm: React.FC<BookingFormProps> = ({
                 totalAmount={formData.total_amount}
                 onCouponApplied={handleCouponApplied}
               />
-
-              {/* Payment Gateway */}
-              {paymentData ? (
-                <RazorpayCheckout
-                  paymentData={paymentData}
-                  patientName={actualUser?.full_name || 'Patient'}
-                  patientPhone={actualUser?.phone}
-                  patientEmail={actualUser?.email}
-                  onSuccess={handlePaymentSuccess}
-                  onError={handlePaymentError}
-                  loading={loading}
-                />
-              ) : (
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <button
-                    onClick={() => setStep('details')}
-                    style={{
-                      flex: 1,
-                      padding: '14px',
-                      background: 'none',
-                      color: '#1e5f79',
-                      border: '1px solid #c8eaeb',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#eff8ff';
-                      e.currentTarget.style.borderColor = '#1e5f79';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.borderColor = '#c8eaeb';
-                    }}
-                  >
-                    Back
-                  </button>
-                  <button
-                    onClick={createPaymentIntent}
-                    disabled={paymentLoading}
-                    style={{
-                      flex: 2,
-                      padding: '14px',
-                      background: paymentLoading ? '#9ca3af' : '#1e5f79',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '15px',
-                      fontWeight: '600',
-                      cursor: paymentLoading ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!paymentLoading) {
-                        e.currentTarget.style.backgroundColor = '#000000';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!paymentLoading) {
-                        e.currentTarget.style.backgroundColor = '#1e5f79';
-                      }
-                    }}
-                  >
-                    {paymentLoading ? (
-                      <>
-                        <div style={{
-                          width: '16px',
-                          height: '16px',
-                          border: '2px solid white',
-                          borderTopColor: 'transparent',
-                          borderRadius: '50%',
-                          animation: 'spin 1s linear infinite'
-                        }} />
-                        Setting up...
-                      </>
-                    ) : (
-                      `Proceed to Pay ₹${finalAmount}`
-                    )}
-                  </button>
-                </div>
-              )}
             </div>
-          )}
+
+            {/* Submit Button */}
+            {paymentData ? (
+              <RazorpayCheckout
+                paymentData={paymentData}
+                patientName={actualUser?.full_name || 'Patient'}
+                patientPhone={actualUser?.phone}
+                patientEmail={actualUser?.email}
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
+                loading={loading}
+              />
+            ) : (
+              <button
+                onClick={handleCreateBookingAndPayment}
+                disabled={!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading}
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  background: (!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading) 
+                    ? '#9ca3af' 
+                    : '#1e5f79',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: (!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading) ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  if (!(!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading)) {
+                    e.currentTarget.style.backgroundColor = '#000000';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!(!formData.chief_complaint || (formData.visit_mode === 'HOME_VISIT' && !formData.patient_address) || loading)) {
+                    e.currentTarget.style.backgroundColor = '#1e5f79';
+                  }
+                }}
+              >
+                {loading ? (
+                  <>
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid white',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                    Creating Booking...
+                  </>
+                ) : (
+                  `Book Appointment - Pay ₹${finalAmount}`
+                )}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* CSS for animations */}

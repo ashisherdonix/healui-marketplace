@@ -37,12 +37,35 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({ onAddAddress }) => {
     dispatch(fetchAddresses());
   }, [dispatch]);
 
+  // Auto-detect current location when no saved addresses
+  useEffect(() => {
+    if (addresses.length === 0 && !currentAddress && !currentLocation && !locationLoading) {
+      // No saved addresses and no current location - automatically get current location
+      console.log('No saved addresses found, automatically getting current location...');
+      dispatch(getCurrentLocation());
+    }
+  }, [addresses, currentAddress, currentLocation, locationLoading, dispatch]);
+
   const handleUseCurrentLocation = () => {
     dispatch(getCurrentLocation());
     setIsOpen(false);
   };
 
+  // Extract and log pincode when current location changes
+  useEffect(() => {
+    if (currentLocation && currentLocation.address) {
+      // Extract 6-digit pincode from address string
+      const pincodeMatch = currentLocation.address.match(/\b\d{6}\b/);
+      if (pincodeMatch) {
+        console.log('PINCODE CHOOSES:', pincodeMatch[0]);
+      } else {
+        console.log('PINCODE CHOOSES: No pincode found in current location');
+      }
+    }
+  }, [currentLocation]);
+
   const handleSelectAddress = (address: any) => {
+    console.log('PINCODE CHOOSES:', address.pincode);
     dispatch(setCurrentAddress(address));
     setIsOpen(false);
   };

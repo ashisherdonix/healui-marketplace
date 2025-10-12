@@ -40,22 +40,40 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
     dispatch(fetchAddresses());
   }, [dispatch]);
 
-  // Auto-select primary address on first render
+  // Auto-select primary address on first render, or use current location if no addresses
   useEffect(() => {
     if (addresses.length > 0 && !currentAddress) {
       const primaryAddress = addresses.find(addr => addr.is_primary && addr.is_active);
       if (primaryAddress) {
         dispatch(setCurrentAddress(primaryAddress));
       }
+    } else if (addresses.length === 0 && !currentAddress && !currentLocation && !locationLoading) {
+      // No saved addresses and no current location - automatically get current location
+      console.log('No saved addresses found, automatically getting current location...');
+      dispatch(getCurrentLocation());
     }
-  }, [addresses, currentAddress, dispatch]);
+  }, [addresses, currentAddress, currentLocation, locationLoading, dispatch]);
 
   const handleUseCurrentLocation = useCallback(() => {
     dispatch(getCurrentLocation());
     setIsOpen(false);
   }, [dispatch]);
 
+  // Extract and log pincode when current location changes
+  useEffect(() => {
+    if (currentLocation && currentLocation.address) {
+      // Extract 6-digit pincode from address string
+      const pincodeMatch = currentLocation.address.match(/\b\d{6}\b/);
+      if (pincodeMatch) {
+        console.log('PINCODE CHOOSES:', pincodeMatch[0]);
+      } else {
+        console.log('PINCODE CHOOSES: No pincode found in current location');
+      }
+    }
+  }, [currentLocation]);
+
   const handleSelectAddress = useCallback((address: any) => {
+    console.log('PINCODE CHOOSES:', address.pincode);
     dispatch(setCurrentAddress(address));
     setIsOpen(false);
   }, [dispatch]);
@@ -176,11 +194,10 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
                 </div>
               </div>
 
-              {/* Change/Add Buttons */}
+              {/* Change Button Only */}
               <div style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: '6px',
                 flexShrink: 0
               }}>
                 <button
@@ -217,36 +234,6 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
                     transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                     transition: 'transform 0.2s ease'
                   }} />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleAddClick}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '3px',
-                    padding: '4px 8px',
-                    backgroundColor: '#1e5f79',
-                    border: 'none',
-                    borderRadius: '4px',
-                    fontSize: '11px',
-                    fontWeight: '500',
-                    color: '#ffffff',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.3px'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0f172a';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#1e5f79';
-                  }}
-                >
-                  <PlusIcon style={{ width: '10px', height: '10px' }} />
-                  Add
                 </button>
               </div>
             </div>
@@ -500,6 +487,48 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
                     No saved addresses yet. Add your first address to get started.
                   </div>
                 )}
+
+                {/* Add New Address Option */}
+                <div style={{ padding: '8px', borderTop: '1px solid #f1f5f9' }}>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      setShowAddModal(true);
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '12px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f8fafc';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <PlusIcon style={{ 
+                      width: '16px', 
+                      height: '16px', 
+                      color: '#64748b',
+                      flexShrink: 0
+                    }} />
+                    <span style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>
+                      Add new address
+                    </span>
+                  </button>
+                </div>
               </div>
             </>
           )}
