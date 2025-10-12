@@ -16,6 +16,7 @@ import type { User as UserType } from '@/lib/types';
 import CouponInput from '@/components/payment/CouponInput';
 import PaymentSummary from '@/components/payment/PaymentSummary';
 import RazorpayCheckout from '@/components/payment/RazorpayCheckout';
+import { selectCurrentAddress } from '@/store/slices/addressSlice';
 
 interface AvailabilitySlot {
   slot_id: string;
@@ -66,6 +67,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   onSuccess
 }) => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const currentAddress = useAppSelector(selectCurrentAddress);
   
   // Handle nested user structure - user.user.id is the actual ID
   const actualUser = (user as {user?: UserType})?.user || user;
@@ -86,7 +88,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     end_time: selectedSlot.end_time,
     duration_minutes: 60, // Default duration
     chief_complaint: '',
-    patient_address: actualUser?.address || '',
+    patient_address: '', // User will enter specific details only
     consultation_fee: Number(selectedSlot.fee) || 0,
     travel_fee: selectedSlot.visit_mode === 'HOME_VISIT' ? 100 : 0, // Default travel fee
     total_amount: (Number(selectedSlot.fee) || 0) + (selectedSlot.visit_mode === 'HOME_VISIT' ? 100 : 0),
@@ -108,7 +110,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       setFormData(prev => ({
         ...prev,
         patient_user_id: userId,
-        patient_address: actualUser?.address || prev.patient_address
+        // Keep patient_address as user's specific details only
       }));
     }
   }, [userId, actualUser]);
@@ -185,6 +187,13 @@ const BookingForm: React.FC<BookingFormProps> = ({
       // First, create the booking
       const patientUserId = formData.selected_family_member || formData.patient_user_id;
       
+      // Combine base address with specific details
+      const fullAddress = currentAddress && formData.patient_address
+        ? `${formData.patient_address}, ${currentAddress.address_line_1}${currentAddress.address_line_2 ? ', ' + currentAddress.address_line_2 : ''}${currentAddress.landmark ? ', Near ' + currentAddress.landmark : ''}, ${currentAddress.city}, ${currentAddress.state} - ${currentAddress.pincode}`
+        : formData.patient_address || currentAddress 
+          ? `${currentAddress.address_line_1}${currentAddress.address_line_2 ? ', ' + currentAddress.address_line_2 : ''}${currentAddress.landmark ? ', Near ' + currentAddress.landmark : ''}, ${currentAddress.city}, ${currentAddress.state} - ${currentAddress.pincode}`
+          : '';
+
       const bookingData = {
         patient_user_id: patientUserId,
         physiotherapist_id: formData.physiotherapist_id,
@@ -194,7 +203,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         end_time: formData.end_time,
         duration_minutes: Number(formData.duration_minutes),
         chief_complaint: formData.chief_complaint,
-        patient_address: formData.patient_address,
+        patient_address: fullAddress,
         consultation_fee: Number(formData.consultation_fee),
         travel_fee: Number(formData.travel_fee),
         total_amount: Number(finalAmount),
@@ -320,6 +329,13 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
     try {
       // Prepare booking data - ensure numeric fields are numbers
+      // Combine base address with specific details
+      const fullAddress = currentAddress && formData.patient_address
+        ? `${formData.patient_address}, ${currentAddress.address_line_1}${currentAddress.address_line_2 ? ', ' + currentAddress.address_line_2 : ''}${currentAddress.landmark ? ', Near ' + currentAddress.landmark : ''}, ${currentAddress.city}, ${currentAddress.state} - ${currentAddress.pincode}`
+        : formData.patient_address || currentAddress 
+          ? `${currentAddress.address_line_1}${currentAddress.address_line_2 ? ', ' + currentAddress.address_line_2 : ''}${currentAddress.landmark ? ', Near ' + currentAddress.landmark : ''}, ${currentAddress.city}, ${currentAddress.state} - ${currentAddress.pincode}`
+          : '';
+
       const bookingData = {
         patient_user_id: patientUserId,
         physiotherapist_id: formData.physiotherapist_id,
@@ -329,7 +345,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         end_time: formData.end_time,
         duration_minutes: Number(formData.duration_minutes),
         chief_complaint: formData.chief_complaint,
-        patient_address: formData.patient_address,
+        patient_address: fullAddress,
         consultation_fee: Number(formData.consultation_fee),
         travel_fee: Number(formData.travel_fee),
         total_amount: Number(formData.total_amount),
@@ -803,43 +819,103 @@ const BookingForm: React.FC<BookingFormProps> = ({
               {/* Address for Home Visit */}
               {formData.visit_mode === 'HOME_VISIT' && (
                 <div style={{ marginBottom: '16px' }}>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#000000',
-                    marginBottom: '8px'
-                  }}>
-                    Home Address *
-                  </label>
-                  <textarea
-                    value={formData.patient_address}
-                    onChange={(e) => handleInputChange('patient_address', e.target.value)}
-                    placeholder="Enter your complete address for home visit"
-                    rows={3}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '1px solid #c8eaeb',
-                      borderRadius: '8px',
+                  {/* Service Location - Read Only */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{
+                      display: 'block',
                       fontSize: '14px',
-                      backgroundColor: '#ffffff',
+                      fontWeight: '500',
                       color: '#000000',
-                      resize: 'vertical',
-                      fontFamily: 'inherit',
-                      outline: 'none',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#1e5f79';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(30, 95, 121, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = '#c8eaeb';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                    required
-                  />
+                      marginBottom: '8px'
+                    }}>
+                      Service Location
+                    </label>
+                    <div style={{
+                      padding: '12px',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      backgroundColor: '#f8fafc',
+                      fontSize: '14px',
+                      color: '#475569',
+                      lineHeight: '1.5'
+                    }}>
+                      {currentAddress ? (
+                        <>
+                          <div style={{ fontWeight: '500', color: '#1e293b' }}>
+                            {currentAddress.label || currentAddress.address_type}
+                          </div>
+                          <div>
+                            {currentAddress.address_line_1}
+                            {currentAddress.address_line_2 && `, ${currentAddress.address_line_2}`}
+                            {currentAddress.landmark && `, Near ${currentAddress.landmark}`}
+                          </div>
+                          <div>
+                            {currentAddress.city}, {currentAddress.state} - {currentAddress.pincode}
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{ color: '#dc2626' }}>
+                          No address selected. Please select an address from the header to continue.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Additional Address Details */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#000000',
+                      marginBottom: '8px'
+                    }}>
+                      Complete Address Details *
+                      <span style={{
+                        fontSize: '12px',
+                        color: '#64748b',
+                        fontWeight: '400',
+                        marginLeft: '8px'
+                      }}>
+                        (Add house/flat number, floor, etc.)
+                      </span>
+                    </label>
+                    <textarea
+                      value={formData.patient_address}
+                      onChange={(e) => handleInputChange('patient_address', e.target.value)}
+                      placeholder="Enter house/flat number, floor, building name, and any special instructions for reaching your location"
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #c8eaeb',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        resize: 'vertical',
+                        fontFamily: 'inherit',
+                        outline: 'none',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#1e5f79';
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(30, 95, 121, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#c8eaeb';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                      required
+                    />
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#64748b',
+                      marginTop: '6px'
+                    }}>
+                      Example: Flat 301, Tower B, 3rd Floor, Blue Building, Ring bell twice
+                    </div>
+                  </div>
                 </div>
               )}
 

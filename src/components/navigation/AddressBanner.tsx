@@ -40,6 +40,16 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
     dispatch(fetchAddresses());
   }, [dispatch]);
 
+  // Auto-select primary address on first render
+  useEffect(() => {
+    if (addresses.length > 0 && !currentAddress) {
+      const primaryAddress = addresses.find(addr => addr.is_primary && addr.is_active);
+      if (primaryAddress) {
+        dispatch(setCurrentAddress(primaryAddress));
+      }
+    }
+  }, [addresses, currentAddress, dispatch]);
+
   const handleUseCurrentLocation = useCallback(() => {
     dispatch(getCurrentLocation());
     setIsOpen(false);
@@ -62,6 +72,7 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
     dispatch(fetchAddresses());
     setShowAddModal(false);
   }, [dispatch]);
+
 
   const handleDeleteAddress = useCallback(async (addressId: string) => {
     try {
@@ -113,12 +124,13 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
             justifyContent: 'flex-start',
             gap: '1rem'
           }}>
-            {/* Address Container - Compact on desktop */}
-            <div style={{
+            {/* Address Container - Responsive */}
+            <div className="address-container" style={{
               display: 'flex',
               alignItems: 'center',
               gap: '1rem',
               maxWidth: '600px',
+              width: '100%',
               backgroundColor: '#ffffff',
               border: '1px solid #e2e8f0',
               borderRadius: '8px',
@@ -141,7 +153,7 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
                 }} />
                 
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ 
+                  <div className="service-label" style={{ 
                     fontSize: '10px', 
                     color: '#64748b',
                     fontWeight: '500',
@@ -151,7 +163,7 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
                   }}>
                     Service Location
                   </div>
-                  <div style={{ 
+                  <div className="address-text" style={{ 
                     fontSize: '13px', 
                     color: '#1e293b',
                     fontWeight: '600',
@@ -253,8 +265,8 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
                 onClick={() => setIsOpen(false)}
               />
               
-              {/* Dropdown Content - Compact positioning */}
-              <div style={{
+              {/* Dropdown Content - Responsive */}
+              <div className="address-dropdown" style={{
                 position: 'absolute',
                 top: '100%',
                 left: '0',
@@ -428,7 +440,7 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
                                   alignItems: 'center',
                                   gap: '2px'
                                 }}>
-                                  ★ Default
+                                  ★ Primary
                                 </span>
                               )}
                             </div>
@@ -500,6 +512,7 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
         onClose={handleCloseModal}
         onSuccess={handleModalSuccess}
       />
+
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
@@ -643,11 +656,63 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
         </div>
       )}
 
-      {/* CSS for animations */}
+      {/* CSS for animations and responsive styles */}
       <style jsx>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 640px) {
+          .address-container {
+            gap: 0.5rem !important;
+            padding: 6px 12px !important;
+            max-width: 100% !important;
+          }
+          
+          .address-container > div:first-child {
+            gap: 6px !important;
+          }
+          
+          .address-container svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          
+          .address-container button {
+            padding: 3px 6px !important;
+            font-size: 10px !important;
+            gap: 2px !important;
+          }
+          
+          .address-container button svg {
+            width: 8px !important;
+            height: 8px !important;
+          }
+          
+          .address-dropdown {
+            width: calc(100vw - 2rem) !important;
+            max-width: 500px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+          }
+          
+          .address-dropdown button {
+            font-size: 12px !important;
+          }
+          
+          .address-dropdown > div {
+            padding: 12px !important;
+          }
+          
+          .service-label {
+            font-size: 9px !important;
+            letter-spacing: 0.3px !important;
+          }
+          
+          .address-text {
+            font-size: 11px !important;
+          }
         }
       `}</style>
     </>
