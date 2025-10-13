@@ -88,15 +88,15 @@ const DateSelection: React.FC<DateSelectionProps> = ({
       borderRadius: '12px',
       padding: '16px',
       border: '1px solid #E5E7EB',
-      marginBottom: '16px'
+      marginBottom: '8px'
     }}>
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '20px',
+        marginBottom: '12px',
         flexWrap: 'wrap',
-        gap: '12px'
+        gap: '8px'
       }}>
         <h3 style={{
           fontSize: '18px',
@@ -179,8 +179,8 @@ const DateSelection: React.FC<DateSelectionProps> = ({
       {dateViewMode === 'quick' && (
         <div className="quick-date-grid" style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
-          gap: '8px'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+          gap: '6px'
         }}>
           {[0, 1, 2, 3, 4, 5, 6].map((daysAhead) => {
             const date = new Date();
@@ -196,7 +196,7 @@ const DateSelection: React.FC<DateSelectionProps> = ({
                 disabled={slotCount === 0}
                 style={{
                   position: 'relative',
-                  padding: '12px',
+                  padding: '8px 6px',
                   border: `2px solid ${isSelected ? '#2563EB' : '#E5E7EB'}`,
                   borderRadius: '8px',
                   backgroundColor: isSelected ? '#EFF6FF' : slotCount > 0 ? 'white' : '#F9FAFB',
@@ -204,7 +204,11 @@ const DateSelection: React.FC<DateSelectionProps> = ({
                   cursor: slotCount > 0 ? 'pointer' : 'not-allowed',
                   textAlign: 'center',
                   transition: 'all 0.2s ease',
-                  opacity: slotCount === 0 ? 0.6 : 1
+                  opacity: slotCount === 0 ? 0.6 : 1,
+                  minHeight: '60px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center'
                 }}
                 onMouseEnter={(e) => {
                   if (slotCount > 0 && !isSelected) {
@@ -219,10 +223,10 @@ const DateSelection: React.FC<DateSelectionProps> = ({
                   }
                 }}
               >
-                <div style={{ fontWeight: '600', fontSize: '14px' }}>
+                <div style={{ fontWeight: '600', fontSize: '12px', lineHeight: '1.2' }}>
                   {daysAhead === 0 ? 'Today' : daysAhead === 1 ? 'Tomorrow' : formatDate(date)}
                 </div>
-                <div style={{ fontSize: '11px', opacity: 0.8 }}>
+                <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '2px' }}>
                   {slotCount > 0 ? `${slotCount} slots` : 'No slots'}
                 </div>
                 {isSelected && slotCount > 0 && (

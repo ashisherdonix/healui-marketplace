@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ApiManager from '@/services/api';
-import { Calendar, Star, CheckCircle, ArrowLeft, MapPin, Clock, Phone, Video, ChevronLeft, ChevronRight, Home, User } from 'lucide-react';
+import { Calendar, Star, CheckCircle, ArrowLeft, MapPin, Clock, Phone, Video, ChevronLeft, ChevronRight, Home, User, CreditCard } from 'lucide-react';
 import EnhancedBookingForm from '@/components/booking/EnhancedBookingForm';
 import Header from '@/components/layout/Header';
 import { PhysiotherapistProfileSkeleton } from '@/components/shared/SkeletonLoader';
@@ -307,50 +307,7 @@ const PhysiotherapistResponsivePage: React.FC = () => {
     <div style={{ minHeight: '100vh', backgroundColor: theme.colors.background }}>
       <Header />
       
-      {/* Breadcrumb */}
-      <div style={{ backgroundColor: theme.colors.white, borderBottom: `1px solid ${theme.colors.secondary}` }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px 16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <button
-              onClick={() => router.push('/')}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: theme.colors.primary,
-                fontSize: '14px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '4px 8px',
-                borderRadius: '6px'
-              }}
-            >
-              <Home style={{ width: '14px', height: '14px' }} />
-              Home
-            </button>
-            <span style={{ color: theme.colors.gray[400] }}>→</span>
-            <button
-              onClick={() => router.back()}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: theme.colors.primary,
-                fontSize: '14px',
-                cursor: 'pointer',
-                padding: '4px 8px',
-                borderRadius: '6px'
-              }}
-            >
-              Search
-            </button>
-            <span style={{ color: theme.colors.gray[400] }}>→</span>
-            <span style={{ color: theme.colors.gray[600], fontSize: '14px' }}>
-              Dr. {profile.full_name}
-            </span>
-          </div>
-        </div>
-      </div>
+
 
       {/* Desktop Cover Section - Hidden on Mobile */}
       <div className="desktop-only" style={{ position: 'relative', height: '400px', overflow: 'hidden' }}>
@@ -374,6 +331,7 @@ const PhysiotherapistResponsivePage: React.FC = () => {
           background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(30, 95, 121, 0.8))'
         }} />
 
+
         <div style={{
           position: 'absolute',
           bottom: '40px',
@@ -384,9 +342,9 @@ const PhysiotherapistResponsivePage: React.FC = () => {
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
             <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-end' }}>
               <div style={{
-                width: '120px',
-                height: '120px',
-                borderRadius: '16px',
+                width: '150px',
+                height: '150px',
+                borderRadius: '20px',
                 overflow: 'hidden',
                 border: '4px solid rgba(255, 255, 255, 0.2)',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)'
@@ -444,6 +402,23 @@ const PhysiotherapistResponsivePage: React.FC = () => {
                   )}
                 </div>
 
+                {/* About Section */}
+                {profile.bio && (
+                  <p style={{
+                    fontSize: '14px',
+                    lineHeight: '1.5',
+                    marginBottom: '12px',
+                    opacity: 0.95,
+                    maxWidth: '600px',
+                    overflow: 'hidden',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical'
+                  }}>
+                    {profile.bio}
+                  </p>
+                )}
+
                 {profile.specializations && profile.specializations.length > 0 && (
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {profile.specializations.slice(0, 3).map((spec, index) => (
@@ -465,19 +440,55 @@ const PhysiotherapistResponsivePage: React.FC = () => {
                 )}
               </div>
 
+              {/* Payment Information */}
               <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                borderRadius: '12px',
-                padding: '16px',
-                backdropFilter: 'blur(10px)',
-                textAlign: 'center'
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'flex-end'
               }}>
-                <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '12px', marginBottom: '4px' }}>
-                  Consultation Fee
-                </div>
-                <div style={{ color: 'white', fontSize: '20px', fontWeight: '700' }}>
-                  ₹{formatPrice(profile.consultation_fee || '800')}
-                </div>
+                {/* Online Consultation */}
+                {profile.online_consultation_available && (
+                  <div style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    backdropFilter: 'blur(10px)',
+                    textAlign: 'center',
+                    minWidth: '140px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: '8px' }}>
+                      <Video style={{ width: '16px', height: '16px', color: 'rgba(255, 255, 255, 0.9)' }} />
+                      <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '12px' }}>
+                        Online
+                      </div>
+                    </div>
+                    <div style={{ color: 'white', fontSize: '20px', fontWeight: '700' }}>
+                      ₹{formatPrice(profile.consultation_fee || '800')}
+                    </div>
+                  </div>
+                )}
+
+                {/* Home Visit */}
+                {profile.home_visit_available && (
+                  <div style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    backdropFilter: 'blur(10px)',
+                    textAlign: 'center',
+                    minWidth: '140px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: '8px' }}>
+                      <Home style={{ width: '16px', height: '16px', color: 'rgba(255, 255, 255, 0.9)' }} />
+                      <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '12px' }}>
+                        Home Visit
+                      </div>
+                    </div>
+                    <div style={{ color: 'white', fontSize: '20px', fontWeight: '700' }}>
+                      ₹{formatPrice(profile.home_visit_fee || '1200')}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -485,16 +496,17 @@ const PhysiotherapistResponsivePage: React.FC = () => {
       </div>
 
       {/* Mobile Profile Header */}
-      <div className="mobile-only" style={{ backgroundColor: theme.colors.white, padding: '20px 16px' }}>
-        <div style={{ textAlign: 'center' }}>
+      <div className="mobile-only" style={{ backgroundColor: theme.colors.white, padding: '16px' }}>
+        {/* Photo, Name and About Section */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
           <div style={{
             width: '80px',
             height: '80px',
-            borderRadius: '50%',
+            borderRadius: '12px',
             overflow: 'hidden',
-            margin: '0 auto 16px',
+            flexShrink: 0,
             backgroundColor: theme.colors.secondary,
-            border: `3px solid ${theme.colors.primary}`
+            border: `2px solid ${theme.colors.primary}`
           }}>
             {profile.profile_photo_url ? (
               <img
@@ -510,7 +522,7 @@ const PhysiotherapistResponsivePage: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: theme.colors.primary,
-                fontSize: '28px',
+                fontSize: '24px',
                 fontWeight: '600'
               }}>
                 {profile.full_name?.charAt(0) || 'D'}
@@ -518,84 +530,71 @@ const PhysiotherapistResponsivePage: React.FC = () => {
             )}
           </div>
 
-          <h1 style={{
-            fontSize: '24px',
-            fontWeight: '700',
-            color: theme.colors.text,
-            margin: 0,
-            marginBottom: '8px'
-          }}>
-            Dr. {profile.full_name}
-          </h1>
-
-          {profile.is_verified && (
-            <div style={{
-              display: 'inline-flex',
+          {/* Name and About Text */}
+          <div style={{ flex: 1 }}>
+            <h1 style={{
+              fontSize: '18px',
+              fontWeight: '700',
+              color: theme.colors.text,
+              margin: 0,
+              marginBottom: '6px',
+              display: 'flex',
               alignItems: 'center',
-              gap: '4px',
-              backgroundColor: '#10B981',
-              color: 'white',
-              padding: '4px 8px',
-              borderRadius: '12px',
-              fontSize: '12px',
-              fontWeight: '600',
-              marginBottom: '12px'
+              gap: '4px'
             }}>
-              <CheckCircle style={{ width: '12px', height: '12px' }} />
-              Verified
-            </div>
-          )}
+              Dr. {profile.full_name}
+              {profile.is_verified && (
+                <CheckCircle style={{ 
+                  width: '14px', 
+                  height: '14px', 
+                  color: '#10B981'
+                }} />
+              )}
+            </h1>
+            {profile.bio && (
+              <p style={{
+                fontSize: '12px',
+                lineHeight: '1.4',
+                color: theme.colors.gray[700],
+                margin: 0,
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical'
+              }}>
+                {profile.bio}
+              </p>
+            )}
+          </div>
+        </div>
 
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            gap: '16px', 
-            marginBottom: '16px',
-            flexWrap: 'wrap'
-          }}>
+        {/* Rating, Experience and Specializations */}
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Star style={{ width: '16px', height: '16px', fill: '#f59e0b', color: '#f59e0b' }} />
-              <span style={{ fontSize: '16px', fontWeight: '600', color: theme.colors.text }}>
+              <Star style={{ width: '14px', height: '14px', fill: '#f59e0b', color: '#f59e0b' }} />
+              <span style={{ fontSize: '14px', fontWeight: '600', color: theme.colors.text }}>
                 {profile.average_rating || 0}
               </span>
-              <span style={{ fontSize: '14px', color: theme.colors.gray[600] }}>
-                ({profile.total_reviews || 0})
+              <span style={{ fontSize: '12px', color: theme.colors.gray[600] }}>
+                ({profile.total_reviews || 0} reviews)
               </span>
             </div>
-            
             {profile.years_of_experience && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Clock style={{ width: '16px', height: '16px', color: theme.colors.primary }} />
-                <span style={{ fontSize: '14px', color: theme.colors.gray[600] }}>
-                  {profile.years_of_experience} years
+                <Clock style={{ width: '14px', height: '14px', color: theme.colors.primary }} />
+                <span style={{ fontSize: '12px', color: theme.colors.gray[600] }}>
+                  {profile.years_of_experience} years exp
                 </span>
               </div>
             )}
           </div>
 
-          {profile.practice_address && (
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              gap: '6px', 
-              marginBottom: '16px' 
-            }}>
-              <MapPin style={{ width: '14px', height: '14px', color: theme.colors.primary }} />
-              <span style={{ fontSize: '14px', color: theme.colors.gray[600] }}>
-                {profile.practice_address}
-              </span>
-            </div>
-          )}
-
           {profile.specializations && profile.specializations.length > 0 && (
             <div style={{ 
               display: 'flex', 
               gap: '6px', 
-              flexWrap: 'wrap', 
-              justifyContent: 'center',
-              marginBottom: '16px'
+              flexWrap: 'wrap'
             }}>
               {profile.specializations.slice(0, 3).map((spec, index) => (
                 <span
@@ -614,53 +613,84 @@ const PhysiotherapistResponsivePage: React.FC = () => {
               ))}
             </div>
           )}
+        </div>
 
-          <div style={{
-            backgroundColor: theme.colors.background,
-            padding: '12px 16px',
-            borderRadius: '12px',
-            display: 'inline-block'
+        {/* Choose Consultation Type */}
+        <div style={{ marginBottom: '8px' }}>
+          <h3 style={{
+            fontSize: '16px',
+            fontWeight: '600',
+            color: theme.colors.text,
+            marginBottom: '12px'
           }}>
-            <div style={{ fontSize: '12px', color: theme.colors.gray[600], marginBottom: '2px' }}>
-              Consultation Fee
-            </div>
-            <div style={{ fontSize: '18px', fontWeight: '700', color: theme.colors.primary }}>
-              ₹{formatPrice(profile.consultation_fee || '800')}
-            </div>
+            Choose Consultation Type
+          </h3>
+          
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {profile.home_visit_available && (
+              <button
+                onClick={() => setConsultationType('HOME_VISIT')}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: consultationType === 'HOME_VISIT' ? theme.colors.primary : theme.colors.white,
+                  color: consultationType === 'HOME_VISIT' ? 'white' : theme.colors.text,
+                  border: consultationType === 'HOME_VISIT' ? 'none' : `1px solid ${theme.colors.gray[300]}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <Home style={{ 
+                  width: '16px', 
+                  height: '16px', 
+                  marginBottom: '4px',
+                  color: consultationType === 'HOME_VISIT' ? 'white' : theme.colors.primary
+                }} />
+                <div style={{ fontSize: '14px', fontWeight: '600' }}>Home Visit</div>
+                <div style={{ fontSize: '13px', marginTop: '2px' }}>
+                  ₹{formatPrice(profile.home_visit_fee || '1200')}
+                </div>
+              </button>
+            )}
+            
+            {profile.online_consultation_available && (
+              <button
+                onClick={() => setConsultationType('ONLINE')}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: consultationType === 'ONLINE' ? theme.colors.primary : theme.colors.white,
+                  color: consultationType === 'ONLINE' ? 'white' : theme.colors.text,
+                  border: consultationType === 'ONLINE' ? 'none' : `1px solid ${theme.colors.gray[300]}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <Video style={{ 
+                  width: '16px', 
+                  height: '16px', 
+                  marginBottom: '4px',
+                  color: consultationType === 'ONLINE' ? 'white' : theme.colors.primary
+                }} />
+                <div style={{ fontSize: '14px', fontWeight: '600' }}>Online</div>
+                <div style={{ fontSize: '13px', marginTop: '2px' }}>
+                  ₹{formatPrice(profile.consultation_fee || '800')}
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Bio Section - Both Mobile and Desktop */}
-      {profile.bio && (
-        <div style={{ backgroundColor: theme.colors.white, padding: '20px 16px', borderTop: `1px solid ${theme.colors.secondary}` }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: theme.colors.text,
-              marginBottom: '12px'
-            }}>
-              About Dr. {profile.full_name}
-            </h3>
-            <p style={{
-              fontSize: '15px',
-              lineHeight: '1.6',
-              color: theme.colors.gray[700],
-              margin: 0
-            }}>
-              {profile.bio}
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Booking Section */}
       <div style={{ backgroundColor: theme.colors.background, padding: '24px 16px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           
-          {/* Consultation Types */}
-          <div style={{ marginBottom: '24px' }}>
+          {/* Consultation Types - Desktop Only */}
+          <div className="desktop-only" style={{ marginBottom: '24px' }}>
             <h3 style={{
               fontSize: '18px',
               fontWeight: '600',
