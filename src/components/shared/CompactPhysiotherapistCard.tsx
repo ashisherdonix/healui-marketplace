@@ -243,6 +243,13 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
 
   const availabilitySummary = getSmartAvailabilitySummary(availability?.availability);
   
+  // Debug logging
+  console.log('=== AVAILABILITY DEBUG ===');
+  console.log('Raw availability data:', availability?.availability);
+  console.log('Availability summary:', availabilitySummary);
+  console.log('Summary lines:', availabilitySummary.lines);
+  console.log('First line:', availabilitySummary.lines[0]);
+  
   const getAvailabilityColor = () => {
     if (availabilityLoading) return theme.colors.gray[400];
     if (!availabilitySummary.hasAvailability) return theme.colors.gray[500];
@@ -263,26 +270,21 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
     if (availabilityLoading) return 'Checking availability...';
     if (!availabilitySummary.hasAvailability) return 'All slots booked';
     
-    const firstLine = availabilitySummary.lines[0];
-    if (firstLine) {
-      if (firstLine.includes('today')) {
-        const timeMatch = firstLine.match(/from (\d+:\d+ [AP]M) - (\d+:\d+ [AP]M)/);
-        if (timeMatch) {
-          const serviceType = firstLine.includes('Online') ? 'Online' : 'Home visit';
-          return `${serviceType} available today ${timeMatch[1]}-${timeMatch[2]}`;
-        }
-        return firstLine;
-      } else {
-        return firstLine.replace('available ', '');
-      }
+    // Show complete availability information - no truncation
+    const allLines = availabilitySummary.lines;
+    if (allLines && allLines.length > 0) {
+      const fullText = allLines[0];
+      console.log('getAvailabilityText returning:', fullText);
+      console.log('Text length:', fullText.length);
+      // Return the full first line without any modifications or truncation
+      return fullText;
     }
     
     return 'Check availability';
   };
 
-  const getTruncatedAvailability = () => {
-    const text = getAvailabilityText();
-    return text.length > 30 ? `${text.substring(0, 27)}...` : text;
+  const getFullAvailabilityText = () => {
+    return getAvailabilityText();
   };
 
   const getDoctorTitle = () => {
@@ -476,35 +478,34 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
         </div>
       </div>
 
-      {/* Availability Section - Keep Original Styling */}
+      {/* Availability Section */}
       <div style={{ 
-        padding: '12px 16px',
+        padding: '14px 16px',
         borderTop: `1px solid ${theme.colors.secondary}`,
-        backgroundColor: theme.colors.background,
-        textAlign: 'center'
+        backgroundColor: theme.colors.background
       }}>
         <div style={{
-          backgroundColor: getAvailabilityColor(),
-          color: '#ffffff',
-          padding: '8px 14px',
-          borderRadius: '20px',
-          fontSize: 'clamp(10px, 2.5vw, 12px)',
-          fontWeight: '600',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          maxWidth: '100%',
-          minHeight: '32px',
-          boxShadow: '0 2px 8px rgba(30, 95, 121, 0.2)'
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '8px',
+          fontSize: '13px',
+          color: theme.colors.text,
+          lineHeight: '1.4',
+          fontFamily: 'Inter, system-ui, sans-serif'
         }}>
-          <Clock style={{ width: '12px', height: '12px', flexShrink: 0 }} />
-          <span className="availability-text" style={{ 
-            overflow: 'hidden', 
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
+          <Clock style={{ 
+            width: '14px', 
+            height: '14px', 
+            flexShrink: 0, 
+            marginTop: '1px',
+            color: theme.colors.primary
+          }} />
+          <div style={{ 
+            flex: 1,
+            wordBreak: 'break-word'
           }}>
-            {getTruncatedAvailability()}
-          </span>
+            {getFullAvailabilityText()}
+          </div>
         </div>
       </div>
 
@@ -597,8 +598,11 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
         )}
       </div>
 
-      {/* Book Button */}
-      <div style={{ padding: '14px 16px 16px 16px' }}>
+      {/* Enhanced Book Button */}
+      <div style={{ 
+        padding: '16px',
+        backgroundColor: theme.colors.white
+      }}>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -606,26 +610,34 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
           }}
           style={{
             width: '100%',
-            padding: '12px 16px',
-            backgroundColor: theme.colors.primary,
-            color: '#ffffff',
+            padding: '16px 20px',
+            background: theme.gradients.primary,
+            color: theme.colors.white,
             border: 'none',
-            borderRadius: '12px',
-            fontSize: 'clamp(12px, 3vw, 14px)',
+            borderRadius: '16px',
+            fontSize: 'clamp(14px, 3vw, 16px)',
             fontWeight: '700',
             cursor: 'pointer',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            minHeight: '44px',
-            boxShadow: '0 4px 12px rgba(30, 95, 121, 0.3)',
-            background: `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryDark} 100%)`
+            minHeight: '52px',
+            boxShadow: '0 6px 20px rgba(30, 95, 121, 0.25)',
+            fontFamily: 'Inter, system-ui, sans-serif',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            position: 'relative',
+            overflow: 'hidden'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            e.currentTarget.style.boxShadow = '0 6px 16px rgba(30, 95, 121, 0.4)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 8px 28px rgba(30, 95, 121, 0.35)';
+            e.currentTarget.style.background = `linear-gradient(135deg, ${theme.colors.primaryDark}, ${theme.colors.primary})`;
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(30, 95, 121, 0.3)';
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(30, 95, 121, 0.25)';
+            e.currentTarget.style.background = theme.gradients.primary;
           }}
         >
           {getBookButtonText()}
@@ -637,26 +649,6 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
-        }
-        
-        @media (max-width: 768px) {
-          .availability-text {
-            font-size: 10px !important;
-          }
-        }
-        
-        @media (max-width: 480px) {
-          .availability-text {
-            font-size: 9px !important;
-            max-width: 120px !important;
-          }
-        }
-        
-        @media (max-width: 360px) {
-          .availability-text {
-            font-size: 8px !important;
-            max-width: 100px !important;
-          }
         }
       `}</style>
     </div>

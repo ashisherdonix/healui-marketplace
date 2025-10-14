@@ -366,7 +366,7 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
             >
               <span className="search-btn-text">{loading ? 'Searching...' : 'Search'}</span>
               <span className="search-btn-icon" style={{ display: 'none' }}>
-                <Search style={{ width: '18px', height: '18px' }} />
+                <Search style={{ width: '16px', height: '16px' }} />
               </span>
             </button>
           </div>
@@ -403,9 +403,18 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
             }
             
             button[type="submit"] {
-              padding: 0 !important;
-              min-width: 40px !important;
-              width: 40px !important;
+              padding: 0 1rem !important;
+              min-width: auto !important;
+              width: auto !important;
+              height: auto !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              border-radius: 20px !important;
+              right: 4px !important;
+              top: 4px !important;
+              bottom: 4px !important;
+              transform: none !important;
             }
             
             /* Show icon, hide text on mobile */
@@ -415,6 +424,13 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
             
             .search-btn-icon {
               display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+            }
+            
+            .search-btn-icon svg {
+              width: 16px !important;
+              height: 16px !important;
             }
             
             /* Clear button adjustment */
@@ -431,8 +447,23 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
             }
             
             button[type="submit"] {
-              min-width: 36px !important;
-              width: 36px !important;
+              padding: 0 0.75rem !important;
+              min-width: auto !important;
+              width: auto !important;
+              height: auto !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              border-radius: 18px !important;
+              right: 4px !important;
+              top: 4px !important;
+              bottom: 4px !important;
+              transform: none !important;
+            }
+            
+            .search-btn-icon svg {
+              width: 14px !important;
+              height: 14px !important;
             }
             
             /* Clear button adjustment */

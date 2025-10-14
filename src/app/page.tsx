@@ -365,7 +365,7 @@ const HomePage: React.FC = () => {
       part1: "Your Recovery",
       part2: "Starts",
       part3: "Here", 
-      subtitle: "Smart search finds the right physiotherapist for your needs"
+      subtitle: "Find verified physiotherapists near you in minutes"
     },
     {
       part1: "Get Relief from",
