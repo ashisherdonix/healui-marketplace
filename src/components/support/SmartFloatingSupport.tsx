@@ -133,12 +133,14 @@ const SmartFloatingSupport: React.FC = () => {
                       transition: 'all 0.2s ease',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f8fafc';
-                      e.currentTarget.style.borderColor = '#cbd5e1';
+                      e.currentTarget.style.backgroundColor = '#eff8ff';
+                      e.currentTarget.style.borderColor = '#c8eaeb';
+                      e.currentTarget.style.color = '#1e5f79';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = '#ffffff';
                       e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.color = '#475569';
                     }}
                   >
                     {action.label}
@@ -152,7 +154,7 @@ const SmartFloatingSupport: React.FC = () => {
                 style={{
                   width: '100%',
                   padding: '10px',
-                  backgroundColor: '#25D366',
+                  backgroundColor: '#1e5f79',
                   border: 'none',
                   borderRadius: '6px',
                   color: '#ffffff',
@@ -163,10 +165,10 @@ const SmartFloatingSupport: React.FC = () => {
                   transition: 'all 0.2s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#128C7E';
+                  e.currentTarget.style.backgroundColor = '#164a5e';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#25D366';
+                  e.currentTarget.style.backgroundColor = '#1e5f79';
                 }}
               >
                 Open WhatsApp Chat
@@ -182,13 +184,14 @@ const SmartFloatingSupport: React.FC = () => {
             position: 'absolute',
             top: '-4px',
             right: '-4px',
-            backgroundColor: '#1e293b',
+            backgroundColor: '#1e5f79',
             color: '#ffffff',
             fontSize: '8px',
             fontWeight: '600',
             padding: '2px 4px',
             borderRadius: '8px',
             zIndex: 101,
+            border: '2px solid #ffffff',
           }}>
             24/7
           </div>
@@ -200,9 +203,9 @@ const SmartFloatingSupport: React.FC = () => {
               width: '48px',
               height: '48px',
               borderRadius: '50%',
-              backgroundColor: '#25D366',
+              backgroundColor: '#1e5f79',
               border: 'none',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+              boxShadow: '0 4px 16px rgba(30, 95, 121, 0.3)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -211,9 +214,13 @@ const SmartFloatingSupport: React.FC = () => {
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.backgroundColor = '#164a5e';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(30, 95, 121, 0.4)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.backgroundColor = '#1e5f79';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(30, 95, 121, 0.3)';
             }}
           >
             {isExpanded ? (

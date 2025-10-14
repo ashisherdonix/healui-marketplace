@@ -5,7 +5,7 @@ import ApiManager from '@/services/api';
 import Header from '@/components/layout/Header';
 import AddressBanner from '@/components/navigation/AddressBanner';
 import SimpleSearchInterface from '@/components/search/SimpleSearchInterface';
-import CleanPhysiotherapistCard from '@/components/shared/CleanPhysiotherapistCard';
+import CompactPhysiotherapistCard from '@/components/shared/CompactPhysiotherapistCard';
 import Card from '@/components/card';
 import Button from '@/components/button';
 import { theme } from '@/utils/theme';
@@ -150,18 +150,18 @@ const AvailableTodaySection = memo(({
         Available Today{userLocation?.city ? ` in ${userLocation.city}` : ''}
       </h3>
       
-      <div style={{
+      <div className="available-today-grid" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: 'clamp(1rem, 2vw, 1.5rem)',
-        maxWidth: '900px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: 'clamp(0.5rem, 1vw, 1rem)',
+        maxWidth: '100%',
         margin: '0 auto'
       }}>
         {!loading && !error && allPhysiotherapists.length > 0 ? (
-          allPhysiotherapists.slice(0, 3).map((physio: unknown, index: number) => {
+          allPhysiotherapists.map((physio: unknown, index: number) => {
             const availability = batchAvailability[physio.id];
             return (
-              <CleanPhysiotherapistCard
+              <CompactPhysiotherapistCard
                 key={physio.id || index}
                 physiotherapist={physio}
                 availability={availability}
@@ -674,6 +674,61 @@ const HomePage: React.FC = () => {
 
   return (
     <>
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: translateY(-10px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.2); opacity: 0.7; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+          .physiotherapist-grid {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+            gap: 8px !important;
+            padding: 0 8px !important;
+          }
+          .available-today-grid {
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+            gap: 8px !important;
+          }
+          section {
+            min-height: 500px !important;
+          }
+          h1 {
+            font-size: clamp(1.5rem, 7vw, 2.5rem) !important;
+            min-height: clamp(3.5rem, 8vw, 5rem) !important;
+            line-height: 1.3 !important;
+          }
+          p {
+            font-size: clamp(0.875rem, 2.5vw, 1rem) !important;
+            line-height: 1.5 !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .physiotherapist-grid {
+            grid-template-columns: 1fr !important;
+          }
+          section {
+            padding: clamp(1.5rem, 4vw, 2.5rem) 0 !important;
+            min-height: 350px !important;
+          }
+          h1 {
+            font-size: clamp(1.75rem, 5vw, 2.25rem) !important;
+            min-height: clamp(3.5rem, 7vw, 5rem) !important;
+          }
+          p {
+            font-size: 0.875rem !important;
+          }
+        }
+      `}</style>
       <Header />
       <AddressBanner />
       <div style={{ minHeight: '100vh', backgroundColor: theme.colors.background }}>
@@ -856,115 +911,10 @@ const HomePage: React.FC = () => {
               marginTop: 'clamp(2rem, 3vw, 2.5rem)',
               textAlign: 'center'
             }}>
-              <div style={{
-                fontSize: 'clamp(0.875rem, 2vw, 1rem)',
-                color: theme.colors.gray[600],
-                fontWeight: '500'
-              }}>
-                4.8/5 rating from 2,847 patients
-              </div>
-              <div style={{
-                fontSize: 'clamp(0.8rem, 1.8vw, 0.9rem)',
-                color: theme.colors.gray[500],
-                marginTop: '0.5rem',
-                fontStyle: 'italic'
-              }}>
-                &ldquo;Dr. Sharma helped me walk pain-free in just 3 sessions&rdquo; - Priya M.
-              </div>
             </div>
 
           </div>
 
-          {/* Mobile Responsive CSS */}
-          <style jsx>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-            @keyframes fadeIn {
-              0% { opacity: 0; transform: translateY(-10px); }
-              100% { opacity: 1; transform: translateY(0); }
-            }
-            @keyframes pulse {
-              0% { transform: scale(1); opacity: 1; }
-              50% { transform: scale(1.2); opacity: 0.7; }
-              100% { transform: scale(1); opacity: 1; }
-            }
-            
-            /* Mobile-first responsive design */
-            @media (max-width: 768px) {
-              section {
-                min-height: 500px !important;
-              }
-              
-              h1 {
-                font-size: clamp(1.5rem, 7vw, 2.5rem) !important;
-                min-height: clamp(3.5rem, 8vw, 5rem) !important;
-                line-height: 1.3 !important;
-              }
-              
-              p {
-                font-size: clamp(0.875rem, 2.5vw, 1rem) !important;
-                line-height: 1.5 !important;
-              }
-              
-              /* Ultra-compact trust signals on mobile */
-              div[style*="gap: 0.75rem"][style*="marginTop: 1.5rem"] {
-                gap: 0.5rem !important;
-                margin-top: 1rem !important;
-                justify-content: center !important;
-              }
-              
-              /* Trust signal items on mobile */
-              div[style*="fontSize: 0.8125rem"] {
-                font-size: 0.75rem !important;
-              }
-              
-              /* Even smaller icons on mobile */
-              svg[style*="width: 14px"] {
-                width: 12px !important;
-                height: 12px !important;
-              }
-              
-              /* Tiny dot indicator */
-              div[style*="width: 6px"] {
-                width: 5px !important;
-                height: 5px !important;
-              }
-              
-              /* Hide separators on very small screens */
-              @media (max-width: 360px) {
-                span[style*="color: theme.colors.gray[300]"] {
-                  display: none !important;
-                }
-                
-                div[style*="gap: 0.75rem"] {
-                  gap: 0.75rem !important;
-                }
-              }
-            }
-            
-            @media (max-width: 480px) {
-              section {
-                padding: clamp(1.5rem, 4vw, 2.5rem) 0 !important;
-                min-height: 350px !important;
-              }
-              
-              h1 {
-                font-size: clamp(1.75rem, 5vw, 2.25rem) !important;
-                min-height: clamp(3.5rem, 7vw, 5rem) !important;
-              }
-              
-              p {
-                font-size: 0.875rem !important;
-              }
-              
-              /* Trust signals smaller text on mobile */
-              div[style*="150,000+ patients"] {
-                font-size: 0.75rem !important;
-              }
-            }
-          `}</style>
         </section>
 
         {/* Results Section */}

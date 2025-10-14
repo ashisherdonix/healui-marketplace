@@ -108,8 +108,8 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
         cursor: 'pointer',
         display: 'flex',
         boxShadow: '0 2px 8px rgba(30, 95, 121, 0.08)',
-        padding: '20px',
-        gap: '20px',
+        padding: '16px',
+        gap: '16px',
         alignItems: 'center'
       }}
       onClick={handleBookAppointment}
@@ -125,8 +125,8 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
       }}>
         {/* Profile Image */}
         <div style={{
-          width: '80px',
-          height: '80px',
+          width: '64px',
+          height: '64px',
           borderRadius: '50%',
           overflow: 'hidden',
           backgroundColor: '#F3F4F6',
@@ -583,8 +583,8 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
             }}>
               <div style={{ marginBottom: '4px' }}>
                 <Home style={{ 
-                  width: '16px', 
-                  height: '16px', 
+                  width: '14px', 
+                  height: '14px', 
                   color: theme.colors.gray[600]
                 }} />
               </div>
@@ -596,7 +596,7 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
                 Home Visit
               </div>
               <div style={{ 
-                fontSize: '16px', 
+                fontSize: '14px', 
                 fontWeight: '600', 
                 color: theme.colors.text
               }}>
@@ -613,8 +613,8 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
             }}>
               <div style={{ marginBottom: '4px' }}>
                 <Video style={{ 
-                  width: '16px', 
-                  height: '16px', 
+                  width: '14px', 
+                  height: '14px', 
                   color: theme.colors.gray[600]
                 }} />
               </div>
@@ -626,7 +626,7 @@ const CleanPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
                 Online
               </div>
               <div style={{ 
-                fontSize: '16px', 
+                fontSize: '14px', 
                 fontWeight: '600', 
                 color: theme.colors.text
               }}>

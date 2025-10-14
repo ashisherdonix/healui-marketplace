@@ -249,128 +249,203 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
         padding: '0 1rem'
       }}>
         <form onSubmit={handleSubmit}>
-          {/* Single version with search button inside input */}
+          {/* Modern pill design search bar */}
           <div style={{ position: 'relative' }}>
-            <div style={{
-              position: 'absolute',
-              left: '1rem',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              pointerEvents: 'none',
-              zIndex: 10
-            }}>
-              <Search style={{ 
-                width: '1.25rem', 
-                height: '1.25rem', 
-                color: theme.colors.gray[400]
-              }} />
-            </div>
             <input
               type="text"
               value={filters.query}
               onChange={(e) => handleInputChange('query', e.target.value)}
               placeholder={getPlaceholderText()}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  handleInputChange('query', '');
+                }
+              }}
               style={{
                 fontSize: '1rem',
-                padding: '1rem 7rem 1rem 3.5rem',
-                border: `2px solid ${theme.colors.gray[300]}`,
-                borderRadius: '12px',
+                padding: '1rem 5.5rem 1rem 1.5rem',
+                border: `2px solid ${theme.colors.secondary}`,
+                borderRadius: '26px',
                 backgroundColor: theme.colors.white,
                 color: theme.colors.text,
                 outline: 'none',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 width: '100%',
                 fontWeight: '400',
-                minHeight: '52px',
-                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)'
+                height: '56px',
+                boxSizing: 'border-box',
+                boxShadow: '0 4px 20px rgba(30, 95, 121, 0.08)',
+                fontFamily: 'Inter, system-ui, sans-serif'
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = theme.colors.primary;
-                e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                e.target.style.boxShadow = `0 4px 24px rgba(30, 95, 121, 0.15), 0 0 0 3px ${theme.colors.primary}15`;
+                e.target.style.transform = 'translateY(-1px)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = theme.colors.gray[300];
-                e.target.style.boxShadow = '0 2px 12px rgba(0, 0, 0, 0.06)';
+                e.target.style.borderColor = theme.colors.secondary;
+                e.target.style.boxShadow = '0 4px 20px rgba(30, 95, 121, 0.08)';
+                e.target.style.transform = 'translateY(0)';
               }}
             />
+            
+            {/* Clear button */}
+            {filters.query && (
+              <button
+                type="button"
+                onClick={() => handleInputChange('query', '')}
+                style={{
+                  position: 'absolute',
+                  right: '60px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = theme.colors.gray[100];
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.colors.gray[500]} strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            )}
+            
+            {/* Search button */}
             <button
               type="submit"
               disabled={loading}
               style={{
                 position: 'absolute',
-                right: '0.5rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
+                right: '4px',
+                top: '4px',
+                bottom: '4px',
                 background: loading ? theme.colors.gray[400] : theme.colors.primary,
                 color: theme.colors.white,
                 fontWeight: '600',
-                fontSize: '0.9rem',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '8px',
+                fontSize: '0.875rem',
+                padding: '0 1.25rem',
+                borderRadius: '22px',
                 border: 'none',
                 cursor: loading ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s ease',
                 boxShadow: '0 2px 8px rgba(30, 95, 121, 0.2)',
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minWidth: '48px',
+                fontFamily: 'Inter, system-ui, sans-serif'
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.backgroundColor = theme.colors.primaryDark;
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(30, 95, 121, 0.3)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.backgroundColor = theme.colors.primary;
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(30, 95, 121, 0.2)';
+                }
               }}
             >
-              {loading ? 'Searching...' : 'Search'}
+              <span className="search-btn-text">{loading ? 'Searching...' : 'Search'}</span>
+              <span className="search-btn-icon" style={{ display: 'none' }}>
+                <Search style={{ width: '18px', height: '18px' }} />
+              </span>
             </button>
           </div>
         </form>
 
 
-        {/* Mobile Responsive CSS for simple version */}
+        {/* Mobile Responsive CSS */}
         <style jsx>{`
-          /* Mobile responsive adjustments */
+          /* Tablet and mobile adjustments */
           @media (max-width: 768px) {
             input[type="text"] {
-              padding: 1rem 6rem 1rem 3.5rem !important;
-              font-size: 0.95rem !important;
+              padding: 0.875rem 3.5rem 0.875rem 1.25rem !important;
+              font-size: 0.9rem !important;
+              height: 52px !important;
             }
             
             button[type="submit"] {
-              padding: 0.7rem 1.25rem !important;
-              font-size: 0.85rem !important;
-              right: 0.5rem !important;
+              padding: 0 0.875rem !important;
+              font-size: 0.8rem !important;
+              min-width: 44px !important;
+            }
+            
+            /* Clear button adjustment */
+            button[style*="right: 60px"] {
+              right: 52px !important;
             }
           }
           
           @media (max-width: 480px) {
             input[type="text"] {
-              padding: 1rem 5.5rem 1rem 3rem !important;
-              font-size: 0.9rem !important;
-              min-height: 48px !important;
+              padding: 0.75rem 3.25rem 0.75rem 1rem !important;
+              font-size: 0.875rem !important;
+              height: 48px !important;
             }
             
             button[type="submit"] {
-              padding: 0.65rem 1rem !important;
-              font-size: 0.8rem !important;
-              right: 0.4rem !important;
+              padding: 0 !important;
+              min-width: 40px !important;
+              width: 40px !important;
             }
             
-            /* Search icon positioning */
-            div[style*="left: 1rem"] {
-              left: 0.8rem !important;
+            /* Show icon, hide text on mobile */
+            .search-btn-text {
+              display: none !important;
             }
             
-            /* Search icon smaller */
-            svg {
-              width: 1.1rem !important;
-              height: 1.1rem !important;
+            .search-btn-icon {
+              display: flex !important;
+            }
+            
+            /* Clear button adjustment */
+            button[style*="right: 60px"] {
+              right: 48px !important;
             }
           }
           
           @media (max-width: 360px) {
             input[type="text"] {
-              padding: 0.9rem 5rem 0.9rem 2.8rem !important;
-              font-size: 0.85rem !important;
-              min-height: 44px !important;
+              padding: 0.7rem 3rem 0.7rem 0.875rem !important;
+              font-size: 0.8rem !important;
+              height: 44px !important;
             }
             
             button[type="submit"] {
-              padding: 0.6rem 0.8rem !important;
-              font-size: 0.75rem !important;
+              min-width: 36px !important;
+              width: 36px !important;
+            }
+            
+            /* Clear button adjustment */
+            button[style*="right: 60px"] {
+              right: 44px !important;
+            }
+          }
+          
+          /* Enhanced focus states */
+          @media (hover: hover) {
+            input[type="text"]:hover {
+              border-color: ${theme.colors.primary} !important;
+              box-shadow: 0 4px 20px rgba(30, 95, 121, 0.12) !important;
             }
           }
         `}</style>
