@@ -91,22 +91,22 @@ const DateSelection: React.FC<DateSelectionProps> = ({
       marginBottom: '8px'
     }}>
       <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: '12px',
-        flexWrap: 'wrap',
-        gap: '8px'
+        marginBottom: '12px'
       }}>
-        <h3 style={{
-          fontSize: '18px',
-          fontWeight: '700',
-          color: '#1F2937',
-          margin: 0
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '12px'
         }}>
-          Select Date
-        </h3>
-        <div className="view-toggle" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h3 style={{
+            fontSize: '18px',
+            fontWeight: '700',
+            color: '#1F2937',
+            margin: 0
+          }}>
+            Select Date
+          </h3>
           <div style={{
             display: 'flex',
             backgroundColor: '#F3F4F6',
@@ -131,7 +131,7 @@ const DateSelection: React.FC<DateSelectionProps> = ({
               }}
             >
               <Grid3x3 style={{ width: '14px', height: '14px' }} />
-              Quick
+              <span className="desktop-only">Quick</span>
             </button>
             <button
               onClick={() => setDateViewMode('calendar')}
@@ -151,46 +151,37 @@ const DateSelection: React.FC<DateSelectionProps> = ({
               }}
             >
               <CalendarDays style={{ width: '14px', height: '14px' }} />
-              Calendar
+              <span className="desktop-only">Calendar</span>
             </button>
           </div>
-          
-          <button
-            onClick={findNextAvailableSlot}
-            style={{
-              padding: '6px 12px',
-              backgroundColor: '#10B981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '12px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10B981'}
-          >
-            Next Available
-          </button>
         </div>
       </div>
       
       {dateViewMode === 'quick' && (
         <>
-          {/* Mobile: Horizontal scrollable 7 days */}
-          <div className="mobile-only" style={{
+          <style>{`
+            @media (min-width: 769px) {
+              .date-selection-mobile {
+                display: none !important;
+              }
+            }
+            @media (max-width: 768px) {
+              .date-selection-desktop {
+                display: none !important;
+              }
+            }
+            .date-selection-mobile::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
+          
+          {/* Mobile: Horizontal scrollable */}
+          <div className="date-selection-mobile" style={{
             overflowX: 'auto',
             paddingBottom: '4px',
             marginBottom: '8px',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none'
+            WebkitOverflowScrolling: 'touch'
           }}>
-            <style>{`
-              .mobile-only::-webkit-scrollbar {
-                display: none;
-              }
-            `}</style>
             <div style={{
               display: 'flex',
               gap: '8px',
@@ -257,8 +248,8 @@ const DateSelection: React.FC<DateSelectionProps> = ({
             </div>
           </div>
           
-          {/* Desktop: Show all 7 days in grid */}
-          <div className="desktop-only" style={{
+          {/* Desktop: Grid layout */}
+          <div className="date-selection-desktop" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(7, 1fr)',
             gap: '8px'

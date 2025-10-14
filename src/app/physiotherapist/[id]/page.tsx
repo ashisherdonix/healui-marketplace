@@ -792,39 +792,99 @@ const PhysiotherapistResponsivePage: React.FC = () => {
                 Loading slots...
               </div>
             ) : availability.length > 0 ? (
-              <div style={{ 
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
-                gap: '8px',
-                maxWidth: '800px',
-                margin: '0 auto'
-              }}>
-                {availability.map((slot, index) => {
-                  const isSelected = selectedSlot === slot;
-                  const slotKey = slot.slot_id || slot.id || `${slot.start_time}-${index}`;
-                  
-                  return (
-                    <button
-                      key={slotKey}
-                      onClick={() => setSelectedSlot(slot)}
-                      style={{
-                        padding: '12px 8px',
-                        backgroundColor: isSelected ? theme.colors.primary : theme.colors.white,
-                        color: isSelected ? theme.colors.white : theme.colors.text,
-                        border: `2px solid ${isSelected ? theme.colors.primary : theme.colors.secondary}`,
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        textAlign: 'center',
-                        fontSize: '14px',
-                        fontWeight: isSelected ? '600' : '500',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      {formatTime(slot.start_time)}
-                    </button>
-                  );
-                })}
-              </div>
+              <>
+                <style>{`
+                  @media (max-width: 768px) {
+                    .time-slots-mobile {
+                      display: grid !important;
+                      grid-template-columns: repeat(3, 1fr) !important;
+                    }
+                    .time-slots-desktop {
+                      display: none !important;
+                    }
+                  }
+                  @media (min-width: 769px) {
+                    .time-slots-mobile {
+                      display: none !important;
+                    }
+                    .time-slots-desktop {
+                      display: grid !important;
+                    }
+                  }
+                `}</style>
+                
+                {/* Mobile: 3 column grid */}
+                <div className="time-slots-mobile" style={{ 
+                  gap: '8px',
+                  width: '100%'
+                }}>
+                  {availability.map((slot, index) => {
+                    const isSelected = selectedSlot === slot;
+                    const slotKey = slot.slot_id || slot.id || `${slot.start_time}-${index}`;
+                    
+                    return (
+                      <button
+                        key={slotKey}
+                        onClick={() => setSelectedSlot(slot)}
+                        style={{
+                          padding: '10px 6px',
+                          backgroundColor: isSelected ? theme.colors.primary : theme.colors.white,
+                          color: isSelected ? theme.colors.white : theme.colors.text,
+                          border: `2px solid ${isSelected ? theme.colors.primary : theme.colors.secondary}`,
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          fontSize: '13px',
+                          fontWeight: isSelected ? '600' : '500',
+                          transition: 'all 0.2s ease',
+                          minHeight: '45px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '100%'
+                        }}
+                      >
+                        {formatTime(slot.start_time)}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                {/* Desktop: Auto-fit grid */}
+                <div className="time-slots-desktop" style={{ 
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                  gap: '8px',
+                  maxWidth: '800px',
+                  margin: '0 auto'
+                }}>
+                  {availability.map((slot, index) => {
+                    const isSelected = selectedSlot === slot;
+                    const slotKey = slot.slot_id || slot.id || `${slot.start_time}-${index}`;
+                    
+                    return (
+                      <button
+                        key={slotKey}
+                        onClick={() => setSelectedSlot(slot)}
+                        style={{
+                          padding: '12px 8px',
+                          backgroundColor: isSelected ? theme.colors.primary : theme.colors.white,
+                          color: isSelected ? theme.colors.white : theme.colors.text,
+                          border: `2px solid ${isSelected ? theme.colors.primary : theme.colors.secondary}`,
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          fontSize: '14px',
+                          fontWeight: isSelected ? '600' : '500',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {formatTime(slot.start_time)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
             ) : (
               <div style={{ 
                 padding: '40px', 
