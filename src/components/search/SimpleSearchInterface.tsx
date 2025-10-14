@@ -479,6 +479,15 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
               box-shadow: 0 4px 20px rgba(30, 95, 121, 0.12) !important;
             }
           }
+          
+          /* Override global button min-height specifically for search */
+          form button[type="submit"] {
+            min-height: 36px !important;
+          }
+          
+          div button[type="submit"] {
+            min-height: 36px !important;
+          }
         `}</style>
       </div>
     );
@@ -1001,7 +1010,7 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
             padding: 0.75rem 1.25rem !important;
             font-size: 0.85rem !important;
             border-radius: 10px !important;
-            min-height: 38px !important;
+            min-height: 36px !important;
           }
           
           /* Service type tabs responsive */

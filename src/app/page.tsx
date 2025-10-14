@@ -16,7 +16,10 @@ import {
   RefreshCw,
   Award,
   CheckCircle2,
-  TrendingUp
+  TrendingUp,
+  Home,
+  Clock,
+  Shield
 } from 'lucide-react';
 import { useAvailabilityBatch } from '@/hooks/useAvailabilityBatch';
 import { useSelector, useDispatch } from 'react-redux';
@@ -353,31 +356,22 @@ const HomePage: React.FC = () => {
 
   const backgroundImages = isMobile ? mobileBackgroundImages : desktopBackgroundImages;
 
-  // Emotional, outcome-focused headlines for conversion
+  // Marketplace-focused headlines for home visit booking
   const headlines = [
     {
-      part1: "Get Back to",
-      part2: "Living", 
-      part3: "Pain-Free",
-      subtitle: "Find physiotherapists by name, pincode, or condition - we handle the rest"
+      part1: "Physiotherapy",
+      part2: "at Your",
+      part3: "Doorstep"
     },
     {
-      part1: "Your Recovery",
-      part2: "Starts",
-      part3: "Here", 
-      subtitle: "Find verified physiotherapists near you in minutes"
+      part1: "Book Today",
+      part2: "Feel Better",
+      part3: "Tomorrow"
     },
     {
-      part1: "Get Relief from",
-      part2: "Pain",
-      part3: "Today",
-      subtitle: "Search any way you want - our system understands what you need"
-    },
-    {
-      part1: "Start Your",
-      part2: "Healing",
-      part3: "Journey",
-      subtitle: "Intelligent matching connects you with the perfect physiotherapist"
+      part1: "Home Visits",
+      part2: "Made",
+      part3: "Simple"
     }
   ];
 
@@ -700,12 +694,14 @@ const HomePage: React.FC = () => {
             gap: 12px !important;
           }
           section {
-            min-height: 500px !important;
+            min-height: 450px !important;
+            padding-top: 1rem !important;
           }
           h1 {
-            font-size: clamp(1.5rem, 7vw, 2.5rem) !important;
-            min-height: clamp(3.5rem, 8vw, 5rem) !important;
-            line-height: 1.3 !important;
+            font-size: clamp(1.75rem, 7vw, 2.5rem) !important;
+            min-height: clamp(3rem, 7vw, 4.5rem) !important;
+            line-height: 1.2 !important;
+            margin-bottom: clamp(1rem, 2vw, 1.5rem) !important;
           }
           p {
             font-size: clamp(0.875rem, 2.5vw, 1rem) !important;
@@ -766,7 +762,9 @@ const HomePage: React.FC = () => {
           <div style={{ 
             maxWidth: '1200px',
             margin: '0 auto',
-            padding: 'clamp(2rem, 4vw, 5rem) clamp(1rem, 3vw, 1.5rem)',
+            padding: isMobile 
+              ? 'clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 1.5rem)' 
+              : 'clamp(2rem, 4vw, 5rem) clamp(1rem, 3vw, 1.5rem)',
             textAlign: 'center',
             position: 'relative',
             zIndex: 10,
@@ -812,20 +810,6 @@ const HomePage: React.FC = () => {
               </div>
             </h1>
 
-            <p style={{
-              fontSize: 'clamp(0.875rem, 2.5vw, 1.25rem)',
-              color: theme.colors.gray[600],
-              marginBottom: 'clamp(1rem, 3vw, 1.5rem)',
-              lineHeight: '1.6',
-              maxWidth: '600px',
-              margin: '0 auto clamp(1rem, 3vw, 1.5rem)',
-              opacity: animationPhase === 'complete' ? 1 : 0,
-              transform: animationPhase === 'complete' ? 'translateY(0)' : 'translateY(10px)',
-              transition: 'all 0.4s ease-in-out 0.2s',
-              fontWeight: '500'
-            }}>
-              {headlines[currentHeadlineIndex].subtitle}
-            </p>
 
             {/* Enhanced Search Bar */}
             <div style={{ 
@@ -845,55 +829,38 @@ const HomePage: React.FC = () => {
               />
             </div>
 
-            {/* Ultra-Compact Trust Signals - Static */}
+            {/* Simple Trust Line */}
             <div style={{
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              gap: '0.75rem',
-              marginTop: '1.5rem',
-              flexWrap: 'wrap',
-              opacity: 1,
-              transition: 'none'
+              gap: isMobile ? '8px' : '12px',
+              marginTop: isMobile ? '0.75rem' : '1rem',
+              opacity: animationPhase === 'complete' ? 1 : 0,
+              transition: 'all 0.4s ease-in-out 0.6s'
             }}>
-              {/* 35+ Years Excellence */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                fontSize: '0.8125rem',
-                color: theme.colors.gray[700],
-                fontWeight: '600',
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
+              <span style={{
+                fontSize: isMobile ? '11px' : '13px',
+                color: theme.colors.gray[600],
+                fontWeight: '500',
+                fontFamily: 'Inter, system-ui, sans-serif'
               }}>
-                <Award style={{ 
-                  width: '14px', 
-                  height: '14px', 
-                  color: theme.colors.primary
-                }} />
-                <span>35+ Years Excellence</span>
-              </div>
+                35+ Years Excellence
+              </span>
 
-              {/* Separator */}
-              <span style={{ color: theme.colors.gray[300] }}>•</span>
+              <span style={{ 
+                color: theme.colors.gray[400],
+                fontSize: isMobile ? '10px' : '12px'
+              }}>•</span>
 
-              {/* Verified Doctors */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                fontSize: '0.8125rem',
-                color: theme.colors.gray[700],
-                fontWeight: '600',
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
+              <span style={{
+                fontSize: isMobile ? '11px' : '13px',
+                color: theme.colors.gray[600],
+                fontWeight: '500',
+                fontFamily: 'Inter, system-ui, sans-serif'
               }}>
-                <CheckCircle2 style={{ 
-                  width: '14px', 
-                  height: '14px', 
-                  color: theme.colors.success
-                }} />
-                <span>Verified Doctors</span>
-              </div>
+                10K+ Happy Patients
+              </span>
 
             </div>
 
