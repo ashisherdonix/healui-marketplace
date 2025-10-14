@@ -615,79 +615,90 @@ const PhysiotherapistResponsivePage: React.FC = () => {
           )}
         </div>
 
-        {/* Choose Consultation Type */}
-        <div style={{ marginBottom: '8px' }}>
-          <h3 style={{
-            fontSize: '16px',
-            fontWeight: '600',
-            color: theme.colors.text,
-            marginBottom: '12px'
-          }}>
-            Choose Consultation Type
-          </h3>
-          
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {profile.home_visit_available && (
-              <button
-                onClick={() => setConsultationType('HOME_VISIT')}
-                style={{
-                  flex: 1,
-                  padding: '12px',
-                  backgroundColor: consultationType === 'HOME_VISIT' ? theme.colors.primary : theme.colors.white,
-                  color: consultationType === 'HOME_VISIT' ? 'white' : theme.colors.text,
-                  border: consultationType === 'HOME_VISIT' ? 'none' : `1px solid ${theme.colors.gray[300]}`,
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <Home style={{ 
-                  width: '16px', 
-                  height: '16px', 
-                  marginBottom: '4px',
-                  color: consultationType === 'HOME_VISIT' ? 'white' : theme.colors.primary
-                }} />
-                <div style={{ fontSize: '14px', fontWeight: '600' }}>Home Visit</div>
-                <div style={{ fontSize: '13px', marginTop: '2px' }}>
-                  ₹{formatPrice(profile.home_visit_fee || '1200')}
-                </div>
-              </button>
-            )}
-            
-            {profile.online_consultation_available && (
-              <button
-                onClick={() => setConsultationType('ONLINE')}
-                style={{
-                  flex: 1,
-                  padding: '12px',
-                  backgroundColor: consultationType === 'ONLINE' ? theme.colors.primary : theme.colors.white,
-                  color: consultationType === 'ONLINE' ? 'white' : theme.colors.text,
-                  border: consultationType === 'ONLINE' ? 'none' : `1px solid ${theme.colors.gray[300]}`,
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <Video style={{ 
-                  width: '16px', 
-                  height: '16px', 
-                  marginBottom: '4px',
-                  color: consultationType === 'ONLINE' ? 'white' : theme.colors.primary
-                }} />
-                <div style={{ fontSize: '14px', fontWeight: '600' }}>Online</div>
-                <div style={{ fontSize: '13px', marginTop: '2px' }}>
-                  ₹{formatPrice(profile.consultation_fee || '800')}
-                </div>
-              </button>
-            )}
-          </div>
-        </div>
       </div>
 
 
       {/* Booking Section */}
       <div style={{ backgroundColor: theme.colors.background, padding: '24px 16px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          
+          {/* Mobile Consultation Type */}
+          <div className="mobile-only" style={{ marginBottom: '16px' }}>
+            <h3 style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: theme.colors.text,
+              marginBottom: '12px'
+            }}>
+              Choose Consultation Type
+            </h3>
+            
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {profile.home_visit_available && (
+                <button
+                  onClick={() => setConsultationType('HOME_VISIT')}
+                  style={{
+                    flex: 1,
+                    padding: '8px 10px',
+                    backgroundColor: consultationType === 'HOME_VISIT' ? theme.colors.primary : theme.colors.white,
+                    color: consultationType === 'HOME_VISIT' ? 'white' : theme.colors.text,
+                    border: consultationType === 'HOME_VISIT' ? 'none' : `1px solid ${theme.colors.gray[300]}`,
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    minHeight: '40px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Home style={{ 
+                      width: '14px', 
+                      height: '14px',
+                      color: consultationType === 'HOME_VISIT' ? 'white' : theme.colors.primary
+                    }} />
+                    <span style={{ fontSize: '13px', fontWeight: '500' }}>Home Visit</span>
+                  </div>
+                  <span style={{ fontSize: '12px', fontWeight: '600' }}>
+                    ₹{formatPrice(profile.home_visit_fee || '1200')}
+                  </span>
+                </button>
+              )}
+              
+              {profile.online_consultation_available && (
+                <button
+                  onClick={() => setConsultationType('ONLINE')}
+                  style={{
+                    flex: 1,
+                    padding: '8px 10px',
+                    backgroundColor: consultationType === 'ONLINE' ? theme.colors.primary : theme.colors.white,
+                    color: consultationType === 'ONLINE' ? 'white' : theme.colors.text,
+                    border: consultationType === 'ONLINE' ? 'none' : `1px solid ${theme.colors.gray[300]}`,
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    minHeight: '40px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Video style={{ 
+                      width: '14px', 
+                      height: '14px',
+                      color: consultationType === 'ONLINE' ? 'white' : theme.colors.primary
+                    }} />
+                    <span style={{ fontSize: '13px', fontWeight: '500' }}>Online</span>
+                  </div>
+                  <span style={{ fontSize: '12px', fontWeight: '600' }}>
+                    ₹{formatPrice(profile.consultation_fee || '800')}
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
           
           {/* Consultation Types - Desktop Only */}
           <div className="desktop-only" style={{ marginBottom: '24px' }}>

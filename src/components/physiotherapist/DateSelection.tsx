@@ -83,30 +83,21 @@ const DateSelection: React.FC<DateSelectionProps> = ({
   };
 
   return (
-    <div style={{
-      backgroundColor: 'white',
-      borderRadius: '12px',
-      padding: '16px',
-      border: '1px solid #E5E7EB',
-      marginBottom: '8px'
-    }}>
+    <div style={{ marginBottom: '8px' }}>
       <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
         marginBottom: '12px'
       }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          marginBottom: '12px'
+        <h3 style={{
+          fontSize: '16px',
+          fontWeight: '600',
+          color: '#1F2937',
+          margin: 0
         }}>
-          <h3 style={{
-            fontSize: '18px',
-            fontWeight: '700',
-            color: '#1F2937',
-            margin: 0
-          }}>
-            Select Date
-          </h3>
+          Select Date
+        </h3>
           <div style={{
             display: 'flex',
             backgroundColor: '#F3F4F6',
@@ -154,7 +145,6 @@ const DateSelection: React.FC<DateSelectionProps> = ({
               <span className="desktop-only">Calendar</span>
             </button>
           </div>
-        </div>
       </div>
       
       {dateViewMode === 'quick' && (
@@ -179,7 +169,6 @@ const DateSelection: React.FC<DateSelectionProps> = ({
           <div className="date-selection-mobile" style={{
             overflowX: 'auto',
             paddingBottom: '4px',
-            marginBottom: '8px',
             WebkitOverflowScrolling: 'touch'
           }}>
             <div style={{
