@@ -177,79 +177,161 @@ const DateSelection: React.FC<DateSelectionProps> = ({
       </div>
       
       {dateViewMode === 'quick' && (
-        <div className="quick-date-grid" style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
-          gap: '6px'
-        }}>
-          {[0, 1, 2, 3, 4, 5, 6].map((daysAhead) => {
-            const date = new Date();
-            date.setDate(date.getDate() + daysAhead);
-            const dateString = date.toISOString().split('T')[0];
-            const isSelected = selectedDate === dateString;
-            const slotCount = getSlotCountForDate(dateString);
-            
-            return (
-              <button
-                key={dateString}
-                onClick={() => setSelectedDate(dateString)}
-                disabled={slotCount === 0}
-                style={{
-                  position: 'relative',
-                  padding: '8px 6px',
-                  border: `2px solid ${isSelected ? '#2563EB' : '#E5E7EB'}`,
-                  borderRadius: '8px',
-                  backgroundColor: isSelected ? '#EFF6FF' : slotCount > 0 ? 'white' : '#F9FAFB',
-                  color: slotCount > 0 ? (isSelected ? '#1E40AF' : '#1F2937') : '#9CA3AF',
-                  cursor: slotCount > 0 ? 'pointer' : 'not-allowed',
-                  textAlign: 'center',
-                  transition: 'all 0.2s ease',
-                  opacity: slotCount === 0 ? 0.6 : 1,
-                  minHeight: '60px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center'
-                }}
-                onMouseEnter={(e) => {
-                  if (slotCount > 0 && !isSelected) {
-                    e.currentTarget.style.borderColor = '#93BBFB';
-                    e.currentTarget.style.backgroundColor = '#F0F9FF';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (slotCount > 0 && !isSelected) {
-                    e.currentTarget.style.borderColor = '#E5E7EB';
-                    e.currentTarget.style.backgroundColor = 'white';
-                  }
-                }}
-              >
-                <div style={{ fontWeight: '600', fontSize: '12px', lineHeight: '1.2' }}>
-                  {daysAhead === 0 ? 'Today' : daysAhead === 1 ? 'Tomorrow' : formatDate(date)}
-                </div>
-                <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '2px' }}>
-                  {slotCount > 0 ? `${slotCount} slots` : 'No slots'}
-                </div>
-                {isSelected && slotCount > 0 && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '-8px',
-                    right: '-8px',
-                    width: '20px',
-                    height: '20px',
-                    backgroundColor: '#2563EB',
-                    borderRadius: '50%',
+        <>
+          {/* Mobile: Horizontal scrollable 7 days */}
+          <div className="mobile-only" style={{
+            overflowX: 'auto',
+            paddingBottom: '4px',
+            marginBottom: '8px',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }}>
+            <style>{`
+              .mobile-only::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              minWidth: 'max-content',
+              paddingRight: '16px'
+            }}>
+              {[0, 1, 2, 3, 4, 5, 6].map((daysAhead) => {
+                const date = new Date();
+                date.setDate(date.getDate() + daysAhead);
+                const dateString = date.toISOString().split('T')[0];
+                const isSelected = selectedDate === dateString;
+                const slotCount = getSlotCountForDate(dateString);
+                
+                return (
+                  <button
+                    key={dateString}
+                    onClick={() => setSelectedDate(dateString)}
+                    disabled={slotCount === 0}
+                    style={{
+                      position: 'relative',
+                      padding: '10px 12px',
+                      minWidth: '85px',
+                      border: `2px solid ${isSelected ? '#2563EB' : '#E5E7EB'}`,
+                      borderRadius: '8px',
+                      backgroundColor: isSelected ? '#EFF6FF' : slotCount > 0 ? 'white' : '#F9FAFB',
+                      color: slotCount > 0 ? (isSelected ? '#1E40AF' : '#1F2937') : '#9CA3AF',
+                      cursor: slotCount > 0 ? 'pointer' : 'not-allowed',
+                      textAlign: 'center',
+                      transition: 'all 0.2s ease',
+                      opacity: slotCount === 0 ? 0.6 : 1,
+                      minHeight: '65px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
+                  >
+                    <div style={{ fontWeight: '600', fontSize: '12px', lineHeight: '1.2' }}>
+                      {daysAhead === 0 ? 'Today' : daysAhead === 1 ? 'Tomorrow' : formatDate(date)}
+                    </div>
+                    <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '2px' }}>
+                      {slotCount > 0 ? `${slotCount} slots` : 'No slots'}
+                    </div>
+                    {isSelected && slotCount > 0 && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '-6px',
+                        right: '-6px',
+                        width: '18px',
+                        height: '18px',
+                        backgroundColor: '#2563EB',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                      }}>
+                        <span style={{ fontSize: '10px', color: 'white' }}>✓</span>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* Desktop: Show all 7 days in grid */}
+          <div className="desktop-only" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '8px'
+          }}>
+            {[0, 1, 2, 3, 4, 5, 6].map((daysAhead) => {
+              const date = new Date();
+              date.setDate(date.getDate() + daysAhead);
+              const dateString = date.toISOString().split('T')[0];
+              const isSelected = selectedDate === dateString;
+              const slotCount = getSlotCountForDate(dateString);
+              
+              return (
+                <button
+                  key={dateString}
+                  onClick={() => setSelectedDate(dateString)}
+                  disabled={slotCount === 0}
+                  style={{
+                    position: 'relative',
+                    padding: '12px 8px',
+                    border: `2px solid ${isSelected ? '#2563EB' : '#E5E7EB'}`,
+                    borderRadius: '8px',
+                    backgroundColor: isSelected ? '#EFF6FF' : slotCount > 0 ? 'white' : '#F9FAFB',
+                    color: slotCount > 0 ? (isSelected ? '#1E40AF' : '#1F2937') : '#9CA3AF',
+                    cursor: slotCount > 0 ? 'pointer' : 'not-allowed',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease',
+                    opacity: slotCount === 0 ? 0.6 : 1,
+                    minHeight: '70px',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-                  }}>
-                    <span style={{ fontSize: '12px', color: 'white' }}>✓</span>
+                    flexDirection: 'column',
+                    justifyContent: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (slotCount > 0 && !isSelected) {
+                      e.currentTarget.style.borderColor = '#93BBFB';
+                      e.currentTarget.style.backgroundColor = '#F0F9FF';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (slotCount > 0 && !isSelected) {
+                      e.currentTarget.style.borderColor = '#E5E7EB';
+                      e.currentTarget.style.backgroundColor = 'white';
+                    }
+                  }}
+                >
+                  <div style={{ fontWeight: '600', fontSize: '14px', lineHeight: '1.2' }}>
+                    {daysAhead === 0 ? 'Today' : daysAhead === 1 ? 'Tomorrow' : formatDate(date)}
                   </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
+                  <div style={{ fontSize: '11px', opacity: 0.8, marginTop: '4px' }}>
+                    {slotCount > 0 ? `${slotCount} slots` : 'No slots'}
+                  </div>
+                  {isSelected && slotCount > 0 && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '-8px',
+                      right: '-8px',
+                      width: '20px',
+                      height: '20px',
+                      backgroundColor: '#2563EB',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                    }}>
+                      <span style={{ fontSize: '12px', color: 'white' }}>✓</span>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </>
       )}
       
       {dateViewMode === 'calendar' && (
@@ -352,7 +434,8 @@ const DateSelection: React.FC<DateSelectionProps> = ({
                   onClick={() => !dayInfo.isPast && slotCount > 0 && setSelectedDate(dayInfo.dateString)}
                   disabled={dayInfo.isPast || slotCount === 0}
                   style={{
-                    padding: '12px 8px',
+                    padding: '14px 8px',
+                    minHeight: '50px',
                     backgroundColor: isSelected ? '#1e5f79' : isToday ? '#c8eaeb' : 'white',
                     border: 'none',
                     cursor: dayInfo.isPast || slotCount === 0 ? 'not-allowed' : 'pointer',
