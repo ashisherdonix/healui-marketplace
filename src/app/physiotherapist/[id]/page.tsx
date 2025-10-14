@@ -625,7 +625,7 @@ const PhysiotherapistResponsivePage: React.FC = () => {
           {/* Mobile Consultation Type */}
           <div className="mobile-only" style={{ marginBottom: '16px' }}>
             <h3 style={{
-              fontSize: '16px',
+              fontSize: '15px',
               fontWeight: '600',
               color: theme.colors.text,
               marginBottom: '12px'
@@ -785,11 +785,10 @@ const PhysiotherapistResponsivePage: React.FC = () => {
           {/* Time Slots */}
           <div style={{ marginBottom: '24px' }}>
             <h3 style={{
-              fontSize: '18px',
+              fontSize: '15px',
               fontWeight: '600',
               color: theme.colors.text,
-              marginBottom: '16px',
-              textAlign: 'center'
+              marginBottom: '12px'
             }}>
               Available Times
             </h3>

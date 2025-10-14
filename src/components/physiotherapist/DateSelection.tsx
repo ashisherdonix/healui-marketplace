@@ -87,64 +87,64 @@ const DateSelection: React.FC<DateSelectionProps> = ({
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
+        justifyContent: 'space-between',
         marginBottom: '12px'
       }}>
         <h3 style={{
-          fontSize: '16px',
+          fontSize: '15px',
           fontWeight: '600',
           color: '#1F2937',
           margin: 0
         }}>
           Select Date
         </h3>
-          <div style={{
-            display: 'flex',
-            backgroundColor: '#F3F4F6',
-            borderRadius: '8px',
-            padding: '2px'
-          }}>
-            <button
-              onClick={() => setDateViewMode('quick')}
-              style={{
-                padding: '6px 12px',
-                border: 'none',
-                borderRadius: '6px',
-                backgroundColor: dateViewMode === 'quick' ? '#2563EB' : 'transparent',
-                color: dateViewMode === 'quick' ? 'white' : '#6B7280',
-                fontSize: '12px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              <Grid3x3 style={{ width: '14px', height: '14px' }} />
-              <span className="desktop-only">Quick</span>
-            </button>
-            <button
-              onClick={() => setDateViewMode('calendar')}
-              style={{
-                padding: '6px 12px',
-                border: 'none',
-                borderRadius: '6px',
-                backgroundColor: dateViewMode === 'calendar' ? '#2563EB' : 'transparent',
-                color: dateViewMode === 'calendar' ? 'white' : '#6B7280',
-                fontSize: '12px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              <CalendarDays style={{ width: '14px', height: '14px' }} />
-              <span className="desktop-only">Calendar</span>
-            </button>
-          </div>
+        <div style={{
+          display: 'flex',
+          gap: '4px'
+        }}>
+          <button
+            onClick={() => setDateViewMode('quick')}
+            style={{
+              padding: '6px 8px',
+              border: dateViewMode === 'quick' ? 'none' : '1px solid #D1D5DB',
+              borderRadius: '6px',
+              backgroundColor: dateViewMode === 'quick' ? '#1E40AF' : '#FFFFFF',
+              color: dateViewMode === 'quick' ? 'white' : '#374151',
+              fontSize: '11px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '3px',
+              minHeight: '28px'
+            }}
+          >
+            <Grid3x3 style={{ width: '12px', height: '12px' }} />
+            <span>Quick</span>
+          </button>
+          <button
+            onClick={() => setDateViewMode('calendar')}
+            style={{
+              padding: '6px 8px',
+              border: dateViewMode === 'calendar' ? 'none' : '1px solid #D1D5DB',
+              borderRadius: '6px',
+              backgroundColor: dateViewMode === 'calendar' ? '#1E40AF' : '#FFFFFF',
+              color: dateViewMode === 'calendar' ? 'white' : '#374151',
+              fontSize: '11px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '3px',
+              minHeight: '28px'
+            }}
+          >
+            <CalendarDays style={{ width: '12px', height: '12px' }} />
+            <span>Calendar</span>
+          </button>
+        </div>
       </div>
       
       {dateViewMode === 'quick' && (
