@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Grid3x3, CalendarDays } from 'lucide-react';
+import { theme } from '@/utils/theme';
 
 interface DateSelectionProps {
   dateViewMode: 'quick' | 'calendar';
@@ -106,10 +107,10 @@ const DateSelection: React.FC<DateSelectionProps> = ({
             onClick={() => setDateViewMode('quick')}
             style={{
               padding: '6px 8px',
-              border: dateViewMode === 'quick' ? 'none' : '1px solid #D1D5DB',
+              border: dateViewMode === 'quick' ? 'none' : `1px solid ${theme.colors.gray[300]}`,
               borderRadius: '6px',
-              backgroundColor: dateViewMode === 'quick' ? '#1E40AF' : '#FFFFFF',
-              color: dateViewMode === 'quick' ? 'white' : '#374151',
+              backgroundColor: dateViewMode === 'quick' ? theme.colors.primary : theme.colors.white,
+              color: dateViewMode === 'quick' ? 'white' : theme.colors.text,
               fontSize: '11px',
               fontWeight: '500',
               cursor: 'pointer',
@@ -127,10 +128,10 @@ const DateSelection: React.FC<DateSelectionProps> = ({
             onClick={() => setDateViewMode('calendar')}
             style={{
               padding: '6px 8px',
-              border: dateViewMode === 'calendar' ? 'none' : '1px solid #D1D5DB',
+              border: dateViewMode === 'calendar' ? 'none' : `1px solid ${theme.colors.gray[300]}`,
               borderRadius: '6px',
-              backgroundColor: dateViewMode === 'calendar' ? '#1E40AF' : '#FFFFFF',
-              color: dateViewMode === 'calendar' ? 'white' : '#374151',
+              backgroundColor: dateViewMode === 'calendar' ? theme.colors.primary : theme.colors.white,
+              color: dateViewMode === 'calendar' ? 'white' : theme.colors.text,
               fontSize: '11px',
               fontWeight: '500',
               cursor: 'pointer',
@@ -193,10 +194,10 @@ const DateSelection: React.FC<DateSelectionProps> = ({
                       position: 'relative',
                       padding: '10px 12px',
                       minWidth: '85px',
-                      border: `2px solid ${isSelected ? '#2563EB' : '#E5E7EB'}`,
+                      border: `2px solid ${isSelected ? theme.colors.primary : theme.colors.gray[300]}`,
                       borderRadius: '8px',
-                      backgroundColor: isSelected ? '#EFF6FF' : slotCount > 0 ? 'white' : '#F9FAFB',
-                      color: slotCount > 0 ? (isSelected ? '#1E40AF' : '#1F2937') : '#9CA3AF',
+                      backgroundColor: isSelected ? theme.colors.primary : slotCount > 0 ? theme.colors.white : theme.colors.gray[100],
+                      color: isSelected ? 'white' : slotCount > 0 ? theme.colors.text : theme.colors.gray[500],
                       cursor: slotCount > 0 ? 'pointer' : 'not-allowed',
                       textAlign: 'center',
                       transition: 'all 0.2s ease',
@@ -221,7 +222,7 @@ const DateSelection: React.FC<DateSelectionProps> = ({
                         right: '-6px',
                         width: '18px',
                         height: '18px',
-                        backgroundColor: '#2563EB',
+                        backgroundColor: theme.colors.primary,
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
@@ -258,10 +259,10 @@ const DateSelection: React.FC<DateSelectionProps> = ({
                   style={{
                     position: 'relative',
                     padding: '12px 8px',
-                    border: `2px solid ${isSelected ? '#2563EB' : '#E5E7EB'}`,
+                    border: `2px solid ${isSelected ? theme.colors.primary : theme.colors.gray[300]}`,
                     borderRadius: '8px',
-                    backgroundColor: isSelected ? '#EFF6FF' : slotCount > 0 ? 'white' : '#F9FAFB',
-                    color: slotCount > 0 ? (isSelected ? '#1E40AF' : '#1F2937') : '#9CA3AF',
+                    backgroundColor: isSelected ? theme.colors.primary : slotCount > 0 ? theme.colors.white : theme.colors.gray[100],
+                    color: isSelected ? 'white' : slotCount > 0 ? theme.colors.text : theme.colors.gray[500],
                     cursor: slotCount > 0 ? 'pointer' : 'not-allowed',
                     textAlign: 'center',
                     transition: 'all 0.2s ease',
@@ -273,14 +274,14 @@ const DateSelection: React.FC<DateSelectionProps> = ({
                   }}
                   onMouseEnter={(e) => {
                     if (slotCount > 0 && !isSelected) {
-                      e.currentTarget.style.borderColor = '#93BBFB';
-                      e.currentTarget.style.backgroundColor = '#F0F9FF';
+                      e.currentTarget.style.borderColor = theme.colors.primary;
+                      e.currentTarget.style.backgroundColor = theme.colors.secondary;
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (slotCount > 0 && !isSelected) {
-                      e.currentTarget.style.borderColor = '#E5E7EB';
-                      e.currentTarget.style.backgroundColor = 'white';
+                      e.currentTarget.style.borderColor = theme.colors.gray[300];
+                      e.currentTarget.style.backgroundColor = theme.colors.white;
                     }
                   }}
                 >
@@ -297,7 +298,7 @@ const DateSelection: React.FC<DateSelectionProps> = ({
                       right: '-8px',
                       width: '20px',
                       height: '20px',
-                      backgroundColor: '#2563EB',
+                      backgroundColor: theme.colors.primary,
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
