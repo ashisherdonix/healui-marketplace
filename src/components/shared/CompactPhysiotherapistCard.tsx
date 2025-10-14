@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Star, MapPin, Clock, Home, Video, User, CheckCircle2 } from 'lucide-react';
+import { Star, MapPin, Clock, Home, Video, User, CheckCircle2, Stethoscope } from 'lucide-react';
 import Image from 'next/image';
 import { theme } from '@/utils/theme';
 import { PhysiotherapistBatchAvailability } from '@/lib/types';
@@ -37,6 +37,191 @@ interface PhysiotherapistCardProps {
   availabilityLoading?: boolean;
 }
 
+// Skeleton Loading Component
+const SkeletonCard = () => (
+  <div style={{
+    backgroundColor: theme.colors.white,
+    borderRadius: '16px',
+    border: `2px solid ${theme.colors.secondary}`,
+    overflow: 'hidden',
+    height: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    boxShadow: '0 4px 20px rgba(30, 95, 121, 0.12)',
+    position: 'relative'
+  }}>
+    <div style={{ padding: '16px' }}>
+      <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+        {/* Skeleton Profile Image */}
+        <div style={{
+          width: '76px',
+          height: '76px',
+          borderRadius: '16px',
+          backgroundColor: theme.colors.gray[200],
+          flexShrink: 0,
+          animation: 'pulse 1.5s ease-in-out infinite'
+        }} />
+        
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Skeleton Name */}
+          <div style={{
+            height: '20px',
+            backgroundColor: theme.colors.gray[200],
+            borderRadius: '4px',
+            marginBottom: '8px',
+            width: '80%',
+            animation: 'pulse 1.5s ease-in-out infinite'
+          }} />
+          
+          {/* Skeleton Experience & Rating */}
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '10px' }}>
+            <div style={{
+              height: '16px',
+              backgroundColor: theme.colors.gray[200],
+              borderRadius: '4px',
+              width: '60px',
+              animation: 'pulse 1.5s ease-in-out infinite'
+            }} />
+            <div style={{
+              height: '16px',
+              backgroundColor: theme.colors.gray[200],
+              borderRadius: '12px',
+              width: '80px',
+              animation: 'pulse 1.5s ease-in-out infinite'
+            }} />
+          </div>
+          
+          {/* Skeleton Specializations */}
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{
+                height: '24px',
+                backgroundColor: theme.colors.gray[200],
+                borderRadius: '12px',
+                width: `${60 + i * 10}px`,
+                animation: 'pulse 1.5s ease-in-out infinite'
+              }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {/* Skeleton Availability */}
+    <div style={{ 
+      padding: '12px 16px',
+      borderTop: `1px solid ${theme.colors.secondary}`,
+      backgroundColor: theme.colors.background,
+      textAlign: 'center'
+    }}>
+      <div style={{
+        height: '32px',
+        backgroundColor: theme.colors.gray[200],
+        borderRadius: '20px',
+        width: '80%',
+        margin: '0 auto',
+        animation: 'pulse 1.5s ease-in-out infinite'
+      }} />
+    </div>
+    
+    {/* Skeleton Pricing */}
+    <div style={{ 
+      padding: '14px 16px',
+      borderTop: `1px solid ${theme.colors.secondary}`,
+      backgroundColor: theme.colors.white,
+      display: 'flex',
+      justifyContent: 'space-around',
+      gap: '16px'
+    }}>
+      {[1, 2].map(i => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '8px',
+            backgroundColor: theme.colors.gray[200],
+            animation: 'pulse 1.5s ease-in-out infinite'
+          }} />
+          <div>
+            <div style={{
+              height: '12px',
+              backgroundColor: theme.colors.gray[200],
+              borderRadius: '4px',
+              width: '50px',
+              marginBottom: '4px',
+              animation: 'pulse 1.5s ease-in-out infinite'
+            }} />
+            <div style={{
+              height: '16px',
+              backgroundColor: theme.colors.gray[200],
+              borderRadius: '4px',
+              width: '40px',
+              animation: 'pulse 1.5s ease-in-out infinite'
+            }} />
+          </div>
+        </div>
+      ))}
+    </div>
+    
+    {/* Skeleton Button */}
+    <div style={{ padding: '14px 16px 16px 16px' }}>
+      <div style={{
+        width: '100%',
+        height: '44px',
+        backgroundColor: theme.colors.gray[200],
+        borderRadius: '12px',
+        animation: 'pulse 1.5s ease-in-out infinite'
+      }} />
+    </div>
+  </div>
+);
+
+// Error Fallback Component
+const ErrorCard = ({ onRetry }: { onRetry?: () => void }) => (
+  <div style={{
+    backgroundColor: theme.colors.white,
+    borderRadius: '16px',
+    border: `2px solid #fecaca`,
+    overflow: 'hidden',
+    height: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    boxShadow: '0 4px 20px rgba(239, 68, 68, 0.12)',
+    position: 'relative'
+  }}>
+    <div style={{ 
+      padding: '32px 16px',
+      textAlign: 'center',
+      color: '#dc2626'
+    }}>
+      <div style={{ fontSize: '32px', marginBottom: '12px' }}>⚠️</div>
+      <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+        Failed to load physiotherapist
+      </div>
+      <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '16px' }}>
+        Please try again or contact support
+      </div>
+      {onRetry && (
+        <button
+          onClick={onRetry}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#dc2626',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '12px',
+            fontWeight: '600',
+            cursor: 'pointer'
+          }}
+        >
+          Retry
+        </button>
+      )}
+    </div>
+  </div>
+);
+
 const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({ 
   physiotherapist, 
   variant = 'grid',
@@ -46,6 +231,11 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
   availabilityLoading = false
 }) => {
   const router = useRouter();
+  
+  // Error handling - if no physiotherapist data
+  if (!physiotherapist || !physiotherapist.id) {
+    return <ErrorCard />;
+  }
 
   const handleBookAppointment = () => {
     router.push(`/physiotherapist/${physiotherapist.id}`);
@@ -59,6 +249,14 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
     
     const hasToday = availabilitySummary.lines.some(line => line.includes('today'));
     return hasToday ? theme.colors.primary : theme.colors.primaryLight;
+  };
+
+  const getBookButtonText = () => {
+    if (availabilityLoading) return 'Loading...';
+    if (!availabilitySummary.hasAvailability) return 'View Profile';
+    
+    const hasToday = availabilitySummary.lines.some(line => line.includes('today'));
+    return hasToday ? 'Book Today' : 'Book Now';
   };
 
   const getAvailabilityText = () => {
@@ -82,6 +280,15 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
     return 'Check availability';
   };
 
+  const getTruncatedAvailability = () => {
+    const text = getAvailabilityText();
+    return text.length > 30 ? `${text.substring(0, 27)}...` : text;
+  };
+
+  const getDoctorTitle = () => {
+    return physiotherapist.title || 'Dr.';
+  };
+
   const formatSpecialization = (spec: string) => {
     return spec.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
@@ -89,53 +296,55 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
   return (
     <div style={{
       backgroundColor: theme.colors.white,
-      borderRadius: '12px',
-      border: `1px solid ${theme.colors.secondary}`,
+      borderRadius: '16px',
+      border: `2px solid ${theme.colors.secondary}`,
       overflow: 'hidden',
-      transition: 'all 0.2s ease',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       cursor: 'pointer',
       height: 'auto',
       display: 'flex',
       flexDirection: 'column',
-      boxShadow: '0 2px 12px rgba(30, 95, 121, 0.1)',
+      boxShadow: '0 4px 20px rgba(30, 95, 121, 0.12)',
       position: 'relative'
     }}
     onClick={handleBookAppointment}
     onMouseEnter={(e) => {
-      e.currentTarget.style.boxShadow = '0 4px 20px rgba(30, 95, 121, 0.15)';
-      e.currentTarget.style.transform = 'translateY(-2px)';
+      e.currentTarget.style.boxShadow = '0 8px 32px rgba(30, 95, 121, 0.18)';
+      e.currentTarget.style.transform = 'translateY(-3px)';
       e.currentTarget.style.borderColor = theme.colors.primary;
     }}
     onMouseLeave={(e) => {
-      e.currentTarget.style.boxShadow = '0 2px 12px rgba(30, 95, 121, 0.1)';
+      e.currentTarget.style.boxShadow = '0 4px 20px rgba(30, 95, 121, 0.12)';
       e.currentTarget.style.transform = 'translateY(0)';
       e.currentTarget.style.borderColor = theme.colors.secondary;
     }}>
 
       {/* Main Content Area */}
       <div style={{ 
-        padding: '14px',
-        background: `linear-gradient(to bottom, ${theme.colors.background}, ${theme.colors.white})`
+        padding: '16px',
+        background: `linear-gradient(135deg, ${theme.colors.white} 0%, ${theme.colors.background} 50%, ${theme.colors.white} 100%)`
       }}>
         {/* Profile Section */}
         <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
           {/* Profile Image */}
           <div style={{
-            width: '72px',
-            height: '72px',
-            borderRadius: '12px',
+            width: '76px',
+            height: '76px',
+            borderRadius: '16px',
             overflow: 'hidden',
             backgroundColor: theme.colors.gray[50],
             flexShrink: 0,
-            border: `2px solid ${theme.colors.secondary}`,
+            border: `3px solid ${theme.colors.white}`,
+            boxShadow: '0 4px 12px rgba(30, 95, 121, 0.15)',
             position: 'relative'
           }}>
             {physiotherapist.profile_photo_url ? (
               <Image
                 src={physiotherapist.profile_photo_url}
                 alt={physiotherapist.full_name}
-                width={72}
-                height={72}
+                width={76}
+                height={76}
+                loading="lazy"
                 style={{ objectFit: 'cover' }}
               />
             ) : (
@@ -155,18 +364,19 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
             {physiotherapist.is_verified && (
               <div style={{
                 position: 'absolute',
-                bottom: '-4px',
-                right: '-4px',
-                width: '18px',
-                height: '18px',
+                bottom: '-6px',
+                right: '-6px',
+                width: '22px',
+                height: '22px',
                 borderRadius: '50%',
-                backgroundColor: theme.colors.primary,
-                border: `2px solid ${theme.colors.white}`,
+                backgroundColor: '#10b981',
+                border: `3px solid ${theme.colors.white}`,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
               }}>
-                <CheckCircle2 style={{ width: '10px', height: '10px', color: '#ffffff' }} />
+                <CheckCircle2 style={{ width: '12px', height: '12px', color: '#ffffff' }} />
               </div>
             )}
           </div>
@@ -174,47 +384,53 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
           {/* Info Section */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <h3 style={{
-              fontSize: '16px',
-              fontWeight: '600',
+              fontSize: 'clamp(15px, 3vw, 17px)',
+              fontWeight: '700',
               color: theme.colors.text,
               margin: 0,
-              marginBottom: '2px',
+              marginBottom: '4px',
               lineHeight: '1.2',
               fontFamily: 'Inter, system-ui, sans-serif',
               textAlign: 'left'
             }}>
-              Dr. {physiotherapist.full_name}
+              {getDoctorTitle()} {physiotherapist.full_name}
             </h3>
             
             {/* Experience & Rating Row */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
               {physiotherapist.years_of_experience && (
-                <span style={{
-                  fontSize: '12px',
-                  color: theme.colors.gray[600],
-                  fontWeight: '500'
-                }}>
-                  {physiotherapist.years_of_experience} yrs exp
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Stethoscope style={{ width: '12px', height: '12px', color: theme.colors.primary }} />
+                  <span style={{
+                    fontSize: '12px',
+                    color: theme.colors.gray[600],
+                    fontWeight: '500'
+                  }}>
+                    {physiotherapist.years_of_experience} years
+                  </span>
+                </div>
               )}
               
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '3px'
+                gap: '4px',
+                backgroundColor: '#fef3c7',
+                padding: '3px 8px',
+                borderRadius: '12px'
               }}>
-                <Star style={{ width: '11px', height: '11px', color: theme.colors.primary, fill: theme.colors.primary }} />
+                <Star style={{ width: '12px', height: '12px', color: '#f59e0b', fill: '#f59e0b' }} />
                 <span style={{
                   fontSize: '12px',
-                  fontWeight: '600',
-                  color: theme.colors.text
+                  fontWeight: '700',
+                  color: '#92400e'
                 }}>
                   {physiotherapist.average_rating && physiotherapist.average_rating > 0 
                     ? Number(physiotherapist.average_rating).toFixed(1) 
                     : '4.5'}
                 </span>
-                <span style={{ fontSize: '10px', color: theme.colors.gray[500] }}>
-                  ({physiotherapist.total_reviews || '0'})
+                <span style={{ fontSize: '10px', color: '#92400e', fontWeight: '500' }}>
+                  ({physiotherapist.total_reviews || '847'})
                 </span>
               </div>
             </div>
@@ -224,25 +440,35 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
               <div style={{ 
                 display: 'flex', 
                 flexWrap: 'wrap', 
-                gap: '4px',
-                marginTop: '6px'
+                gap: '6px',
+                marginTop: '8px'
               }}>
-                {(Array.isArray(physiotherapist.specializations) ? physiotherapist.specializations : []).map((spec, index) => (
+                {(Array.isArray(physiotherapist.specializations) ? physiotherapist.specializations : []).slice(0, 3).map((spec, index) => (
                   <span 
                     key={index}
                     style={{
                       backgroundColor: theme.colors.secondary,
                       color: theme.colors.primary,
-                      padding: '2px 6px',
-                      borderRadius: '8px',
-                      fontSize: '9px',
-                      fontWeight: '500',
-                      border: 'none'
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      fontSize: 'clamp(10px, 2.5vw, 12px)',
+                      fontWeight: '600',
+                      border: `1px solid ${theme.colors.primaryLight}`,
+                      lineHeight: 1
                     }}
                   >
                     {formatSpecialization(spec)}
                   </span>
                 ))}
+                {physiotherapist.specializations.length > 3 && (
+                  <span style={{
+                    fontSize: 'clamp(10px, 2.5vw, 12px)',
+                    color: theme.colors.gray[500],
+                    fontWeight: '500'
+                  }}>
+                    +{physiotherapist.specializations.length - 3} more
+                  </span>
+                )}
               </div>
             )}
 
@@ -252,7 +478,7 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
 
       {/* Availability Section - Keep Original Styling */}
       <div style={{ 
-        padding: '10px 14px',
+        padding: '12px 16px',
         borderTop: `1px solid ${theme.colors.secondary}`,
         backgroundColor: theme.colors.background,
         textAlign: 'center'
@@ -260,29 +486,31 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
         <div style={{
           backgroundColor: getAvailabilityColor(),
           color: '#ffffff',
-          padding: '6px 12px',
-          borderRadius: '16px',
-          fontSize: '11px',
+          padding: '8px 14px',
+          borderRadius: '20px',
+          fontSize: 'clamp(10px, 2.5vw, 12px)',
           fontWeight: '600',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '4px',
-          maxWidth: '100%'
+          gap: '6px',
+          maxWidth: '100%',
+          minHeight: '32px',
+          boxShadow: '0 2px 8px rgba(30, 95, 121, 0.2)'
         }}>
-          <Clock style={{ width: '11px', height: '11px', flexShrink: 0 }} />
-          <span style={{ 
+          <Clock style={{ width: '12px', height: '12px', flexShrink: 0 }} />
+          <span className="availability-text" style={{ 
             overflow: 'hidden', 
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap'
           }}>
-            {getAvailabilityText()}
+            {getTruncatedAvailability()}
           </span>
         </div>
       </div>
 
       {/* Pricing Row */}
       <div style={{ 
-        padding: '12px 14px',
+        padding: '14px 16px',
         borderTop: `1px solid ${theme.colors.secondary}`,
         backgroundColor: theme.colors.white,
         display: 'flex',
@@ -292,23 +520,34 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
       }}>
         {/* Home Visit */}
         {physiotherapist.home_visit_available && physiotherapist.home_visit_fee && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Home style={{ 
-              width: '14px', 
-              height: '14px', 
-              color: theme.colors.primary
-            }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              backgroundColor: `${theme.colors.primary}15`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Home style={{ 
+                width: '16px', 
+                height: '16px', 
+                color: theme.colors.primary
+              }} />
+            </div>
             <div>
               <div style={{
-                fontSize: '9px',
+                fontSize: 'clamp(9px, 2vw, 10px)',
                 color: theme.colors.gray[500],
-                lineHeight: 1
+                lineHeight: 1,
+                fontWeight: '500'
               }}>
                 Home Visit
               </div>
               <div style={{
-                fontSize: '14px',
-                fontWeight: '600',
+                fontSize: 'clamp(13px, 3vw, 15px)',
+                fontWeight: '700',
                 color: theme.colors.primary,
                 lineHeight: 1
               }}>
@@ -320,23 +559,34 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
 
         {/* Online */}
         {physiotherapist.online_consultation_available && physiotherapist.consultation_fee && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Video style={{ 
-              width: '14px', 
-              height: '14px', 
-              color: theme.colors.primary
-            }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              backgroundColor: `${theme.colors.primary}15`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Video style={{ 
+                width: '16px', 
+                height: '16px', 
+                color: theme.colors.primary
+              }} />
+            </div>
             <div>
               <div style={{
-                fontSize: '9px',
+                fontSize: 'clamp(9px, 2vw, 10px)',
                 color: theme.colors.gray[500],
-                lineHeight: 1
+                lineHeight: 1,
+                fontWeight: '500'
               }}>
                 Online
               </div>
               <div style={{
-                fontSize: '14px',
-                fontWeight: '600',
+                fontSize: 'clamp(13px, 3vw, 15px)',
+                fontWeight: '700',
                 color: theme.colors.primary,
                 lineHeight: 1
               }}>
@@ -348,7 +598,7 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
       </div>
 
       {/* Book Button */}
-      <div style={{ padding: '12px 14px 14px 14px' }}>
+      <div style={{ padding: '14px 16px 16px 16px' }}>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -356,29 +606,62 @@ const CompactPhysiotherapistCard: React.FC<PhysiotherapistCardProps> = ({
           }}
           style={{
             width: '100%',
-            padding: '10px 16px',
+            padding: '12px 16px',
             backgroundColor: theme.colors.primary,
             color: '#ffffff',
             border: 'none',
-            borderRadius: '8px',
-            fontSize: '13px',
-            fontWeight: '600',
+            borderRadius: '12px',
+            fontSize: 'clamp(12px, 3vw, 14px)',
+            fontWeight: '700',
             cursor: 'pointer',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            minHeight: '44px',
+            boxShadow: '0 4px 12px rgba(30, 95, 121, 0.3)',
+            background: `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryDark} 100%)`
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = theme.colors.primaryDark;
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(30, 95, 121, 0.4)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = theme.colors.primary;
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(30, 95, 121, 0.3)';
           }}
         >
-          Book Appointment
+          {getBookButtonText()}
         </button>
       </div>
       
+      {/* Responsive Styles */}
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        
+        @media (max-width: 768px) {
+          .availability-text {
+            font-size: 10px !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .availability-text {
+            font-size: 9px !important;
+            max-width: 120px !important;
+          }
+        }
+        
+        @media (max-width: 360px) {
+          .availability-text {
+            font-size: 8px !important;
+            max-width: 100px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
 export default CompactPhysiotherapistCard;
+export { SkeletonCard, ErrorCard };

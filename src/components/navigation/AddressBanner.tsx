@@ -123,11 +123,12 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
 
   return (
     <>
-      {/* Address Banner */}
+      {/* Modern Compact Address Banner */}
       <div style={{
-        backgroundColor: '#f8fafc',
-        borderBottom: '1px solid #e2e8f0',
-        padding: '8px 0'
+        backgroundColor: '#ffffff',
+        borderBottom: `1px solid #e5f3f4`,
+        padding: '12px 0',
+        boxShadow: '0 1px 3px rgba(30, 95, 121, 0.05)'
       }}>
         <div style={{ 
           maxWidth: '1200px', 
@@ -135,111 +136,112 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
           padding: '0 1rem',
           position: 'relative'
         }}>
-          {/* Desktop: Compact left-aligned container */}
+          {/* Modern Pill Design */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'flex-start',
-            gap: '1rem'
+            justifyContent: 'center'
           }}>
-            {/* Address Container - Responsive */}
-            <div className="address-container" style={{
+            {/* Address Pill Container */}
+            <div className="address-pill" style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '1rem',
+              gap: '12px',
               maxWidth: '600px',
-              width: '100%',
+              width: 'fit-content',
               backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              padding: '8px 16px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-            }}>
-              {/* Address Display */}
+              border: `2px solid #c8eaeb`,
+              borderRadius: '24px',
+              padding: '8px 20px',
+              boxShadow: '0 4px 20px rgba(30, 95, 121, 0.08)',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              cursor: 'pointer',
+              fontFamily: 'Inter, system-ui, sans-serif'
+            }}
+            onClick={() => setIsOpen(!isOpen)}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#1e5f79';
+              e.currentTarget.style.boxShadow = '0 4px 24px rgba(30, 95, 121, 0.15)';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#c8eaeb';
+              e.currentTarget.style.boxShadow = '0 4px 20px rgba(30, 95, 121, 0.08)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+            >
+              {/* Location Icon */}
+              <MapPinIcon style={{ 
+                width: '18px', 
+                height: '18px', 
+                color: '#1e5f79',
+                flexShrink: 0
+              }} />
+              
+              {/* Address Text */}
               <div style={{ 
                 display: 'flex', 
-                alignItems: 'center', 
-                gap: '10px',
-                flex: 1,
+                alignItems: 'center',
+                gap: '8px',
                 minWidth: 0
               }}>
-                <MapPinIcon style={{ 
-                  width: '16px', 
-                  height: '16px', 
-                  color: '#dc2626',
-                  flexShrink: 0
+                <div className="address-display" style={{ 
+                  fontSize: '14px', 
+                  color: '#1e5f79',
+                  fontWeight: '600',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  lineHeight: 1
+                }}>
+                  {addressLoading ? 'Detecting location...' : (
+                    <span>
+                      {currentAddress ? (
+                        <span>
+                          <span className="full-address">{currentAddress.address_line_1}, {currentAddress.city}</span>
+                          <span className="short-address" style={{ display: 'none' }}>{currentAddress.city}</span>
+                        </span>
+                      ) : currentLocation ? (
+                        <span>
+                          <span className="full-address">{currentLocation.address || 'Current Location'}</span>
+                          <span className="short-address" style={{ display: 'none' }}>Current Location</span>
+                        </span>
+                      ) : (
+                        'Select delivery location'
+                      )}
+                    </span>
+                  )}
+                </div>
+                
+                {/* Separator & Change */}
+                <div style={{
+                  width: '2px',
+                  height: '16px',
+                  backgroundColor: '#c8eaeb',
+                  borderRadius: '1px'
                 }} />
                 
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="service-label" style={{ 
-                    fontSize: '10px', 
-                    color: '#64748b',
-                    fontWeight: '500',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    marginBottom: '1px'
-                  }}>
-                    Service Location
-                  </div>
-                  <div className="address-text" style={{ 
-                    fontSize: '13px', 
-                    color: '#1e293b',
-                    fontWeight: '600',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {addressLoading ? 'Loading...' : shortDisplayText}
-                  </div>
-                </div>
-              </div>
-
-              {/* Change Button Only */}
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                flexShrink: 0
-              }}>
-                <button
-                  onClick={() => setIsOpen(!isOpen)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '3px',
-                    padding: '4px 8px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '4px',
-                    fontSize: '11px',
-                    fontWeight: '500',
-                    color: '#475569',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.3px'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f1f5f9';
-                    e.currentTarget.style.borderColor = '#94a3b8';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#ffffff';
-                    e.currentTarget.style.borderColor = '#cbd5e1';
-                  }}
-                >
-                  Change
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  color: '#6b7280',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}>
+                  <span>Change</span>
                   <ChevronDownIcon style={{ 
-                    width: '10px', 
-                    height: '10px',
+                    width: '12px', 
+                    height: '12px',
                     transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                     transition: 'transform 0.2s ease'
                   }} />
-                </button>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Dropdown Menu - Positioned relative to address container */}
+          {/* Modern Dropdown Menu */}
           {isOpen && (
             <>
               {/* Backdrop */}
@@ -252,23 +254,25 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
                 onClick={() => setIsOpen(false)}
               />
               
-              {/* Dropdown Content - Responsive */}
+              {/* Dropdown Content - Modern Design */}
               <div className="address-dropdown" style={{
                 position: 'absolute',
                 top: '100%',
-                left: '0',
+                left: '50%',
+                transform: 'translateX(-50%)',
                 width: '500px',
-                marginTop: '8px',
+                marginTop: '12px',
                 backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                border: `2px solid #c8eaeb`,
+                borderRadius: '16px',
+                boxShadow: '0 20px 25px -5px rgba(30, 95, 121, 0.1), 0 10px 10px -5px rgba(30, 95, 121, 0.04)',
                 zIndex: 20,
-                maxHeight: '400px',
-                overflowY: 'auto'
+                maxHeight: '450px',
+                overflowY: 'auto',
+                fontFamily: 'Inter, system-ui, sans-serif'
               }}>
                 {/* Current Location Option */}
-                <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ padding: '18px', borderBottom: '1px solid #e5f3f4' }}>
                   <button
                     onClick={handleUseCurrentLocation}
                     disabled={locationLoading}
@@ -276,23 +280,23 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
                       width: '100%',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px',
+                      gap: '14px',
+                      padding: '14px 16px',
                       backgroundColor: 'transparent',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
+                      border: `2px solid #c8eaeb`,
+                      borderRadius: '12px',
                       cursor: locationLoading ? 'not-allowed' : 'pointer',
                       transition: 'all 0.2s ease'
                     }}
                     onMouseEnter={(e) => {
                       if (!locationLoading) {
-                        e.currentTarget.style.backgroundColor = '#eff6ff';
-                        e.currentTarget.style.borderColor = '#3b82f6';
+                        e.currentTarget.style.backgroundColor = '#eff8ff';
+                        e.currentTarget.style.borderColor = '#1e5f79';
                       }
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.borderColor = '#c8eaeb';
                     }}
                   >
                     <div style={{ flexShrink: 0 }}>
@@ -692,54 +696,85 @@ const AddressBanner: React.FC<AddressBannerProps> = ({ onAddAddress }) => {
           100% { transform: rotate(360deg); }
         }
         
-        @media (max-width: 640px) {
-          .address-container {
-            gap: 0.5rem !important;
-            padding: 6px 12px !important;
-            max-width: 100% !important;
+        @media (max-width: 768px) {
+          .address-pill {
+            gap: 10px !important;
+            padding: 7px 16px !important;
+            max-width: calc(100vw - 2rem) !important;
+            border-radius: 20px !important;
           }
           
-          .address-container > div:first-child {
-            gap: 6px !important;
+          .address-pill svg {
+            width: 16px !important;
+            height: 16px !important;
           }
           
-          .address-container svg {
-            width: 14px !important;
-            height: 14px !important;
-          }
-          
-          .address-container button {
-            padding: 3px 6px !important;
-            font-size: 10px !important;
-            gap: 2px !important;
-          }
-          
-          .address-container button svg {
-            width: 8px !important;
-            height: 8px !important;
+          .address-display {
+            font-size: 13px !important;
           }
           
           .address-dropdown {
             width: calc(100vw - 2rem) !important;
             max-width: 500px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
+            margin-top: 8px !important;
+          }
+          
+          .address-dropdown > div {
+            padding: 14px !important;
           }
           
           .address-dropdown button {
+            padding: 12px 14px !important;
+            font-size: 13px !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .address-pill {
+            gap: 8px !important;
+            padding: 6px 14px !important;
+            border-radius: 18px !important;
+          }
+          
+          .address-pill svg {
+            width: 14px !important;
+            height: 14px !important;
+          }
+          
+          .address-display {
             font-size: 12px !important;
+          }
+          
+          .full-address {
+            display: none !important;
+          }
+          
+          .short-address {
+            display: inline !important;
+          }
+          
+          .address-dropdown {
+            border-radius: 12px !important;
           }
           
           .address-dropdown > div {
             padding: 12px !important;
           }
           
-          .service-label {
-            font-size: 9px !important;
-            letter-spacing: 0.3px !important;
+          .address-dropdown button {
+            padding: 10px 12px !important;
+            font-size: 12px !important;
+          }
+        }
+        
+        @media (max-width: 360px) {
+          .address-pill {
+            padding: 5px 12px !important;
+            gap: 6px !important;
+            font-size: 11px !important;
           }
           
-          .address-text {
+          .address-display {
             font-size: 11px !important;
           }
         }

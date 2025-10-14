@@ -691,13 +691,13 @@ const HomePage: React.FC = () => {
         
         @media (max-width: 768px) {
           .physiotherapist-grid {
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
-            gap: 8px !important;
-            padding: 0 8px !important;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+            gap: 12px !important;
+            padding: 0 12px !important;
           }
           .available-today-grid {
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
-            gap: 8px !important;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+            gap: 12px !important;
           }
           section {
             min-height: 500px !important;
@@ -714,7 +714,9 @@ const HomePage: React.FC = () => {
         }
         @media (max-width: 480px) {
           .physiotherapist-grid {
-            grid-template-columns: 1fr !important;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+            gap: 16px !important;
+            padding: 0 16px !important;
           }
           section {
             padding: clamp(1.5rem, 4vw, 2.5rem) 0 !important;
