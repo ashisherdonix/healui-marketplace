@@ -282,27 +282,6 @@ const TrustSignals = memo(({ theme }: { theme: unknown }) => {
         <span>Verified Doctors</span>
       </div>
 
-      {/* Separator */}
-      <span style={{ color: theme.colors.gray[300] }}>•</span>
-
-      {/* Available Today */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.25rem',
-        fontSize: '0.8125rem',
-        color: theme.colors.gray[700],
-        fontWeight: '600',
-        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
-      }}>
-        <div style={{
-          width: '6px',
-          height: '6px',
-          borderRadius: '50%',
-          backgroundColor: theme.colors.success
-        }} />
-        <span>Available Today</span>
-      </div>
     </div>
   );
 });
@@ -859,27 +838,6 @@ const HomePage: React.FC = () => {
                 <span>Verified Doctors</span>
               </div>
 
-              {/* Separator */}
-              <span style={{ color: theme.colors.gray[300] }}>•</span>
-
-              {/* Available Today */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                fontSize: '0.8125rem',
-                color: theme.colors.gray[700],
-                fontWeight: '600',
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
-              }}>
-                <div style={{
-                  width: '6px',
-                  height: '6px',
-                  borderRadius: '50%',
-                  backgroundColor: theme.colors.success
-                }} />
-                <span>Available Today</span>
-              </div>
             </div>
 
             {/* Memoized Available Today Section - No re-renders on hero text change */}

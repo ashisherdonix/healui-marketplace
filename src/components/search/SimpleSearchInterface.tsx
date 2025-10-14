@@ -185,7 +185,7 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
 
   // Clear search capabilities placeholder
   const getPlaceholderText = () => {
-    return "Search by name or pincode";
+    return 'Try: "Dr. Sharma", "back pain"';
   };
 
   const getSearchIcon = () => {
@@ -243,19 +243,14 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
   if (!showFilters) {
     return (
       <div style={{
-        background: theme.colors.white,
-        borderRadius: '16px',
-        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
-        border: `1px solid ${theme.colors.gray[200]}`,
-        padding: '1.5rem',
         width: '100%',
-        maxWidth: '600px',
-        margin: '0 auto'
+        maxWidth: '800px',
+        margin: '0 auto',
+        padding: '0 1rem'
       }}>
-        
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'stretch' }}>
-          {/* Single Search Input */}
-          <div style={{ position: 'relative', flex: 1 }}>
+        <form onSubmit={handleSubmit}>
+          {/* Single version with search button inside input */}
+          <div style={{ position: 'relative' }}>
             <div style={{
               position: 'absolute',
               left: '1rem',
@@ -277,7 +272,7 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
               placeholder={getPlaceholderText()}
               style={{
                 fontSize: '1rem',
-                padding: '1rem 1.5rem 1rem 3.5rem',
+                padding: '1rem 7rem 1rem 3.5rem',
                 border: `2px solid ${theme.colors.gray[300]}`,
                 borderRadius: '12px',
                 backgroundColor: theme.colors.white,
@@ -286,152 +281,96 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 width: '100%',
                 fontWeight: '400',
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
                 minHeight: '52px',
-                textOverflow: 'ellipsis'
+                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)'
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = theme.colors.primary;
                 e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
-                e.target.style.transform = 'scale(1.01)';
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = theme.colors.gray[300];
-                e.target.style.boxShadow = 'none';
-                e.target.style.transform = 'scale(1)';
+                e.target.style.boxShadow = '0 2px 12px rgba(0, 0, 0, 0.06)';
               }}
-              className="search-input"
             />
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                position: 'absolute',
+                right: '0.5rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: loading ? theme.colors.gray[400] : theme.colors.primary,
+                color: theme.colors.white,
+                fontWeight: '600',
+                fontSize: '0.9rem',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(30, 95, 121, 0.2)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {loading ? 'Searching...' : 'Search'}
+            </button>
           </div>
-
-          {/* Minimized Search Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              background: loading ? theme.colors.gray[400] : theme.colors.primary,
-              color: theme.colors.white,
-              fontWeight: '600',
-              fontSize: '1rem',
-              padding: '1rem 2rem',
-              borderRadius: '12px',
-              border: 'none',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              whiteSpace: 'nowrap',
-              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-              minHeight: '52px',
-              boxShadow: '0 2px 8px rgba(30, 95, 121, 0.2)'
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = theme.colors.primaryDark;
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(30, 95, 121, 0.3)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = theme.colors.primary;
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(30, 95, 121, 0.2)';
-              }
-            }}
-          >
-            {loading ? 'Searching...' : 'Search'}
-          </button>
         </form>
 
-        {/* Search capabilities hint */}
-        <div style={{
-          textAlign: 'center',
-          marginTop: '0.75rem',
-          fontSize: '0.875rem',
-          color: theme.colors.gray[500]
-        }}>
-          Try: "Dr. Sharma", "400001", "back pain"
-        </div>
 
         {/* Mobile Responsive CSS for simple version */}
         <style jsx>{`
-          /* Container adjustments for mobile */
+          /* Mobile responsive adjustments */
           @media (max-width: 768px) {
-            div[style*="maxWidth: 600px"] {
-              max-width: 100% !important;
-              margin: 0 !important;
-              padding: 1rem !important;
-              border-radius: 12px !important;
-              box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04) !important;
-            }
-            
-            form {
-              flex-direction: column !important;
-              gap: 1rem !important;
+            input[type="text"] {
+              padding: 1rem 6rem 1rem 3.5rem !important;
+              font-size: 0.95rem !important;
             }
             
             button[type="submit"] {
-              width: 100% !important;
-              padding: 1rem 1.5rem !important;
-              font-size: 1rem !important;
-              min-height: 52px !important;
-              border-radius: 12px !important;
-              margin: 0 !important;
-            }
-            
-            input[type="text"] {
-              font-size: 1rem !important;
-              padding: 1rem 1.5rem 1rem 3.5rem !important;
-              min-height: 52px !important;
-              border-radius: 12px !important;
-              width: 100% !important;
-              box-sizing: border-box !important;
-            }
-            
-            /* Search icon positioning */
-            div[style*="position: absolute"] {
-              left: 1.25rem !important;
-            }
-            
-            /* Hint text */
-            div[style*="Try:"] {
-              font-size: 0.875rem !important;
-              margin-top: 1rem !important;
+              padding: 0.7rem 1.25rem !important;
+              font-size: 0.85rem !important;
+              right: 0.5rem !important;
             }
           }
           
           @media (max-width: 480px) {
-            div[style*="maxWidth: 600px"] {
-              padding: 1rem !important;
-              margin: 0 0.5rem !important;
-            }
-            
             input[type="text"] {
-              font-size: 1rem !important;
-              padding: 1rem 1.25rem 1rem 3.25rem !important;
-            }
-            
-            /* Search icon positioning for small mobile */
-            div[style*="position: absolute"] {
-              left: 1.125rem !important;
+              padding: 1rem 5.5rem 1rem 3rem !important;
+              font-size: 0.9rem !important;
+              min-height: 48px !important;
             }
             
             button[type="submit"] {
-              font-size: 1rem !important;
-              padding: 1rem 1.5rem !important;
+              padding: 0.65rem 1rem !important;
+              font-size: 0.8rem !important;
+              right: 0.4rem !important;
+            }
+            
+            /* Search icon positioning */
+            div[style*="left: 1rem"] {
+              left: 0.8rem !important;
             }
             
             /* Search icon smaller */
             svg {
-              width: 1.125rem !important;
-              height: 1.125rem !important;
+              width: 1.1rem !important;
+              height: 1.1rem !important;
             }
           }
           
-          /* Ensure full width on very small screens */
-          @media (max-width: 320px) {
-            div[style*="maxWidth: 600px"] {
-              margin: 0 !important;
-              border-radius: 8px !important;
+          @media (max-width: 360px) {
+            input[type="text"] {
+              padding: 0.9rem 5rem 0.9rem 2.8rem !important;
+              font-size: 0.85rem !important;
+              min-height: 44px !important;
+            }
+            
+            button[type="submit"] {
+              padding: 0.6rem 0.8rem !important;
+              font-size: 0.75rem !important;
             }
           }
         `}</style>
@@ -936,15 +875,6 @@ const SimpleSearchInterface: React.FC<SimpleSearchInterfaceProps> = ({
         </div>
       )}
 
-      {/* Search capabilities hint */}
-      <div style={{
-        textAlign: 'center',
-        fontSize: '0.7rem',
-        color: theme.colors.gray[400],
-        lineHeight: '1.2'
-      }}>
-        Try: "Dr. Sharma", "400001", "back pain", "sports injury"
-      </div>
 
       {/* Mobile Responsive CSS */}
       <style jsx>{`
